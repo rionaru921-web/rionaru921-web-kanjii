@@ -2,13 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { UserPlus, Mail, Lock, AlertCircle, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
 
 export default function SignupPage() {
-  const router = useRouter();
   const supabase = createClient();
 
   const [email, setEmail] = useState("");
@@ -17,6 +15,8 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -32,9 +32,12 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      },
     });
 
     if (signUpError) {
@@ -43,14 +46,19 @@ export default function SignupPage() {
       return;
     }
 
-    if (data.session) {
-      router.push("/dashboard");
-      router.refresh();
-      return;
-    }
-
     setSentConfirmation(true);
     setLoading(false);
+  }
+
+  async function handleResend() {
+    setResending(true);
+    await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+    });
+    setResending(false);
+    setResent(true);
   }
 
   if (sentConfirmation) {
@@ -61,11 +69,44 @@ export default function SignupPage() {
             <MailCheck size={26} />
           </span>
           <p className="text-sm text-ink-secondary leading-relaxed">
-            {email} 宛に確認メールを送信しました。メール内のリンクから登録を完了してください。
+            {email} 宛に確認メールを送信しました。メールに記載されたリンクをクリックして登録を完了してください。
           </p>
-          <Link href="/login" className="text-sm text-gold hover:brightness-125">
+          <p className="text-xs text-ink-muted leading-relaxed">
+            メールが届かない場合は、迷惑メールフォルダをご確認ください。
+          </p>
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resending}
+            className="text-sm text-gold hover:brightness-125 disabled:opacity-50"
+          >
+            {resending ? "再送信中..." : resent ? "再送信しました" : "確認メールを再送信する"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSentConfirmation(false);
+              setResent(false);
+              setPassword("");
+              setConfirmPassword("");
+            }}
+            className="text-sm text-ink-secondary hover:text-gold"
+          >
+            別のメールアドレスで登録し直す
+          </button>
+          <Link href="/login" className="text-sm text-ink-secondary hover:text-gold">
             ログイン画面へ戻る
           </Link>
+          <p className="text-xs text-ink-muted leading-relaxed border-t border-gold/10 pt-4 mt-2">
+            解決しない場合は{" "}
+            <a
+              href="mailto:steplife.contact@gmail.com"
+              className="text-gold hover:brightness-125"
+            >
+              steplife.contact@gmail.com
+            </a>{" "}
+            までご連絡ください。
+          </p>
         </div>
       </AuthCard>
     );

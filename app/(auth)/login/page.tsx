@@ -24,19 +24,35 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(
+    searchParams.get("verify") === "required"
+  );
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setResent(false);
     setLoading(true);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (signInError) {
       setError("メールアドレスまたはパスワードが正しくありません。");
+      setNeedsVerification(false);
+      setLoading(false);
+      return;
+    }
+
+    if (!data.user.email_confirmed_at) {
+      // A session was issued for an unconfirmed account — don't let it stand.
+      await supabase.auth.signOut();
+      setError("メールアドレスが未確認です。確認メールをご確認ください。");
+      setNeedsVerification(true);
       setLoading(false);
       return;
     }
@@ -46,9 +62,31 @@ function LoginForm() {
     router.refresh();
   }
 
+  async function handleResend() {
+    if (!email) {
+      setError("再送信するメールアドレスを入力してください。");
+      return;
+    }
+    setResending(true);
+    await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+    });
+    setResending(false);
+    setResent(true);
+  }
+
   return (
     <AuthCard title="ログイン" subtitle="Kanjiiへおかえりなさい">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {needsVerification && !error && (
+          <div className="flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20 rounded-xl px-3 py-2.5">
+            <AlertCircle size={14} className="shrink-0" />
+            メール確認が必要です。届いた確認メールのリンクをクリックしてください。
+          </div>
+        )}
+
         <div>
           <label className="flex items-center gap-1.5 text-xs text-ink-secondary mb-1.5">
             <Mail size={14} />
@@ -93,6 +131,17 @@ function LoginForm() {
             <AlertCircle size={14} className="shrink-0" />
             {error}
           </div>
+        )}
+
+        {needsVerification && (
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resending}
+            className="text-xs text-gold hover:brightness-125 disabled:opacity-50 -mt-1 text-left"
+          >
+            {resending ? "再送信中..." : resent ? "確認メールを再送信しました" : "確認メールを再送信する"}
+          </button>
         )}
 
         <button

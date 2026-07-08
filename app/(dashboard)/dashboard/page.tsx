@@ -1,28 +1,8 @@
 import Link from "next/link";
-import { CalendarCheck, Clock, Users, Wine, Plane, MapPin } from "lucide-react";
+import { CalendarCheck, Users, Layers, Wine, Plane, History as HistoryIcon } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import { createClient } from "@/lib/supabase/server";
-
-const STATS = [
-  { icon: CalendarCheck, label: "今月の開催回数", value: "03", unit: "回" },
-  { icon: Clock, label: "節約時間", value: "18.5", unit: "時間" },
-  { icon: Users, label: "総幹事人数", value: "146", unit: "人" },
-];
-
-const UPCOMING = [
-  {
-    title: "忘年会 with 営業部",
-    date: "2026-07-18 19:00",
-    place: "栄・個室居酒屋 灯火",
-    icon: Wine,
-  },
-  {
-    title: "京都旅行(1泊2日)",
-    date: "2026-08-02〜08-03",
-    place: "京都駅周辺",
-    icon: Plane,
-  },
-];
+import type { HistoryPayload } from "@/lib/history/types";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -30,6 +10,32 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "ゲスト";
+
+  const { data: history } = user
+    ? await supabase
+        .from("history")
+        .select("id, type, title, event_date, created_at, payload")
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  const records = history ?? [];
+  const now = new Date();
+  const thisMonthCount = records.filter((item) => {
+    const created = new Date(item.created_at);
+    return created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth();
+  }).length;
+  const totalParticipants = records.reduce((sum, item) => {
+    const payload = item.payload as HistoryPayload;
+    return sum + (payload?.pdf?.participants?.length ?? 0);
+  }, 0);
+
+  const STATS = [
+    { icon: CalendarCheck, label: "今月の開催回数", value: String(thisMonthCount), unit: "回" },
+    { icon: Layers, label: "開催回数（累計）", value: String(records.length), unit: "回" },
+    { icon: Users, label: "のべ参加人数", value: String(totalParticipants), unit: "人" },
+  ];
+
+  const RECENT = records.slice(0, 3);
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-5xl mx-auto">
@@ -75,31 +81,36 @@ export default async function DashboardPage() {
       </div>
 
       <div>
-        <h2 className="font-serif font-bold text-lg text-ink mb-4">最近の予定</h2>
-        <div className="flex flex-col gap-3">
-          {UPCOMING.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.title}
-                href="/dashboard"
-                className="flex items-center gap-4 rounded-3xl bg-surface-tertiary shadow-warm p-4 hover:shadow-warm-hover hover:-translate-y-0.5 transition-all"
-              >
-                <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-gold/10 text-gold shrink-0">
-                  <Icon size={18} />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-ink truncate">{item.title}</p>
-                  <p className="text-xs text-ink-secondary mt-0.5">{item.date}</p>
-                  <p className="text-xs text-ink-muted flex items-center gap-1 mt-0.5">
-                    <MapPin size={11} />
-                    {item.place}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <h2 className="font-serif font-bold text-lg text-ink mb-4">最近の履歴</h2>
+        {RECENT.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-14 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">
+            <HistoryIcon className="text-ink-muted" size={32} />
+            <p className="text-ink-secondary text-sm">まだ履歴がありません。最初の幹事を始めましょう</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {RECENT.map((item) => {
+              const Icon = item.type === "nomikai" ? Wine : Plane;
+              return (
+                <Link
+                  key={item.id}
+                  href={`/history/${item.id}`}
+                  className="flex items-center gap-4 rounded-3xl bg-surface-tertiary shadow-warm p-4 hover:shadow-warm-hover hover:-translate-y-0.5 transition-all"
+                >
+                  <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-gold/10 text-gold shrink-0">
+                    <Icon size={18} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-ink truncate">{item.title}</p>
+                    <p className="text-xs text-ink-muted mt-0.5">
+                      {item.event_date ?? new Date(item.created_at).toLocaleDateString("ja-JP")}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </main>
   );

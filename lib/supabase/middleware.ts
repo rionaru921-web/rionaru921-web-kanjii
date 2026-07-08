@@ -47,6 +47,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isAuthOnlyRoute = AUTH_ONLY_ROUTES.includes(pathname);
+  const isConfirmed = !!user?.email_confirmed_at;
 
   if (!user && isProtectedRoute(pathname)) {
     const url = request.nextUrl.clone();
@@ -56,7 +57,18 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthOnlyRoute) {
+  // Belt-and-suspenders: even if a session slipped through with an
+  // unconfirmed email (e.g. Supabase's "Confirm email" setting is
+  // misconfigured), never let it reach protected pages.
+  if (user && !isConfirmed && isProtectedRoute(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    url.searchParams.set("verify", "required");
+    return NextResponse.redirect(url);
+  }
+
+  if (user && isConfirmed && isAuthOnlyRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";

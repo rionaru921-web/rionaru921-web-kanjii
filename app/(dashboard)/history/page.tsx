@@ -25,7 +25,7 @@ export default async function HistoryPage() {
       {!history || history.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-20 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">
           <HistoryIcon className="text-ink-muted" size={40} />
-          <p className="text-ink-secondary">まだ保存された履歴がありません</p>
+          <p className="text-ink-secondary">まだ履歴がありません。最初の幹事を始めましょう</p>
           <p className="text-xs text-ink-muted">
             割り勘計算・費用分担の完了画面から「履歴に保存」すると、ここに表示されます
           </p>

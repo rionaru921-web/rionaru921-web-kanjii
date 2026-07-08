@@ -6,22 +6,22 @@ import MizuhikiDivider from "@/components/shared/MizuhikiDivider";
 
 const REVIEWS = [
   {
-    name: "田中 誠",
-    meta: "32歳・会社員",
+    name: "M.T.さん",
+    meta: "都内IT企業",
     body: "毎回の飲み会幹事が憂鬱でしたが、Kanjiiに任せたら5分でお店が決まりました。割り勘の計算まで自動なので、もう手放せません。",
-    initial: "田",
+    initial: "M",
   },
   {
-    name: "佐藤 陽菜",
-    meta: "20歳・大学生",
+    name: "H.S.さん",
+    meta: "都内大学生",
     body: "サークル旅行の計画で大活躍。行き先を入れるだけでプランが出てくるので、みんなの意見をまとめる時間が要らなくなりました。",
-    initial: "佐",
+    initial: "H",
   },
   {
-    name: "鈴木 美咲",
-    meta: "41歳・主婦",
+    name: "M.S.さん",
+    meta: "30代・主婦",
     body: "ママ友との集まりの予算調整がいつも大変でしたが、費用分担がきれいに出るので気を遣わずに済むようになりました。",
-    initial: "鈴",
+    initial: "M",
   },
 ];
 
@@ -71,6 +71,10 @@ export default function Testimonials() {
             </motion.div>
           ))}
         </div>
+
+        <p className="text-center text-[11px] text-ink-muted mt-8">
+          ※ 開発中サービスのイメージです
+        </p>
       </div>
     </section>
   );
