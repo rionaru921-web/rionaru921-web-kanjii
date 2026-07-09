@@ -3,7 +3,11 @@
 import { motion } from "framer-motion";
 import GoldButton from "@/components/shared/GoldButton";
 
-export default function CTASection() {
+interface CTASectionProps {
+  isLoggedIn: boolean;
+}
+
+export default function CTASection({ isLoggedIn }: CTASectionProps) {
   return (
     <section className="px-4 py-24 sm:py-32 relative overflow-hidden">
       <div
@@ -25,8 +29,8 @@ export default function CTASection() {
           <br className="sm:hidden" />
           手放しましょう
         </h2>
-        <GoldButton href="/signup" size="lg">
-          無料ではじめる
+        <GoldButton href={isLoggedIn ? "/dashboard" : "/signup"} size="lg">
+          {isLoggedIn ? "マイページへ" : "無料ではじめる"}
         </GoldButton>
       </motion.div>
     </section>

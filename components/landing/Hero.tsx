@@ -6,7 +6,11 @@ import { ChevronDown, PlayCircle } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ChochinIcon from "@/components/shared/ChochinIcon";
 
-export default function Hero() {
+interface HeroProps {
+  isLoggedIn: boolean;
+}
+
+export default function Hero({ isLoggedIn }: HeroProps) {
   return (
     <section className="relative overflow-hidden ink-wash px-4 sm:px-6 pt-14 pb-16">
       <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-8 items-center min-h-[80vh]">
@@ -33,8 +37,8 @@ export default function Hero() {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
-            <GoldButton href="/signup" size="lg">
-              無料ではじめる
+            <GoldButton href={isLoggedIn ? "/dashboard" : "/signup"} size="lg">
+              {isLoggedIn ? "マイページへ" : "無料ではじめる"}
             </GoldButton>
             <GoldButton href="#how-it-works" variant="outline" size="lg" icon={PlayCircle}>
               デモを見る
