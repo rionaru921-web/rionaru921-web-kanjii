@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarCheck, Users, Layers, Wine, Plane, History as HistoryIcon } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
+import ProfileCard from "@/components/dashboard/ProfileCard";
 import { createClient } from "@/lib/supabase/server";
 import type { HistoryPayload } from "@/lib/history/types";
 
@@ -9,7 +10,13 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "ゲスト";
+
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle()
+    : { data: null };
+
+  const displayName =
+    profile?.display_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "ゲスト";
 
   const { data: history } = user
     ? await supabase
@@ -45,9 +52,13 @@ export default async function DashboardPage() {
         <br className="sm:hidden" />
         {displayName}さん
       </h1>
-      <p className="text-sm text-ink-secondary mb-10">
+      <p className="text-sm text-ink-secondary mb-6">
         今日も幹事業務、Kanjiiにお任せください。
       </p>
+
+      {user && (
+        <ProfileCard userId={user.id} email={user.email ?? ""} displayName={displayName} />
+      )}
 
       <div className="grid sm:grid-cols-3 gap-4 mb-10">
         {STATS.map((stat) => {
