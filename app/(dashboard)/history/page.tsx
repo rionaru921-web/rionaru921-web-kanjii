@@ -12,6 +12,7 @@ export default async function HistoryPage() {
     ? await supabase
         .from("history")
         .select("id, type, title, event_date, created_at")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
     : { data: [] };
 

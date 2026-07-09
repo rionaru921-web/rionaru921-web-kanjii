@@ -15,6 +15,7 @@ export default async function DashboardPage() {
     ? await supabase
         .from("history")
         .select("id, type, title, event_date, created_at, payload")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
     : { data: [] };
 
