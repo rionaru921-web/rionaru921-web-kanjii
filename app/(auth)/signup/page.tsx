@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UserPlus, Mail, Lock, AlertCircle, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
+import { translateSupabaseError } from "@/lib/auth/error-translator";
 
 export default function SignupPage() {
   const supabase = createClient();
@@ -32,33 +33,64 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
 
-    if (signUpError) {
-      setError(signUpError.message || "登録に失敗しました。");
+      if (signUpError) {
+        console.error("Sign up error:", {
+          message: signUpError.message,
+          status: signUpError.status,
+          code: signUpError.code,
+        });
+        setError(translateSupabaseError(signUpError.message));
+        setLoading(false);
+        return;
+      }
+
+      setSentConfirmation(true);
       setLoading(false);
-      return;
+    } catch (err) {
+      console.error("Sign up error (unexpected):", err);
+      const message =
+        err instanceof Error
+          ? translateSupabaseError(err.message)
+          : "サインアップ中に予期せぬエラーが発生しました。時間をおいて再度お試しください。";
+      setError(message);
+      setLoading(false);
     }
-
-    setSentConfirmation(true);
-    setLoading(false);
   }
 
   async function handleResend() {
     setResending(true);
-    await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-    });
-    setResending(false);
-    setResent(true);
+    setError(null);
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (resendError) {
+        console.error("Resend error:", {
+          message: resendError.message,
+          status: resendError.status,
+          code: resendError.code,
+        });
+        setError(translateSupabaseError(resendError.message));
+      } else {
+        setResent(true);
+      }
+    } catch (err) {
+      console.error("Resend error (unexpected):", err);
+      setError("再送信中に予期せぬエラーが発生しました。時間をおいて再度お試しください。");
+    } finally {
+      setResending(false);
+    }
   }
 
   if (sentConfirmation) {
@@ -74,6 +106,12 @@ export default function SignupPage() {
           <p className="text-xs text-ink-muted leading-relaxed">
             メールが届かない場合は、迷惑メールフォルダをご確認ください。
           </p>
+          {error && (
+            <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 w-full">
+              <AlertCircle size={14} className="shrink-0" />
+              {error}
+            </div>
+          )}
           <button
             type="button"
             onClick={handleResend}
@@ -87,6 +125,7 @@ export default function SignupPage() {
             onClick={() => {
               setSentConfirmation(false);
               setResent(false);
+              setError(null);
               setPassword("");
               setConfirmPassword("");
             }}

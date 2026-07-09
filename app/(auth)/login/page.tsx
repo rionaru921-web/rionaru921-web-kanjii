@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { LogIn, Mail, Lock, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
+import { translateSupabaseError } from "@/lib/auth/error-translator";
 
 export default function LoginPage() {
   return (
@@ -36,30 +37,45 @@ function LoginForm() {
     setResent(false);
     setLoading(true);
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (signInError) {
-      setError("メールアドレスまたはパスワードが正しくありません。");
-      setNeedsVerification(false);
+      if (signInError) {
+        console.error("Sign in error:", {
+          message: signInError.message,
+          status: signInError.status,
+          code: signInError.code,
+        });
+        setError(translateSupabaseError(signInError.message));
+        setNeedsVerification(false);
+        setLoading(false);
+        return;
+      }
+
+      if (!data.user.email_confirmed_at) {
+        // A session was issued for an unconfirmed account — don't let it stand.
+        await supabase.auth.signOut();
+        setError(translateSupabaseError("Email not confirmed"));
+        setNeedsVerification(true);
+        setLoading(false);
+        return;
+      }
+
+      const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err) {
+      console.error("Sign in error (unexpected):", err);
+      const message =
+        err instanceof Error
+          ? translateSupabaseError(err.message)
+          : "ログイン中に予期せぬエラーが発生しました。時間をおいて再度お試しください。";
+      setError(message);
       setLoading(false);
-      return;
     }
-
-    if (!data.user.email_confirmed_at) {
-      // A session was issued for an unconfirmed account — don't let it stand.
-      await supabase.auth.signOut();
-      setError("メールアドレスが未確認です。確認メールをご確認ください。");
-      setNeedsVerification(true);
-      setLoading(false);
-      return;
-    }
-
-    const redirectTo = searchParams.get("redirectTo") || "/dashboard";
-    router.push(redirectTo);
-    router.refresh();
   }
 
   async function handleResend() {
@@ -68,13 +84,29 @@ function LoginForm() {
       return;
     }
     setResending(true);
-    await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-    });
-    setResending(false);
-    setResent(true);
+    setError(null);
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (resendError) {
+        console.error("Resend error:", {
+          message: resendError.message,
+          status: resendError.status,
+          code: resendError.code,
+        });
+        setError(translateSupabaseError(resendError.message));
+      } else {
+        setResent(true);
+      }
+    } catch (err) {
+      console.error("Resend error (unexpected):", err);
+      setError("再送信中に予期せぬエラーが発生しました。時間をおいて再度お試しください。");
+    } finally {
+      setResending(false);
+    }
   }
 
   return (
