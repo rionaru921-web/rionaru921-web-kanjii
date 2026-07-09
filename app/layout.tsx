@@ -55,6 +55,9 @@ export const metadata: Metadata = {
   creator: "Kanjii",
   publisher: "Kanjii",
   formatDetection: { email: false, address: false, telephone: false },
+  verification: {
+    google: "fqx0-Oh0qtrop4k0Tt4jKm_v-jcc3vCh6kt2zMSafVc",
+  },
   openGraph: {
     title: "Kanjii - あらゆる集まりを、AIが幹事します",
     description: "飲み会・旅行・イベントの幹事業務をAIが自動化",
