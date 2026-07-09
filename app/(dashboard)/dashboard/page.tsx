@@ -1,9 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { CalendarCheck, Users, Layers, Wine, Plane, History as HistoryIcon } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ProfileCard from "@/components/dashboard/ProfileCard";
 import { createClient } from "@/lib/supabase/server";
 import type { HistoryPayload } from "@/lib/history/types";
+
+export const metadata: Metadata = {
+  title: "マイダッシュボード",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardPage() {
   const supabase = createClient();
