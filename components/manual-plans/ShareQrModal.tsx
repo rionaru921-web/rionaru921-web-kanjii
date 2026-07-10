@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download } from "lucide-react";
+import { X, Download, Loader2 } from "lucide-react";
 import { generateQRDataUrl } from "@/lib/share/qr";
 
 export default function ShareQrModal({
@@ -70,7 +70,13 @@ export default function ShareQrModal({
                 className="rounded-xl border border-gold/15"
               />
             ) : (
-              <div style={{ width: 200, height: 200 }} className="rounded-xl bg-surface animate-pulse" />
+              <div
+                style={{ width: 200, height: 200 }}
+                className="flex flex-col items-center justify-center gap-2 rounded-xl bg-surface animate-pulse"
+              >
+                <Loader2 className="h-5 w-5 animate-spin text-gold" />
+                <p className="text-xs text-ink-muted">QRコード生成中...</p>
+              </div>
             )}
 
             <p className="text-xs text-ink-muted text-center break-all">{url}</p>

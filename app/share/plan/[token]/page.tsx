@@ -8,6 +8,14 @@ import { formatDateRange, PAYMENT_METHOD_LABELS } from "@/lib/manual-plans/forma
 import { yen } from "@/lib/pdf/components";
 import type { ManualPlan } from "@/lib/manual-plans/types";
 
+// Without this, Next's fetch-based Data Cache can treat this dynamic-segment
+// page as staticly cacheable indefinitely (no generateStaticParams + a
+// service-role client that never touches cookies/headers gives Next no
+// other dynamic signal), so an attendee could keep seeing a stale snapshot
+// of the plan after the organizer edits it. Forcing dynamic rendering trades
+// that indefinite staleness for a fresh row on every request.
+export const dynamic = "force-dynamic";
+
 // Public, unauthenticated view. Deliberately at /share/plan/[token] rather
 // than /share/[token] — that path is already used by the existing
 // history-sharing flow (app/share/[token]/page.tsx), which this task must

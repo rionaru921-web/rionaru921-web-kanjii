@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { CalendarDays, MapPin, Wallet, Users as UsersIcon, FileText } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  Wallet,
+  Users as UsersIcon,
+  FileText,
+  Home,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import StatusBadge from "@/components/manual-plans/StatusBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
@@ -51,6 +61,19 @@ export default async function ManualPlanDetailPage({ params }: { params: { id: s
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto space-y-6">
+      <nav className="flex items-center gap-2 text-sm text-ink/60">
+        <Link href="/dashboard" className="flex items-center gap-1 hover:text-gold transition-colors">
+          <Home className="h-4 w-4" />
+          ホーム
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <Link href="/manual-plans" className="hover:text-gold transition-colors">
+          プラン一覧
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <span className="text-ink/80">詳細</span>
+      </nav>
+
       <div>
         <div className="mb-2">
           <StatusBadge status={typedPlan.status} />
@@ -168,6 +191,16 @@ export default async function ManualPlanDetailPage({ params }: { params: { id: s
           </div>
         </section>
       )}
+
+      <div className="mt-6 text-center">
+        <Link
+          href="/manual-plans"
+          className="inline-flex items-center gap-1 text-sm text-ink/60 hover:text-gold transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          プラン一覧に戻る
+        </Link>
+      </div>
     </main>
   );
 }

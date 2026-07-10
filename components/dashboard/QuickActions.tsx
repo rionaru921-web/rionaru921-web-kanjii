@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Sparkles, Plane, History, BookOpen, type LucideIcon } from "lucide-react";
+import { Sparkles, History, BookOpen, type LucideIcon } from "lucide-react";
 import CreatePlanButton from "@/components/shared/CreatePlanButton";
 
 interface ActionItem {
@@ -13,9 +13,10 @@ interface ActionItem {
   disabled?: boolean;
 }
 
-// "新しいプランを作る" opens CreatePlanModal, which lets the user choose
-// between the AI flows (nomikai / travel) or the manual flow. 旅行 is also
-// kept as a direct shortcut alongside history and guide.
+// "新しいプランを作る" opens CreatePlanModal, which is the single entry
+// point for every plan type (飲み会AI / 旅行AI / 自分で作る). Do not add a
+// direct shortcut to /travel (or /nomikai/suggest) here again — that used
+// to bypass the modal and confused users about which button to press.
 const CREATE_PLAN_ACTION: ActionItem = {
   href: "__create_plan__",
   icon: Sparkles,
@@ -25,7 +26,6 @@ const CREATE_PLAN_ACTION: ActionItem = {
 
 const ACTIONS: ActionItem[] = [
   CREATE_PLAN_ACTION,
-  { href: "/travel", icon: Plane, title: "旅行を計画する", description: "行き先決めから精算まで" },
   { href: "/history", icon: History, title: "履歴を見る", description: "過去のプランを振り返る" },
   { href: "#", icon: BookOpen, title: "使い方を見る", description: "準備中", disabled: true },
 ];
@@ -34,7 +34,7 @@ export default function QuickActions() {
   return (
     <section>
       <h2 className="font-serif font-bold text-lg text-ink mb-4">⚡ クイックアクション</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {ACTIONS.map((action, i) => {
           const Icon = action.icon;
           const card = (

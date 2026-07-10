@@ -22,25 +22,26 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
   }
 
+  // Single embedded query instead of a plan fetch followed by a separate
+  // members fetch — the FK on manual_plan_members.plan_id lets PostgREST
+  // join both in one round trip.
   const { data: plan } = await supabase
     .from("manual_plans")
-    .select("*")
+    .select("*, manual_plan_members(*)")
     .eq("id", params.id)
     .eq("user_id", user.id)
+    .order("created_at", { referencedTable: "manual_plan_members", ascending: true })
     .maybeSingle();
 
   if (!plan) {
     return NextResponse.json({ error: "プランが見つかりません。" }, { status: 404 });
   }
 
-  const { data: members } = await supabase
-    .from("manual_plan_members")
-    .select("*")
-    .eq("plan_id", plan.id)
-    .order("created_at", { ascending: true });
-
-  const typedPlan = plan as ManualPlan;
-  const typedMembers = (members ?? []) as ManualPlanMember[];
+  const { manual_plan_members, ...planFields } = plan as ManualPlan & {
+    manual_plan_members: ManualPlanMember[];
+  };
+  const typedPlan = planFields as ManualPlan;
+  const typedMembers = manual_plan_members ?? [];
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
   const shareUrl = `${baseUrl}/share/plan/${typedPlan.share_token}`;
@@ -74,6 +75,11 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="Kanjii_${encodeURIComponent(typedPlan.title)}.pdf"`,
+      // "private" (not "public"): this PDF is gated by an auth check above,
+      // so a shared/CDN cache must never serve one user's cached response
+      // to another user. "private" still lets the requesting browser skip
+      // re-generating the PDF on a quick repeat click.
+      "Cache-Control": "private, max-age=60",
     },
   });
 }
