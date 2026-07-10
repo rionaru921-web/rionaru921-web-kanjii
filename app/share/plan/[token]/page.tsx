@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles } from "lucide-react";
+import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, MessageCircle } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
 import AttendanceButtons from "@/components/manual-plans/AttendanceButtons";
@@ -41,6 +41,13 @@ function buildGoogleCalendarUrl(plan: ManualPlan): string {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
+// Lets an attendee who received this share link forward it to someone else
+// via LINE, without needing to know/copy the URL themselves.
+function buildLineShareUrl(plan: ManualPlan, shareUrl: string): string {
+  const text = `幹事さんからのお知らせです\n\n${plan.title}\n${shareUrl}`;
+  return `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+}
+
 export default async function SharePlanPage({ params }: { params: { token: string } }) {
   const supabase = createAdminClient();
 
@@ -52,6 +59,8 @@ export default async function SharePlanPage({ params }: { params: { token: strin
 
   const typedPlan = plan as ManualPlan | null;
   const gcalUrl = typedPlan ? buildGoogleCalendarUrl(typedPlan) : "";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
+  const lineUrl = typedPlan ? buildLineShareUrl(typedPlan, `${baseUrl}/share/plan/${params.token}`) : "";
   const mapLink =
     typedPlan?.venue_map_url ||
     (typedPlan?.venue_address
@@ -125,6 +134,18 @@ export default async function SharePlanPage({ params }: { params: { token: strin
           </div>
 
           <AttendanceButtons />
+
+          {lineUrl && (
+            <a
+              href={lineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded-full border border-[#06C755]/40 text-[#06C755] font-semibold text-sm py-3 hover:bg-[#06C755]/5 transition-colors"
+            >
+              <MessageCircle size={16} />
+              LINEで共有
+            </a>
+          )}
 
           {gcalUrl && (
             <a

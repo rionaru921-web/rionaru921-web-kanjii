@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, Loader2, FileDown, Link as LinkIcon, QrCode, Check } from "lucide-react";
+import { Pencil, Trash2, Loader2, FileDown, Link as LinkIcon, QrCode, Check, MessageCircle } from "lucide-react";
 import type { ManualPlan } from "@/lib/manual-plans/types";
 
 // The qrcode dependency pulled in by ShareQrModal is only needed once the
@@ -53,9 +53,15 @@ export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function handleLineShare() {
+    const text = `幹事さんからのお知らせです\n\n${plan.title}\n${shareUrl}`;
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+    window.open(lineUrl, "_blank");
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         <Link
           href={`/manual-plans/${plan.id}/edit`}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors"
@@ -85,6 +91,14 @@ export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
         >
           <QrCode size={14} />
           QRで共有
+        </button>
+        <button
+          type="button"
+          onClick={handleLineShare}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-[#06C755]/30 text-[#06C755] text-xs font-semibold py-2.5 hover:border-[#06C755]/60 hover:bg-[#06C755]/5 transition-colors"
+        >
+          <MessageCircle size={14} />
+          LINEで共有
         </button>
       </div>
 
