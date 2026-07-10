@@ -1,0 +1,79 @@
+import { NextRequest, NextResponse } from "next/server";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { createClient } from "@/lib/supabase/server";
+import { generateQRDataUrl } from "@/lib/share/qr";
+import { ManualPlanPDF } from "@/lib/pdf/templates/ManualPlanPDF";
+import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
+
+// Self-contained server-side PDF generation for manual plans. The existing
+// AI-suggestion PDF flow (lib/pdf/generate.ts + pdf.worker.ts) generates
+// PDFs client-side in a Web Worker and is tightly coupled to
+// NomikaiPDFProps/TravelPDFProps — left untouched per the task's
+// instructions. This route reuses only the shared, generic style/helper
+// modules (lib/pdf/styles.ts, lib/pdf/components.tsx) for visual
+// consistency, via @react-pdf/renderer's Node-native renderToBuffer.
+export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
+  const { data: plan } = await supabase
+    .from("manual_plans")
+    .select("*")
+    .eq("id", params.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!plan) {
+    return NextResponse.json({ error: "プランが見つかりません。" }, { status: 404 });
+  }
+
+  const { data: members } = await supabase
+    .from("manual_plan_members")
+    .select("*")
+    .eq("plan_id", plan.id)
+    .order("created_at", { ascending: true });
+
+  const typedPlan = plan as ManualPlan;
+  const typedMembers = (members ?? []) as ManualPlanMember[];
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
+  const shareUrl = `${baseUrl}/share/plan/${typedPlan.share_token}`;
+  const qrDataUrl = await generateQRDataUrl(shareUrl);
+
+  const buffer = await renderToBuffer(
+    <ManualPlanPDF
+      title={typedPlan.title}
+      status={typedPlan.status}
+      eventDate={typedPlan.event_date}
+      endDate={typedPlan.end_date}
+      venueName={typedPlan.venue_name}
+      venueAddress={typedPlan.venue_address}
+      venueUrl={typedPlan.venue_url}
+      feeAmount={typedPlan.fee_amount}
+      paymentMethods={typedPlan.payment_methods}
+      paymentDeadline={typedPlan.payment_deadline}
+      memo={typedPlan.memo}
+      dietaryNotes={typedPlan.dietary_notes}
+      members={typedMembers.map((m) => ({
+        name: m.name,
+        attendanceStatus: m.attendance_status,
+        paymentStatus: m.payment_status,
+      }))}
+      shareUrl={shareUrl}
+      qrDataUrl={qrDataUrl}
+    />
+  );
+
+  return new NextResponse(new Uint8Array(buffer), {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="Kanjii_${encodeURIComponent(typedPlan.title)}.pdf"`,
+    },
+  });
+}
