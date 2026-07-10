@@ -7,11 +7,17 @@ import {
   PAYMENT_STATUS_LABELS,
   formatDateRange,
 } from "@/lib/manual-plans/format";
-import type { AttendanceStatus, PaymentStatus } from "@/lib/manual-plans/types";
+import { getTimelineStatus, type AttendanceStatus, type PaymentStatus } from "@/lib/manual-plans/types";
+
+const TIMELINE_LABELS = {
+  upcoming: "予定",
+  ongoing: "開催中",
+  ended: "終了",
+  archived: "過去",
+} as const;
 
 export interface ManualPlanPDFProps {
   title: string;
-  isShared: boolean;
   eventDate: string | null;
   endDate: string | null;
   venueName: string | null;
@@ -29,7 +35,6 @@ export interface ManualPlanPDFProps {
 
 export function ManualPlanPDF({
   title,
-  isShared,
   eventDate,
   endDate,
   venueName,
@@ -45,13 +50,14 @@ export function ManualPlanPDF({
   qrDataUrl,
 }: ManualPlanPDFProps) {
   const dateLabel = formatDateRange(eventDate, endDate);
+  const timelineLabel = TIMELINE_LABELS[getTimelineStatus({ event_date: eventDate, end_date: endDate })];
 
   return (
     <Document title={`Kanjii_${title}`}>
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
           <Text style={pdfStyles.brand}>Kanjii</Text>
-          <Text style={pdfStyles.headerDate}>{isShared ? "共有中" : "下書き"}</Text>
+          <Text style={pdfStyles.headerDate}>{timelineLabel}</Text>
         </View>
 
         <MizuhikiRule />

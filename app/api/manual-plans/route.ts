@@ -22,9 +22,6 @@ interface CreateManualPlanBody {
   members?: MemberInput[];
 }
 
-// New plans always start as a draft (is_shared defaults to false at the DB
-// level) — sharing is a deliberate, separate action taken from the detail
-// page via PATCH /api/manual-plans/[id]/status.
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   const {

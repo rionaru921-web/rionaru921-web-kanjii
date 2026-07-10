@@ -13,7 +13,6 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import ShareStatusBadge from "@/components/manual-plans/ShareStatusBadge";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import {
@@ -87,16 +86,12 @@ export default async function ManualPlanDetailPage({
       {justCreated && (
         <div className="rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3 flex items-start gap-2.5">
           <PartyPopper className="text-gold shrink-0 mt-0.5" size={18} />
-          <div className="text-sm">
-            <p className="font-semibold text-ink">プランを保存しました(下書きとして)</p>
-            <p className="text-ink-secondary mt-0.5">共有するには「共有を開始する」ボタンを押してください</p>
-          </div>
+          <p className="text-sm font-semibold text-ink">プランを保存しました。共有可能です。</p>
         </div>
       )}
 
       <div>
-        <div className="mb-2 flex items-center gap-2">
-          <ShareStatusBadge isShared={typedPlan.is_shared} />
+        <div className="mb-2">
           <TimelineBadge status={getTimelineStatus(typedPlan)} />
         </div>
         <h1 className="font-serif font-bold text-2xl sm:text-3xl text-ink leading-tight">

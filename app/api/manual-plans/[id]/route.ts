@@ -22,9 +22,6 @@ interface UpdateManualPlanBody {
   members?: MemberInput[];
 }
 
-// Content edits only — this route never touches is_shared. Sharing is
-// toggled separately via PATCH /api/manual-plans/[id]/status so that
-// editing plan details never accidentally starts or stops a share.
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createClient();
   const {

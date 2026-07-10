@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   const { data: manualPlans } = user
     ? await supabase
         .from("manual_plans")
-        .select("id, title, event_date, end_date, created_at, is_shared")
+        .select("id, title, event_date, end_date, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(5)

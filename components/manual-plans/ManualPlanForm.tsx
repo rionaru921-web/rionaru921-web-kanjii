@@ -211,6 +211,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             <label className={labelClass}>開始日時</label>
             <input
               type="datetime-local"
+              step={300}
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
               disabled={saving}
@@ -221,6 +222,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             <label className={labelClass}>終了日時</label>
             <input
               type="datetime-local"
+              step={300}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               disabled={saving}
@@ -313,6 +315,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           <label className={labelClass}>支払い期限</label>
           <input
             type="datetime-local"
+            step={300}
             value={paymentDeadline}
             onChange={(e) => setPaymentDeadline(e.target.value)}
             disabled={saving}

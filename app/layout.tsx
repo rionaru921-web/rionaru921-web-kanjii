@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Noto_Serif_JP, Playfair_Display } from "next/font/google";
 import { Analytics } from "@/components/shared/Analytics";
+import FloatingHomeButton from "@/components/shared/FloatingHomeButton";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -102,6 +103,7 @@ export default function RootLayout({
         className={`${notoSansJP.variable} ${notoSerifJP.variable} ${playfairDisplay.variable} antialiased bg-[#F5F0E8] text-[#2B2420] min-h-screen font-sans`}
       >
         {children}
+        <FloatingHomeButton />
         <Analytics />
       </body>
     </html>

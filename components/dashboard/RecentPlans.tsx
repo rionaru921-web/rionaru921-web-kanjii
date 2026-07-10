@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Wine, Plane, History as HistoryIcon, ChevronRight } from "lucide-react";
-import ShareStatusBadge from "@/components/manual-plans/ShareStatusBadge";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
 import type { HistoryType } from "@/lib/history/types";
@@ -24,7 +23,6 @@ interface RecentManualItem {
   event_date: string | null;
   end_date: string | null;
   created_at: string;
-  is_shared: boolean;
 }
 
 export type RecentPlanItem = RecentHistoryItem | RecentManualItem;
@@ -64,10 +62,7 @@ export default function RecentPlans({ records }: { records: RecentPlanItem[] }) 
                           : new Date(item.created_at).toLocaleDateString("ja-JP")}
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <ShareStatusBadge isShared={item.is_shared} />
-                      <TimelineBadge status={getTimelineStatus(item)} />
-                    </div>
+                    <TimelineBadge status={getTimelineStatus(item)} />
                     <ChevronRight size={16} className="text-ink-muted shrink-0" />
                   </Link>
                 );

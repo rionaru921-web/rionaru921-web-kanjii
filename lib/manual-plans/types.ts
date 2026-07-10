@@ -28,7 +28,6 @@ export interface ManualPlan {
   payment_deadline: string | null;
   memo: string | null;
   dietary_notes: string | null;
-  is_shared: boolean;
   share_token: string;
   created_at: string;
   updated_at: string;
