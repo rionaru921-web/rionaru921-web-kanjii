@@ -46,7 +46,15 @@ export default async function DashboardPage() {
         .limit(5)
     : { data: [] };
 
+  const { count: manualPlansCount } = user
+    ? await supabase
+        .from("manual_plans")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+    : { count: 0 };
+
   const historyRecords = history ?? [];
+  const totalPlanCount = historyRecords.length + (manualPlansCount ?? 0);
 
   const recentItems: RecentPlanItem[] = [
     ...historyRecords.map((h) => ({ kind: "history" as const, ...h })),
@@ -61,7 +69,7 @@ export default async function DashboardPage() {
 
       {user && <ProfileCard userId={user.id} email={user.email ?? ""} displayName={displayName} />}
 
-      <StatsSection totalCount={historyRecords.length} />
+      <StatsSection totalCount={totalPlanCount} />
 
       <QuickActions />
 
