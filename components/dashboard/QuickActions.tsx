@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Wine, Plane, History, BookOpen, type LucideIcon } from "lucide-react";
+import { Sparkles, Plane, History, BookOpen, type LucideIcon } from "lucide-react";
+import CreatePlanButton from "@/components/shared/CreatePlanButton";
 
 interface ActionItem {
   href: string;
@@ -12,11 +13,18 @@ interface ActionItem {
   disabled?: boolean;
 }
 
-// The app has two separate creation flows (nomikai / travel) rather than a
-// single "new plan" screen, so both are surfaced here alongside history and
-// guide instead of one generic "新しいプランを作る" button.
+// "新しいプランを作る" opens CreatePlanModal, which lets the user choose
+// between the AI flows (nomikai / travel) or the manual flow. 旅行 is also
+// kept as a direct shortcut alongside history and guide.
+const CREATE_PLAN_ACTION: ActionItem = {
+  href: "__create_plan__",
+  icon: Sparkles,
+  title: "新しいプランを作る",
+  description: "AIにおまかせ、または自分で入力",
+};
+
 const ACTIONS: ActionItem[] = [
-  { href: "/nomikai", icon: Wine, title: "飲み会を計画する", description: "お店選びから割り勘まで" },
+  CREATE_PLAN_ACTION,
   { href: "/travel", icon: Plane, title: "旅行を計画する", description: "行き先決めから精算まで" },
   { href: "/history", icon: History, title: "履歴を見る", description: "過去のプランを振り返る" },
   { href: "#", icon: BookOpen, title: "使い方を見る", description: "準備中", disabled: true },
@@ -48,9 +56,19 @@ export default function QuickActions() {
             </motion.div>
           );
 
-          return action.disabled ? (
-            <div key={action.title}>{card}</div>
-          ) : (
+          if (action.disabled) {
+            return <div key={action.title}>{card}</div>;
+          }
+
+          if (action.href === CREATE_PLAN_ACTION.href) {
+            return (
+              <CreatePlanButton key={action.title} className="block h-full w-full text-left">
+                {card}
+              </CreatePlanButton>
+            );
+          }
+
+          return (
             <Link key={action.title} href={action.href}>
               {card}
             </Link>

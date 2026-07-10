@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, Plus, X } from "lucide-react";
 import Logo from "./Logo";
 import GoldButton from "./GoldButton";
 import UserMenu from "./UserMenu";
+import CreatePlanButton from "./CreatePlanButton";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+
+const NEW_PLAN_BUTTON_CLASSES =
+  "inline-flex items-center justify-center gap-1.5 rounded-full bg-gold-gradient px-4 py-2 text-sm font-bold text-white shadow-gold transition-all duration-200 hover:brightness-110 hover:shadow-gold-lg";
 
 const NAV_LINKS = [
   { href: "#services", label: "サービス" },
@@ -42,7 +46,13 @@ export default function HeaderNav({ isLoggedIn, displayName }: HeaderNavProps) {
 
         <div className="hidden md:flex items-center gap-4">
           {isLoggedIn ? (
-            <UserMenu displayName={displayName ?? "ゲスト"} />
+            <>
+              <CreatePlanButton className={NEW_PLAN_BUTTON_CLASSES}>
+                <Plus className="h-4 w-4" />
+                新しいプラン
+              </CreatePlanButton>
+              <UserMenu displayName={displayName ?? "ゲスト"} />
+            </>
           ) : (
             <>
               <Link
@@ -83,6 +93,10 @@ export default function HeaderNav({ isLoggedIn, displayName }: HeaderNavProps) {
 
           {isLoggedIn ? (
             <>
+              <CreatePlanButton className={`${NEW_PLAN_BUTTON_CLASSES} w-full`}>
+                <Plus className="h-4 w-4" />
+                新しいプラン
+              </CreatePlanButton>
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
