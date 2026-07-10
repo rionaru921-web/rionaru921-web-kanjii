@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import GoldButton from "@/components/shared/GoldButton";
-import ManualPlansList from "@/components/manual-plans/ManualPlansList";
-import type { ManualPlan } from "@/lib/manual-plans/types";
+import ManualPlansList, { type ManualPlanListItem } from "@/components/manual-plans/ManualPlansList";
+import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
 export const metadata: Metadata = {
   title: "手動プラン",
@@ -27,11 +27,21 @@ export default async function ManualPlansPage() {
     redirect("/login?redirectTo=/manual-plans");
   }
 
+  // Single embedded query (plan + member ids) instead of a plan fetch
+  // followed by N separate member-count fetches — the FK on
+  // manual_plan_members.plan_id lets PostgREST join both in one round trip.
   const { data: plans } = await supabase
     .from("manual_plans")
-    .select("*")
+    .select("*, manual_plan_members(id)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  const items: ManualPlanListItem[] = (plans ?? []).map((row) => {
+    const { manual_plan_members, ...planFields } = row as ManualPlan & {
+      manual_plan_members: Pick<ManualPlanMember, "id">[];
+    };
+    return { ...(planFields as ManualPlan), memberCount: manual_plan_members?.length ?? 0 };
+  });
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-4xl mx-auto">
@@ -45,7 +55,7 @@ export default async function ManualPlansPage() {
         </GoldButton>
       </div>
 
-      <ManualPlansList plans={(plans ?? []) as ManualPlan[]} />
+      <ManualPlansList plans={items} />
     </main>
   );
 }

@@ -3,9 +3,13 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Wine, Plane, History as HistoryIcon, ChevronRight } from "lucide-react";
+import ShareStatusBadge from "@/components/manual-plans/ShareStatusBadge";
+import TimelineBadge from "@/components/manual-plans/TimelineBadge";
+import { getTimelineStatus } from "@/lib/manual-plans/types";
 import type { HistoryType } from "@/lib/history/types";
 
-interface RecentPlanItem {
+interface RecentHistoryItem {
+  kind: "history";
   id: string;
   type: HistoryType;
   title: string;
@@ -13,11 +17,19 @@ interface RecentPlanItem {
   created_at: string;
 }
 
-interface RecentPlansProps {
-  records: RecentPlanItem[];
+interface RecentManualItem {
+  kind: "manual";
+  id: string;
+  title: string;
+  event_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  is_shared: boolean;
 }
 
-export default function RecentPlans({ records }: RecentPlansProps) {
+export type RecentPlanItem = RecentHistoryItem | RecentManualItem;
+
+export default function RecentPlans({ records }: { records: RecentPlanItem[] }) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
@@ -34,11 +46,38 @@ export default function RecentPlans({ records }: RecentPlansProps) {
         <>
           <div className="flex flex-col gap-3">
             {records.map((item) => {
+              if (item.kind === "manual") {
+                return (
+                  <Link
+                    key={`manual-${item.id}`}
+                    href={`/manual-plans/${item.id}`}
+                    className="flex items-center gap-4 rounded-3xl bg-surface-tertiary shadow-warm p-4 hover:shadow-warm-hover hover:-translate-y-0.5 transition-all"
+                  >
+                    <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-gold/10 text-gold shrink-0">
+                      <HistoryIcon size={18} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-ink truncate">{item.title}</p>
+                      <p className="text-xs text-ink-muted mt-0.5">
+                        {item.event_date
+                          ? new Date(item.event_date).toLocaleDateString("ja-JP")
+                          : new Date(item.created_at).toLocaleDateString("ja-JP")}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <ShareStatusBadge isShared={item.is_shared} />
+                      <TimelineBadge status={getTimelineStatus(item)} />
+                    </div>
+                    <ChevronRight size={16} className="text-ink-muted shrink-0" />
+                  </Link>
+                );
+              }
+
               const Icon = item.type === "nomikai" ? Wine : Plane;
               const typeLabel = item.type === "nomikai" ? "飲み会" : "旅行";
               return (
                 <Link
-                  key={item.id}
+                  key={`history-${item.id}`}
                   href={`/history/${item.id}`}
                   className="flex items-center gap-4 rounded-3xl bg-surface-tertiary shadow-warm p-4 hover:shadow-warm-hover hover:-translate-y-0.5 transition-all"
                 >

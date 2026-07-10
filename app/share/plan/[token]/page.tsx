@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles } from "lucide-react";
+import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, EyeOff } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
 import AttendanceButtons from "@/components/manual-plans/AttendanceButtons";
@@ -65,6 +65,12 @@ export default async function SharePlanPage({ params }: { params: { token: strin
       {!typedPlan ? (
         <div className="mt-10 w-full max-w-sm text-center rounded-3xl bg-surface-tertiary shadow-warm p-8">
           <p className="text-ink-secondary">このリンクは見つかりませんでした。</p>
+        </div>
+      ) : !typedPlan.is_shared ? (
+        <div className="mt-10 w-full max-w-sm text-center rounded-3xl bg-surface-tertiary shadow-warm p-8 flex flex-col items-center gap-3">
+          <EyeOff className="text-ink-muted" size={32} />
+          <h1 className="font-serif font-bold text-lg text-ink">このプランはまだ共有されていません</h1>
+          <p className="text-ink-secondary text-sm">作成者に確認してください</p>
         </div>
       ) : (
         <div className="w-full max-w-lg mt-8 flex flex-col gap-6">

@@ -10,9 +10,11 @@ import {
   Home,
   ChevronRight,
   ArrowLeft,
+  PartyPopper,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import StatusBadge from "@/components/manual-plans/StatusBadge";
+import ShareStatusBadge from "@/components/manual-plans/ShareStatusBadge";
+import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import {
   formatDateRange,
@@ -20,6 +22,7 @@ import {
   ATTENDANCE_LABELS,
   PAYMENT_STATUS_LABELS,
 } from "@/lib/manual-plans/format";
+import { getTimelineStatus } from "@/lib/manual-plans/types";
 import { yen } from "@/lib/pdf/components";
 import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
@@ -31,7 +34,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ManualPlanDetailPage({ params }: { params: { id: string } }) {
+export default async function ManualPlanDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { just_created?: string };
+}) {
   const supabase = createClient();
   const {
     data: { user },
@@ -58,6 +67,7 @@ export default async function ManualPlanDetailPage({ params }: { params: { id: s
 
   const typedPlan = plan as ManualPlan;
   const typedMembers = (members ?? []) as ManualPlanMember[];
+  const justCreated = searchParams.just_created === "1";
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto space-y-6">
@@ -74,9 +84,20 @@ export default async function ManualPlanDetailPage({ params }: { params: { id: s
         <span className="text-ink/80">詳細</span>
       </nav>
 
+      {justCreated && (
+        <div className="rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3 flex items-start gap-2.5">
+          <PartyPopper className="text-gold shrink-0 mt-0.5" size={18} />
+          <div className="text-sm">
+            <p className="font-semibold text-ink">プランを保存しました(下書きとして)</p>
+            <p className="text-ink-secondary mt-0.5">共有するには「共有を開始する」ボタンを押してください</p>
+          </div>
+        </div>
+      )}
+
       <div>
-        <div className="mb-2">
-          <StatusBadge status={typedPlan.status} />
+        <div className="mb-2 flex items-center gap-2">
+          <ShareStatusBadge isShared={typedPlan.is_shared} />
+          <TimelineBadge status={getTimelineStatus(typedPlan)} />
         </div>
         <h1 className="font-serif font-bold text-2xl sm:text-3xl text-ink leading-tight">
           {typedPlan.title}

@@ -2,17 +2,16 @@ import { Document, Page, View, Text, Image, Link } from "@react-pdf/renderer";
 import { pdfStyles, COLORS } from "../styles";
 import { MizuhikiRule, yen } from "../components";
 import {
-  STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
   ATTENDANCE_LABELS,
   PAYMENT_STATUS_LABELS,
   formatDateRange,
 } from "@/lib/manual-plans/format";
-import type { ManualPlanStatus, AttendanceStatus, PaymentStatus } from "@/lib/manual-plans/types";
+import type { AttendanceStatus, PaymentStatus } from "@/lib/manual-plans/types";
 
 export interface ManualPlanPDFProps {
   title: string;
-  status: ManualPlanStatus;
+  isShared: boolean;
   eventDate: string | null;
   endDate: string | null;
   venueName: string | null;
@@ -30,7 +29,7 @@ export interface ManualPlanPDFProps {
 
 export function ManualPlanPDF({
   title,
-  status,
+  isShared,
   eventDate,
   endDate,
   venueName,
@@ -52,7 +51,7 @@ export function ManualPlanPDF({
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
           <Text style={pdfStyles.brand}>Kanjii</Text>
-          <Text style={pdfStyles.headerDate}>{STATUS_LABELS[status]}</Text>
+          <Text style={pdfStyles.headerDate}>{isShared ? "共有中" : "下書き"}</Text>
         </View>
 
         <MizuhikiRule />

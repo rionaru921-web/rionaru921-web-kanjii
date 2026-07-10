@@ -5,7 +5,7 @@ import ProfileCard from "@/components/dashboard/ProfileCard";
 import StatsSection from "@/components/dashboard/StatsSection";
 import QuickActions from "@/components/dashboard/QuickActions";
 import DailyTip from "@/components/dashboard/DailyTip";
-import RecentPlans from "@/components/dashboard/RecentPlans";
+import RecentPlans, { type RecentPlanItem } from "@/components/dashboard/RecentPlans";
 import Announcements from "@/components/dashboard/Announcements";
 
 export const metadata: Metadata = {
@@ -37,7 +37,23 @@ export default async function DashboardPage() {
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const records = history ?? [];
+  const { data: manualPlans } = user
+    ? await supabase
+        .from("manual_plans")
+        .select("id, title, event_date, end_date, created_at, is_shared")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5)
+    : { data: [] };
+
+  const historyRecords = history ?? [];
+
+  const recentItems: RecentPlanItem[] = [
+    ...historyRecords.map((h) => ({ kind: "history" as const, ...h })),
+    ...(manualPlans ?? []).map((m) => ({ kind: "manual" as const, ...m })),
+  ]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 3);
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-5xl mx-auto space-y-6">
@@ -45,13 +61,13 @@ export default async function DashboardPage() {
 
       {user && <ProfileCard userId={user.id} email={user.email ?? ""} displayName={displayName} />}
 
-      <StatsSection totalCount={records.length} />
+      <StatsSection totalCount={historyRecords.length} />
 
       <QuickActions />
 
       <DailyTip />
 
-      <RecentPlans records={records.slice(0, 3)} />
+      <RecentPlans records={recentItems} />
 
       <Announcements />
     </main>

@@ -10,7 +10,6 @@ interface CreateManualPlanBody {
   title: string;
   eventDate?: string | null;
   endDate?: string | null;
-  status?: string;
   venueName?: string | null;
   venueAddress?: string | null;
   venueUrl?: string | null;
@@ -23,6 +22,9 @@ interface CreateManualPlanBody {
   members?: MemberInput[];
 }
 
+// New plans always start as a draft (is_shared defaults to false at the DB
+// level) — sharing is a deliberate, separate action taken from the detail
+// page via PATCH /api/manual-plans/[id]/status.
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   const {
@@ -45,7 +47,6 @@ export async function POST(req: NextRequest) {
       title: body.title.trim(),
       event_date: body.eventDate ?? null,
       end_date: body.endDate ?? null,
-      status: body.status ?? "draft",
       venue_name: body.venueName ?? null,
       venue_address: body.venueAddress ?? null,
       venue_url: body.venueUrl ?? null,

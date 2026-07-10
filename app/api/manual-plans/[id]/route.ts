@@ -10,7 +10,6 @@ interface UpdateManualPlanBody {
   title: string;
   eventDate?: string | null;
   endDate?: string | null;
-  status?: string;
   venueName?: string | null;
   venueAddress?: string | null;
   venueUrl?: string | null;
@@ -23,6 +22,9 @@ interface UpdateManualPlanBody {
   members?: MemberInput[];
 }
 
+// Content edits only — this route never touches is_shared. Sharing is
+// toggled separately via PATCH /api/manual-plans/[id]/status so that
+// editing plan details never accidentally starts or stops a share.
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createClient();
   const {
@@ -44,7 +46,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       title: body.title.trim(),
       event_date: body.eventDate ?? null,
       end_date: body.endDate ?? null,
-      status: body.status ?? "draft",
       venue_name: body.venueName ?? null,
       venue_address: body.venueAddress ?? null,
       venue_url: body.venueUrl ?? null,

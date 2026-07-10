@@ -50,7 +50,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const buffer = await renderToBuffer(
     <ManualPlanPDF
       title={typedPlan.title}
-      status={typedPlan.status}
+      isShared={typedPlan.is_shared}
       eventDate={typedPlan.event_date}
       endDate={typedPlan.end_date}
       venueName={typedPlan.venue_name}

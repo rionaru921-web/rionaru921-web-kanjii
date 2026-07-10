@@ -1,11 +1,4 @@
-import type { ManualPlanStatus, AttendanceStatus, PaymentStatus } from "./types";
-
-export const STATUS_LABELS: Record<ManualPlanStatus, string> = {
-  draft: "進行中",
-  confirmed: "確定",
-  completed: "完了",
-  cancelled: "キャンセル",
-};
+import type { AttendanceStatus, PaymentStatus } from "./types";
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: "現金",

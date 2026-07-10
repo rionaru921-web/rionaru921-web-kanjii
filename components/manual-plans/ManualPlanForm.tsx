@@ -15,8 +15,8 @@ import {
   Loader2,
   type LucideIcon,
 } from "lucide-react";
-import type { ManualPlan, ManualPlanMember, ManualPlanStatus } from "@/lib/manual-plans/types";
-import { STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/manual-plans/format";
+import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
+import { PAYMENT_METHOD_LABELS } from "@/lib/manual-plans/format";
 
 interface MemberInput {
   name: string;
@@ -30,7 +30,6 @@ interface ManualPlanFormProps {
   initialMembers?: ManualPlanMember[];
 }
 
-const STATUS_OPTIONS: ManualPlanStatus[] = ["draft", "confirmed", "completed", "cancelled"];
 const PAYMENT_METHOD_OPTIONS = ["cash", "paypay", "bank_transfer"];
 
 function toLocalInputValue(iso: string | null | undefined): string {
@@ -101,7 +100,6 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [eventDate, setEventDate] = useState(toLocalInputValue(initialData?.event_date));
   const [endDate, setEndDate] = useState(toLocalInputValue(initialData?.end_date));
-  const [status, setStatus] = useState<ManualPlanStatus>(initialData?.status ?? "draft");
 
   const [venueName, setVenueName] = useState(initialData?.venue_name ?? "");
   const [venueAddress, setVenueAddress] = useState(initialData?.venue_address ?? "");
@@ -159,7 +157,6 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         title: title.trim(),
         eventDate: fromLocalInputValue(eventDate),
         endDate: fromLocalInputValue(endDate),
-        status,
         venueName: venueName.trim() || null,
         venueAddress: venueAddress.trim() || null,
         venueUrl: venueUrl.trim() || null,
@@ -185,7 +182,8 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "保存に失敗しました。");
 
-      router.push(`/manual-plans/${data.id ?? planId}`);
+      const targetId = data.id ?? planId;
+      router.push(mode === "create" ? `/manual-plans/${targetId}?just_created=1` : `/manual-plans/${targetId}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存に失敗しました。");
@@ -229,21 +227,6 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               className={inputClass}
             />
           </div>
-        </div>
-        <div>
-          <label className={labelClass}>ステータス</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as ManualPlanStatus)}
-            disabled={saving}
-            className={inputClass}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
-              </option>
-            ))}
-          </select>
         </div>
       </FormSection>
 
