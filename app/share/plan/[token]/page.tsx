@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, MessageCircle } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
-import AttendanceButtons from "@/components/manual-plans/AttendanceButtons";
+import AttendanceForm from "@/components/share/AttendanceForm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateRange, PAYMENT_METHOD_LABELS } from "@/lib/manual-plans/format";
 import { yen } from "@/lib/pdf/components";
-import type { ManualPlan } from "@/lib/manual-plans/types";
+import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
 // Without this, Next's fetch-based Data Cache can treat this dynamic-segment
 // page as staticly cacheable indefinitely (no generateStaticParams + a
@@ -58,6 +58,16 @@ export default async function SharePlanPage({ params }: { params: { token: strin
     .maybeSingle();
 
   const typedPlan = plan as ManualPlan | null;
+
+  const { data: members } = typedPlan
+    ? await supabase
+        .from("manual_plan_members")
+        .select("*")
+        .eq("plan_id", typedPlan.id)
+        .order("created_at", { ascending: true })
+    : { data: [] };
+  const typedMembers = (members ?? []) as ManualPlanMember[];
+
   const gcalUrl = typedPlan ? buildGoogleCalendarUrl(typedPlan) : "";
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
   const lineUrl = typedPlan ? buildLineShareUrl(typedPlan, `${baseUrl}/share/plan/${params.token}`) : "";
@@ -134,7 +144,7 @@ export default async function SharePlanPage({ params }: { params: { token: strin
             )}
           </div>
 
-          <AttendanceButtons />
+          <AttendanceForm shareToken={params.token} members={typedMembers} />
 
           {lineUrl && (
             <a

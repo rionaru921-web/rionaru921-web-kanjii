@@ -14,16 +14,12 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
+import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
-import {
-  formatDateRange,
-  PAYMENT_METHOD_LABELS,
-  ATTENDANCE_LABELS,
-  PAYMENT_STATUS_LABELS,
-} from "@/lib/manual-plans/format";
+import { formatDateRange, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/manual-plans/format";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
 import { yen } from "@/lib/pdf/components";
-import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
+import type { AttendanceStatus, ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
 export const metadata: Metadata = {
   title: "プラン詳細",
@@ -67,6 +63,14 @@ export default async function ManualPlanDetailPage({
   const typedPlan = plan as ManualPlan;
   const typedMembers = (members ?? []) as ManualPlanMember[];
   const justCreated = searchParams.just_created === "1";
+
+  const attendanceCounts = typedMembers.reduce(
+    (acc, m) => {
+      acc[m.attendance_status] += 1;
+      return acc;
+    },
+    { attending: 0, declined: 0, maybe: 0, pending: 0 } as Record<AttendanceStatus, number>
+  );
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto space-y-6">
@@ -165,10 +169,16 @@ export default async function ManualPlanDetailPage({
       )}
 
       <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-1.5">
           <UsersIcon className="text-gold" size={18} />
           <p className="text-xs text-ink-muted">メンバー ({typedMembers.length}人)</p>
         </div>
+        {typedMembers.length > 0 && (
+          <p className="text-xs text-ink-muted mb-4">
+            参加{attendanceCounts.attending}人 / 不参加{attendanceCounts.declined}人 / 未定
+            {attendanceCounts.maybe}人 / 未回答{attendanceCounts.pending}人
+          </p>
+        )}
         {typedMembers.length === 0 ? (
           <p className="text-sm text-ink-secondary">まだメンバーが登録されていません</p>
         ) : (
@@ -180,9 +190,7 @@ export default async function ManualPlanDetailPage({
               >
                 <p className="text-sm font-medium text-ink truncate">{m.name}</p>
                 <div className="flex gap-1.5 shrink-0">
-                  <span className="text-[11px] rounded-full bg-gold/10 text-gold px-2 py-0.5">
-                    {ATTENDANCE_LABELS[m.attendance_status]}
-                  </span>
+                  <AttendanceStatusBadge status={m.attendance_status} />
                   <span className="text-[11px] rounded-full bg-sage/10 text-sage px-2 py-0.5">
                     {PAYMENT_STATUS_LABELS[m.payment_status]}
                   </span>

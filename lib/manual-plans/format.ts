@@ -9,8 +9,8 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
 
 export const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
   pending: "未回答",
-  attending: "出席",
-  declined: "欠席",
+  attending: "参加",
+  declined: "不参加",
   maybe: "未定",
 };
 
