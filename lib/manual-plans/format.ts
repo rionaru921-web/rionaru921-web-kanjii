@@ -1,4 +1,5 @@
-import type { AttendanceStatus, PaymentStatus } from "./types";
+import type { IcsEvent } from "@/lib/ics";
+import type { AttendanceStatus, ManualPlan, PaymentStatus } from "./types";
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: "現金",
@@ -40,4 +41,21 @@ export function formatDateRange(start: string | null, end: string | null): strin
     : formatDateTime(end);
 
   return `${startLabel} 〜 ${endLabel}`;
+}
+
+// Shared by both the owner-facing (/api/manual-plans/[id]/ics) and public
+// (/api/share/plan/[token]/ics) calendar-download routes, so the event
+// content stays identical regardless of who downloads it.
+export function buildPlanIcsEvent(plan: ManualPlan, shareUrl: string): IcsEvent {
+  const location = [plan.venue_name, plan.venue_address].filter(Boolean).join(" ") || undefined;
+
+  return {
+    uid: `manual-plan-${plan.id}@kanjii.app`,
+    title: plan.title,
+    description: plan.memo ?? undefined,
+    location,
+    startDate: plan.event_date ?? plan.created_at,
+    endDate: plan.end_date ?? undefined,
+    url: shareUrl,
+  };
 }

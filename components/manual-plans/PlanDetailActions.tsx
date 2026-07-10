@@ -4,7 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, Loader2, FileDown, Link as LinkIcon, QrCode, Check, MessageCircle } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Loader2,
+  FileDown,
+  Link as LinkIcon,
+  QrCode,
+  Check,
+  MessageCircle,
+  CalendarPlus,
+} from "lucide-react";
 import type { ManualPlan } from "@/lib/manual-plans/types";
 
 // The qrcode dependency pulled in by ShareQrModal is only needed once the
@@ -61,7 +71,7 @@ export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
         <Link
           href={`/manual-plans/${plan.id}/edit`}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors"
@@ -100,6 +110,13 @@ export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
           <MessageCircle size={14} />
           LINEで共有
         </button>
+        <a
+          href={`/api/manual-plans/${plan.id}/ics`}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 text-blue-600 text-xs font-semibold py-2.5 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+        >
+          <CalendarPlus size={14} />
+          カレンダーに追加
+        </a>
       </div>
 
       <button

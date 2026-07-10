@@ -61,6 +61,7 @@ export default async function SharePlanPage({ params }: { params: { token: strin
   const gcalUrl = typedPlan ? buildGoogleCalendarUrl(typedPlan) : "";
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
   const lineUrl = typedPlan ? buildLineShareUrl(typedPlan, `${baseUrl}/share/plan/${params.token}`) : "";
+  const icsUrl = typedPlan ? `/api/share/plan/${params.token}/ics` : "";
   const mapLink =
     typedPlan?.venue_map_url ||
     (typedPlan?.venue_address
@@ -144,6 +145,16 @@ export default async function SharePlanPage({ params }: { params: { token: strin
             >
               <MessageCircle size={16} />
               LINEで共有
+            </a>
+          )}
+
+          {icsUrl && (
+            <a
+              href={icsUrl}
+              className="flex items-center justify-center gap-2 rounded-full border border-blue-200 text-blue-600 font-semibold text-sm py-3 hover:bg-blue-50 transition-colors"
+            >
+              <CalendarPlus size={16} />
+              カレンダーに追加(.ics)
             </a>
           )}
 
