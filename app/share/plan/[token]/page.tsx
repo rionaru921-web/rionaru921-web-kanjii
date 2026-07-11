@@ -4,7 +4,8 @@ import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
 import AttendanceForm from "@/components/share/AttendanceForm";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatDateRange, PAYMENT_METHOD_LABELS } from "@/lib/manual-plans/format";
+import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
+import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { yen } from "@/lib/pdf/components";
 import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
@@ -72,11 +73,14 @@ export default async function SharePlanPage({ params }: { params: { token: strin
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
   const lineUrl = typedPlan ? buildLineShareUrl(typedPlan, `${baseUrl}/share/plan/${params.token}`) : "";
   const icsUrl = typedPlan ? `/api/share/plan/${params.token}/ics` : "";
-  const mapLink =
-    typedPlan?.venue_map_url ||
-    (typedPlan?.venue_address
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(typedPlan.venue_address)}`
-      : null);
+  const mapQuery = typedPlan
+    ? [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim()
+    : "";
+
+  const organizers = typedMembers.filter((m) => m.role === "organizer");
+  const attendingCount = typedMembers.filter((m) => m.attendance_status === "attending").length;
+  const payingMemberCount = attendingCount > 0 ? attendingCount : typedMembers.length;
+  const perPerson = typedPlan ? perPersonFee(typedPlan.fee_amount, payingMemberCount) : null;
 
   return (
     <div className="min-h-screen ink-wash px-4 py-10 flex flex-col items-center">
@@ -91,7 +95,14 @@ export default async function SharePlanPage({ params }: { params: { token: strin
           <p className="text-center text-sm text-ink-secondary">幹事さんから招待されました</p>
 
           <div className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex flex-col gap-5">
-            <h1 className="font-serif font-bold text-2xl text-ink text-center">{typedPlan.title}</h1>
+            <div>
+              <h1 className="font-serif font-bold text-2xl text-ink text-center">{typedPlan.title}</h1>
+              {organizers.length > 0 && (
+                <p className="mt-2 text-xs text-ink-muted text-center">
+                  👑 幹事({organizers.length}人): {organizers.map((m) => m.name).join("、")}
+                </p>
+              )}
+            </div>
 
             <div className="flex items-start gap-3">
               <Clock className="text-gold shrink-0" size={18} />
@@ -101,22 +112,41 @@ export default async function SharePlanPage({ params }: { params: { token: strin
             {(typedPlan.venue_name || typedPlan.venue_address) && (
               <div className="flex items-start gap-3">
                 <MapPin className="text-gold shrink-0" size={18} />
-                <div>
+                <div className="min-w-0 flex-1">
                   {typedPlan.venue_name && (
                     <p className="text-sm text-ink font-semibold">{typedPlan.venue_name}</p>
                   )}
                   {typedPlan.venue_address && (
                     <p className="text-sm text-ink-secondary">{typedPlan.venue_address}</p>
                   )}
-                  {mapLink && (
-                    <a
-                      href={mapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-gold hover:text-gold-deep transition-colors mt-1 inline-block"
-                    >
-                      地図を見る →
-                    </a>
+                  {mapQuery && (
+                    <>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                        <span className="text-ink/60">地図で開く:</span>
+                        <a
+                          href={buildGoogleMapsUrl(mapQuery)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gold hover:underline"
+                        >
+                          🗺️ Google Maps
+                        </a>
+                        <a
+                          href={buildAppleMapsUrl(mapQuery)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gold hover:underline"
+                        >
+                          🍎 Apple Maps
+                        </a>
+                      </div>
+                      <iframe
+                        src={buildEmbedUrl(mapQuery)}
+                        className="mt-3 h-40 w-full rounded-lg border border-gold/20"
+                        loading="lazy"
+                        title="地図プレビュー"
+                      />
+                    </>
                   )}
                 </div>
               </div>
@@ -125,8 +155,24 @@ export default async function SharePlanPage({ params }: { params: { token: strin
             {typedPlan.fee_amount != null && (
               <div className="flex items-start gap-3">
                 <Wallet className="text-gold shrink-0" size={18} />
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-display-num font-black text-ink">{yen(typedPlan.fee_amount)}</p>
+                  {typedPlan.fee_breakdown.length > 0 && (
+                    <ul className="mt-1.5 flex flex-col gap-0.5">
+                      {typedPlan.fee_breakdown.map((item, i) => (
+                        <li key={i} className="flex items-center justify-between text-xs text-ink-secondary">
+                          <span>{item.label}</span>
+                          <span className="font-display-num">{yen(item.amount)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {perPerson != null && (
+                    <p className="mt-1.5 text-xs text-ink-secondary">
+                      1人あたり <span className="font-semibold text-gold">{yen(perPerson)}</span>({payingMemberCount}
+                      人で割り勘)
+                    </p>
+                  )}
                   {typedPlan.payment_methods.length > 0 && (
                     <p className="text-xs text-ink-secondary mt-0.5">
                       {typedPlan.payment_methods.map((m) => PAYMENT_METHOD_LABELS[m] ?? m).join(" / ")}

@@ -1,5 +1,5 @@
 import type { IcsEvent } from "@/lib/ics";
-import type { AttendanceStatus, ManualPlan, PaymentStatus } from "./types";
+import type { AttendanceStatus, ManualPlan, MemberRole, PaymentStatus } from "./types";
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: "現金",
@@ -12,6 +12,11 @@ export const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
   attending: "参加",
   declined: "不参加",
   maybe: "未定",
+};
+
+export const ROLE_LABELS: Record<MemberRole, string> = {
+  organizer: "幹事",
+  participant: "参加者",
 };
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
@@ -41,6 +46,14 @@ export function formatDateRange(start: string | null, end: string | null): strin
     : formatDateTime(end);
 
   return `${startLabel} 〜 ${endLabel}`;
+}
+
+// Rounds up so the organizer never collects less than the total fee —
+// any remainder from an uneven split is absorbed by the group rather than
+// left uncollected.
+export function perPersonFee(feeAmount: number | null, memberCount: number): number | null {
+  if (feeAmount == null || memberCount <= 0) return null;
+  return Math.ceil(feeAmount / memberCount);
 }
 
 // Shared by both the owner-facing (/api/manual-plans/[id]/ics) and public

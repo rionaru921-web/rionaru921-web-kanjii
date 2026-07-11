@@ -15,12 +15,15 @@ import {
   Loader2,
   type LucideIcon,
 } from "lucide-react";
-import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
-import { PAYMENT_METHOD_LABELS } from "@/lib/manual-plans/format";
+import type { FeeBreakdownItem, ManualPlan, ManualPlanMember, MemberRole } from "@/lib/manual-plans/types";
+import { ROLE_LABELS } from "@/lib/manual-plans/format";
+import VenueInput, { type VenueValue } from "./VenueInput";
+import FeeSection from "./FeeSection";
 
 interface MemberInput {
   name: string;
   email: string;
+  role: MemberRole;
 }
 
 interface ManualPlanFormProps {
@@ -29,8 +32,6 @@ interface ManualPlanFormProps {
   initialData?: ManualPlan;
   initialMembers?: ManualPlanMember[];
 }
-
-const PAYMENT_METHOD_OPTIONS = ["cash", "paypay", "bank_transfer"];
 
 function toLocalInputValue(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -101,13 +102,20 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const [eventDate, setEventDate] = useState(toLocalInputValue(initialData?.event_date));
   const [endDate, setEndDate] = useState(toLocalInputValue(initialData?.end_date));
 
-  const [venueName, setVenueName] = useState(initialData?.venue_name ?? "");
-  const [venueAddress, setVenueAddress] = useState(initialData?.venue_address ?? "");
-  const [venueUrl, setVenueUrl] = useState(initialData?.venue_url ?? "");
-  const [venueMapUrl, setVenueMapUrl] = useState(initialData?.venue_map_url ?? "");
+  const [venue, setVenue] = useState<VenueValue>({
+    venueName: initialData?.venue_name ?? "",
+    venueAddress: initialData?.venue_address ?? "",
+    venueUrl: initialData?.venue_url ?? "",
+    venueHotpepperId: initialData?.venue_hotpepper_id ?? "",
+    venueLat: initialData?.venue_lat ?? null,
+    venueLng: initialData?.venue_lng ?? null,
+  });
 
   const [feeAmount, setFeeAmount] = useState(
     initialData?.fee_amount != null ? String(initialData.fee_amount) : ""
+  );
+  const [feeBreakdown, setFeeBreakdown] = useState<FeeBreakdownItem[]>(
+    initialData?.fee_breakdown ?? []
   );
   const [paymentMethods, setPaymentMethods] = useState<string[]>(initialData?.payment_methods ?? []);
   const [paymentDeadline, setPaymentDeadline] = useState(toLocalInputValue(initialData?.payment_deadline));
@@ -117,8 +125,8 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
   const [members, setMembers] = useState<MemberInput[]>(
     initialMembers && initialMembers.length > 0
-      ? initialMembers.map((m) => ({ name: m.name, email: m.email ?? "" }))
-      : [{ name: "", email: "" }]
+      ? initialMembers.map((m) => ({ name: m.name, email: m.email ?? "", role: m.role }))
+      : [{ name: "", email: "", role: "participant" }]
   );
 
   const [saving, setSaving] = useState(false);
@@ -135,12 +143,14 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   }
 
   function addMember() {
-    setMembers((prev) => [...prev, { name: "", email: "" }]);
+    setMembers((prev) => [...prev, { name: "", email: "", role: "participant" }]);
   }
 
   function removeMember(index: number) {
     setMembers((prev) => prev.filter((_, i) => i !== index));
   }
+
+  const filledMemberCount = members.filter((m) => m.name.trim()).length;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -157,18 +167,21 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         title: title.trim(),
         eventDate: fromLocalInputValue(eventDate),
         endDate: fromLocalInputValue(endDate),
-        venueName: venueName.trim() || null,
-        venueAddress: venueAddress.trim() || null,
-        venueUrl: venueUrl.trim() || null,
-        venueMapUrl: venueMapUrl.trim() || null,
+        venueName: venue.venueName.trim() || null,
+        venueAddress: venue.venueAddress.trim() || null,
+        venueUrl: venue.venueUrl.trim() || null,
+        venueHotpepperId: venue.venueHotpepperId.trim() || null,
+        venueLat: venue.venueLat,
+        venueLng: venue.venueLng,
         feeAmount: feeAmount.trim() ? Number(feeAmount) : null,
+        feeBreakdown: feeBreakdown.filter((item) => item.label.trim()),
         paymentMethods,
         paymentDeadline: fromLocalInputValue(paymentDeadline),
         memo: memo.trim() || null,
         dietaryNotes: dietaryNotes.trim() || null,
         members: members
           .filter((m) => m.name.trim())
-          .map((m) => ({ name: m.name.trim(), email: m.email.trim() || null })),
+          .map((m) => ({ name: m.name.trim(), email: m.email.trim() || null, role: m.role })),
       };
 
       const res = await fetch(
@@ -233,128 +246,74 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       </FormSection>
 
       <FormSection title="場所" icon={MapPin}>
-        <div>
-          <label className={labelClass}>店名・場所名</label>
-          <input
-            type="text"
-            value={venueName}
-            onChange={(e) => setVenueName(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-            placeholder="例: 居酒屋 花月"
-          />
-        </div>
-        <div>
-          <label className={labelClass}>住所</label>
-          <input
-            type="text"
-            value={venueAddress}
-            onChange={(e) => setVenueAddress(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>お店のURL</label>
-          <input
-            type="url"
-            value={venueUrl}
-            onChange={(e) => setVenueUrl(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-            placeholder="https://..."
-          />
-        </div>
-        <div>
-          <label className={labelClass}>地図URL</label>
-          <input
-            type="url"
-            value={venueMapUrl}
-            onChange={(e) => setVenueMapUrl(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-            placeholder="https://maps.google.com/..."
-          />
-        </div>
+        <VenueInput value={venue} onChange={setVenue} disabled={saving} />
       </FormSection>
 
       <FormSection title="予算・集金" icon={Wallet}>
-        <div>
-          <label className={labelClass}>会費(円)</label>
-          <input
-            type="number"
-            min={0}
-            value={feeAmount}
-            onChange={(e) => setFeeAmount(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-            placeholder="4000"
-          />
-        </div>
-        <div>
-          <label className={labelClass}>支払い方法</label>
-          <div className="mt-1.5 flex flex-wrap gap-2">
-            {PAYMENT_METHOD_OPTIONS.map((method) => (
-              <button
-                key={method}
-                type="button"
-                onClick={() => togglePaymentMethod(method)}
-                disabled={saving}
-                className={`rounded-xl px-3 py-2 text-xs font-semibold border transition-colors disabled:opacity-50 ${
-                  paymentMethods.includes(method)
-                    ? "bg-gold-gradient border-transparent text-white"
-                    : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                }`}
-              >
-                {PAYMENT_METHOD_LABELS[method]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label className={labelClass}>支払い期限</label>
-          <input
-            type="datetime-local"
-            step={300}
-            value={paymentDeadline}
-            onChange={(e) => setPaymentDeadline(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-          />
-        </div>
+        <FeeSection
+          feeAmount={feeAmount}
+          onFeeAmountChange={setFeeAmount}
+          breakdown={feeBreakdown}
+          onBreakdownChange={setFeeBreakdown}
+          paymentMethods={paymentMethods}
+          onTogglePaymentMethod={togglePaymentMethod}
+          paymentDeadline={paymentDeadline}
+          onPaymentDeadlineChange={setPaymentDeadline}
+          memberCount={filledMemberCount}
+          disabled={saving}
+        />
       </FormSection>
 
       <FormSection title="メンバー" icon={UsersIcon}>
         <div className="flex flex-col gap-3">
           {members.map((member, i) => (
-            <div key={i} className="flex items-start gap-2">
-              <div className="flex-1 grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  value={member.name}
-                  onChange={(e) => updateMember(i, "name", e.target.value)}
-                  disabled={saving}
-                  className={inputClass.replace("mt-1.5 ", "")}
-                  placeholder="名前"
-                />
-                <input
-                  type="email"
-                  value={member.email}
-                  onChange={(e) => updateMember(i, "email", e.target.value)}
-                  disabled={saving}
-                  className={inputClass.replace("mt-1.5 ", "")}
-                  placeholder="メール(任意)"
-                />
+            <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
+              <div className="flex items-start gap-2">
+                <div className="flex-1 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={member.name}
+                    onChange={(e) => updateMember(i, "name", e.target.value)}
+                    disabled={saving}
+                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
+                    placeholder="名前"
+                  />
+                  <input
+                    type="email"
+                    value={member.email}
+                    onChange={(e) => updateMember(i, "email", e.target.value)}
+                    disabled={saving}
+                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
+                    placeholder="メール(任意)"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeMember(i)}
+                  disabled={saving || members.length === 1}
+                  className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion transition-colors disabled:opacity-30"
+                  aria-label="メンバーを削除"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => removeMember(i)}
-                disabled={saving || members.length === 1}
-                className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion transition-colors disabled:opacity-30"
-                aria-label="メンバーを削除"
-              >
-                <Trash2 size={16} />
-              </button>
+              <div className="flex gap-2">
+                {(["organizer", "participant"] as MemberRole[]).map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => updateMember(i, "role", role)}
+                    disabled={saving}
+                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50 ${
+                      member.role === role
+                        ? "bg-gold-gradient border-transparent text-white"
+                        : "border-gold/15 text-ink-secondary hover:border-gold/30"
+                    }`}
+                  >
+                    {ROLE_LABELS[role]}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </div>

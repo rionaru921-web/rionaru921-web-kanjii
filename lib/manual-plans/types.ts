@@ -1,3 +1,4 @@
+export type MemberRole = "organizer" | "participant";
 export type AttendanceStatus = "pending" | "attending" | "declined" | "maybe";
 export type PaymentStatus = "unpaid" | "paid";
 
@@ -6,11 +7,17 @@ export interface ManualPlanMember {
   plan_id: string;
   name: string;
   email: string | null;
+  role: MemberRole;
   attendance_status: AttendanceStatus;
   payment_status: PaymentStatus;
   note: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface FeeBreakdownItem {
+  label: string;
+  amount: number;
 }
 
 export interface ManualPlan {
@@ -23,7 +30,11 @@ export interface ManualPlan {
   venue_address: string | null;
   venue_url: string | null;
   venue_map_url: string | null;
+  venue_lat: number | null;
+  venue_lng: number | null;
+  venue_hotpepper_id: string | null;
   fee_amount: number | null;
+  fee_breakdown: FeeBreakdownItem[];
   payment_methods: string[];
   payment_deadline: string | null;
   memo: string | null;

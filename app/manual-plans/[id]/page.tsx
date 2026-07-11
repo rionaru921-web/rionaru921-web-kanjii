@@ -15,8 +15,10 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
+import MemberRoleBadge from "@/components/manual-plans/MemberRoleBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
-import { formatDateRange, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/manual-plans/format";
+import { formatDateRange, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS, perPersonFee } from "@/lib/manual-plans/format";
+import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
 import { yen } from "@/lib/pdf/components";
 import type { AttendanceStatus, ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
@@ -72,6 +74,11 @@ export default async function ManualPlanDetailPage({
     { attending: 0, declined: 0, maybe: 0, pending: 0 } as Record<AttendanceStatus, number>
   );
 
+  const organizers = typedMembers.filter((m) => m.role === "organizer");
+  const payingMemberCount = attendanceCounts.attending > 0 ? attendanceCounts.attending : typedMembers.length;
+  const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
+  const mapQuery = [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim();
+
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto space-y-6">
       <nav className="flex items-center gap-2 text-sm text-ink/60">
@@ -116,7 +123,7 @@ export default async function ManualPlanDetailPage({
       {(typedPlan.venue_name || typedPlan.venue_address || typedPlan.venue_url) && (
         <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
           <MapPin className="text-gold shrink-0" size={18} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-xs text-ink-muted mb-1">場所</p>
             {typedPlan.venue_name && <p className="text-sm text-ink font-semibold">{typedPlan.venue_name}</p>}
             {typedPlan.venue_address && (
@@ -132,15 +139,34 @@ export default async function ManualPlanDetailPage({
                 {typedPlan.venue_url}
               </a>
             )}
-            {typedPlan.venue_map_url && (
-              <a
-                href={typedPlan.venue_map_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-gold hover:text-gold-deep transition-colors mt-1 block"
-              >
-                地図を見る →
-              </a>
+            {mapQuery && (
+              <>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                  <span className="text-ink/60">地図で開く:</span>
+                  <a
+                    href={buildGoogleMapsUrl(mapQuery)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:underline"
+                  >
+                    🗺️ Google Maps
+                  </a>
+                  <a
+                    href={buildAppleMapsUrl(mapQuery)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:underline"
+                  >
+                    🍎 Apple Maps
+                  </a>
+                </div>
+                <iframe
+                  src={buildEmbedUrl(mapQuery)}
+                  className="mt-3 h-48 w-full rounded-lg border border-gold/20"
+                  loading="lazy"
+                  title="地図プレビュー"
+                />
+              </>
             )}
           </div>
         </section>
@@ -149,13 +175,31 @@ export default async function ManualPlanDetailPage({
       {(typedPlan.fee_amount != null || typedPlan.payment_methods.length > 0) && (
         <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
           <Wallet className="text-gold shrink-0" size={18} />
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-xs text-ink-muted mb-1">予算・集金</p>
             {typedPlan.fee_amount != null && (
               <p className="text-lg font-display-num font-black text-ink">{yen(typedPlan.fee_amount)}</p>
             )}
+            {typedPlan.fee_breakdown.length > 0 && (
+              <ul className="mt-2 flex flex-col gap-1">
+                {typedPlan.fee_breakdown.map((item, i) => (
+                  <li key={i} className="flex items-center justify-between text-sm text-ink-secondary">
+                    <span>{item.label}</span>
+                    <span className="font-display-num">{yen(item.amount)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {perPerson != null && (
+              <div className="mt-3 rounded-xl bg-gold/5 border border-gold/15 px-4 py-3">
+                <p className="text-xs text-ink-muted">💡 参加人数: {payingMemberCount}人</p>
+                <p className="text-sm font-semibold text-ink mt-0.5">
+                  1人あたり: <span className="font-display-num text-gold">{yen(perPerson)}</span>
+                </p>
+              </div>
+            )}
             {typedPlan.payment_methods.length > 0 && (
-              <p className="text-sm text-ink-secondary mt-1">
+              <p className="text-sm text-ink-secondary mt-3">
                 {typedPlan.payment_methods.map((m) => PAYMENT_METHOD_LABELS[m] ?? m).join(" / ")}
               </p>
             )}
@@ -173,6 +217,11 @@ export default async function ManualPlanDetailPage({
           <UsersIcon className="text-gold" size={18} />
           <p className="text-xs text-ink-muted">メンバー ({typedMembers.length}人)</p>
         </div>
+        {organizers.length > 0 && (
+          <p className="text-xs text-ink-muted mb-1.5">
+            👑 幹事({organizers.length}人): {organizers.map((m) => m.name).join("、")}
+          </p>
+        )}
         {typedMembers.length > 0 && (
           <p className="text-xs text-ink-muted mb-4">
             参加{attendanceCounts.attending}人 / 不参加{attendanceCounts.declined}人 / 未定
@@ -188,7 +237,10 @@ export default async function ManualPlanDetailPage({
                 key={m.id}
                 className="flex items-center justify-between gap-3 border-b border-gold/10 pb-3 last:border-0 last:pb-0"
               >
-                <p className="text-sm font-medium text-ink truncate">{m.name}</p>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <MemberRoleBadge role={m.role} />
+                  <p className="text-sm font-medium text-ink truncate">{m.name}</p>
+                </div>
                 <div className="flex gap-1.5 shrink-0">
                   <AttendanceStatusBadge status={m.attendance_status} />
                   <span className="text-[11px] rounded-full bg-sage/10 text-sage px-2 py-0.5">
