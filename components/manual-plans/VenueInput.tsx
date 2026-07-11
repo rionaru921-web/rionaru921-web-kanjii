@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Hotel } from "lucide-react";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import HotpepperSearchModal from "./HotpepperSearchModal";
+import RakutenHotelSearchModal from "./RakutenHotelSearchModal";
 import type { HotpepperShop } from "@/lib/api/hotpepper";
+import type { RakutenHotel } from "@/lib/api/rakuten";
 
 export interface VenueValue {
   venueName: string;
@@ -33,6 +35,7 @@ const labelClass = "block text-sm font-medium text-ink";
 // the address/url/hotpepper-id that came from a prior Hotpepper pick.
 export default function VenueInput({ value, onChange, disabled }: VenueInputProps) {
   const [hotpepperOpen, setHotpepperOpen] = useState(false);
+  const [rakutenOpen, setRakutenOpen] = useState(false);
 
   const query = [value.venueName, value.venueAddress].filter(Boolean).join(" ").trim();
 
@@ -59,6 +62,18 @@ export default function VenueInput({ value, onChange, disabled }: VenueInputProp
     setHotpepperOpen(false);
   }
 
+  function handleSelectHotel(hotel: RakutenHotel) {
+    onChange({
+      venueName: hotel.hotelName,
+      venueAddress: [hotel.address1, hotel.address2].filter(Boolean).join(""),
+      venueUrl: hotel.hotelInformationUrl,
+      venueHotpepperId: "",
+      venueLat: hotel.latitude || null,
+      venueLng: hotel.longitude || null,
+    });
+    setRakutenOpen(false);
+  }
+
   return (
     <div>
       <label className={labelClass}>場所</label>
@@ -71,15 +86,26 @@ export default function VenueInput({ value, onChange, disabled }: VenueInputProp
         placeholder="お店の名前や住所を入力"
       />
 
-      <button
-        type="button"
-        onClick={() => setHotpepperOpen(true)}
-        disabled={disabled}
-        className="mt-2 flex items-center gap-1.5 rounded-xl border border-gold/20 text-gold text-xs font-semibold px-3 py-2 hover:bg-gold/5 transition-colors disabled:opacity-50"
-      >
-        <Search size={14} />
-        ホットペッパーで店を探す
-      </button>
+      <div className="mt-2 flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          onClick={() => setHotpepperOpen(true)}
+          disabled={disabled}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-gold text-xs font-semibold px-3 py-2 hover:bg-gold/5 transition-colors disabled:opacity-50"
+        >
+          <Search size={14} />
+          ホットペッパーで店を探す
+        </button>
+        <button
+          type="button"
+          onClick={() => setRakutenOpen(true)}
+          disabled={disabled}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-gold text-xs font-semibold px-3 py-2 hover:bg-gold/5 transition-colors disabled:opacity-50"
+        >
+          <Hotel size={14} />
+          宿泊施設を探す
+        </button>
+      </div>
 
       {query && (
         <>
@@ -114,6 +140,10 @@ export default function VenueInput({ value, onChange, disabled }: VenueInputProp
 
       {hotpepperOpen && (
         <HotpepperSearchModal onClose={() => setHotpepperOpen(false)} onSelect={handleSelectShop} />
+      )}
+
+      {rakutenOpen && (
+        <RakutenHotelSearchModal onClose={() => setRakutenOpen(false)} onSelect={handleSelectHotel} />
       )}
     </div>
   );
