@@ -10,7 +10,7 @@ const PLANS = [
     name: "Free",
     price: "¥0",
     period: "/月",
-    features: ["月3回まで検索", "基本機能", "広告表示"],
+    features: ["無制限利用(現在キャンペーン中)", "基本機能", "広告なし"],
     highlighted: false,
   },
   {
@@ -33,9 +33,12 @@ export default function Pricing() {
     <section id="pricing" className="px-4 py-24 sm:py-32">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="font-serif font-bold text-2xl sm:text-3xl text-ink mb-4">
+          <h2 className="font-serif font-bold text-2xl sm:text-3xl text-ink mb-3">
             料金プラン
           </h2>
+          <p className="text-sm text-ink-muted mb-4">
+            現在は全ユーザー無料でご利用いただけます。Premium機能は開発中です。
+          </p>
           <MizuhikiDivider />
         </div>
 
@@ -49,13 +52,13 @@ export default function Pricing() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className={`relative rounded-3xl p-8 flex flex-col bg-surface-tertiary ${
                 plan.highlighted
-                  ? "border-2 border-gold shadow-warm-hover"
+                  ? "border border-ink/15 shadow-warm opacity-70"
                   : "border border-gold/15 shadow-warm"
               }`}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold tracking-wider rounded-full bg-gold-gradient text-white px-3.5 py-1.5 shadow-warm">
-                  BEST VALUE
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold tracking-wider rounded-full bg-white text-ink/50 border border-ink/20 px-3.5 py-1.5">
+                  Coming Soon
                 </span>
               )}
 
@@ -78,13 +81,24 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              <GoldButton
-                href="/signup"
-                variant={plan.highlighted ? "solid" : "outline"}
-                fullWidth
-              >
-                {plan.highlighted ? "Premiumを試す" : "無料ではじめる"}
-              </GoldButton>
+              {plan.highlighted ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full rounded-full py-3 text-sm font-bold bg-ink/10 text-ink/50 cursor-not-allowed"
+                >
+                  準備中
+                </button>
+              ) : (
+                <>
+                  <GoldButton href="/signup" variant="outline" fullWidth>
+                    無料ではじめる
+                  </GoldButton>
+                  <p className="text-xs text-ink-muted text-center mt-3">
+                    現在は全機能を無料でご利用いただけます
+                  </p>
+                </>
+              )}
             </motion.div>
           ))}
         </div>
