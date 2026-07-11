@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, ChevronDown } from "lucide-react";
+import { LayoutDashboard, MessageSquare, ChevronDown } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import FeedbackModal from "./FeedbackModal";
 
 interface UserMenuProps {
   displayName: string;
@@ -12,6 +13,7 @@ interface UserMenuProps {
 
 export default function UserMenu({ displayName }: UserMenuProps) {
   const [open, setOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,11 +65,24 @@ export default function UserMenu({ displayName }: UserMenuProps) {
               <LayoutDashboard className="h-4 w-4 text-ink-muted" />
               ダッシュボード
             </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setFeedbackOpen(true);
+              }}
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-ink transition-colors hover:bg-gold/5"
+            >
+              <MessageSquare className="h-4 w-4 text-ink-muted" />
+              フィードバックを送る
+            </button>
             <div className="border-t border-gold/10" />
             <LogoutButton className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-vermilion transition-colors hover:bg-gold/5" />
           </motion.div>
         )}
       </AnimatePresence>
+
+      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
 }
