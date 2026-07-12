@@ -8,6 +8,9 @@ const ENDPOINT =
 
 export interface RakutenSearchParams {
   keyword?: string;
+  largeClassCode?: string;
+  middleClassCode?: string;
+  smallClassCode?: string;
   hits?: number;
   page?: number;
 }
@@ -87,6 +90,9 @@ export async function searchRakutenHotels(params: RakutenSearchParams): Promise<
   url.searchParams.set("format", "json");
   url.searchParams.set("formatVersion", "2");
   if (params.keyword) url.searchParams.set("keyword", params.keyword);
+  if (params.largeClassCode) url.searchParams.set("largeClassCode", params.largeClassCode);
+  if (params.middleClassCode) url.searchParams.set("middleClassCode", params.middleClassCode);
+  if (params.smallClassCode) url.searchParams.set("smallClassCode", params.smallClassCode);
   url.searchParams.set("hits", String(Math.min(params.hits ?? 10, 30)));
   url.searchParams.set("page", String(params.page ?? 1));
 

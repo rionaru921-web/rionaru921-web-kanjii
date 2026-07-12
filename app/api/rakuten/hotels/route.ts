@@ -27,14 +27,28 @@ export async function GET(req: NextRequest) {
 
   const sp = req.nextUrl.searchParams;
   const keyword = sp.get("keyword") ?? undefined;
-  if (!keyword) {
-    return NextResponse.json({ error: "keyword is required" }, { status: 400 });
+  const middleClassCode = sp.get("middleClassCode") ?? undefined;
+  const largeClassCode = sp.get("largeClassCode") ?? undefined;
+  const smallClassCode = sp.get("smallClassCode") ?? undefined;
+  // Display name for the selected area, used only as a keyword fallback if
+  // the (unverified) middleClassCode/smallClassCode combination errors or
+  // returns nothing — see lib/manual-plans/rakuten-areas.ts.
+  const areaLabel = sp.get("areaLabel") ?? undefined;
+
+  if (!keyword && !middleClassCode) {
+    return NextResponse.json({ error: "keyword or middleClassCode is required" }, { status: 400 });
   }
+
+  const hits = sp.has("hits") ? Number(sp.get("hits")) : undefined;
+  const page = sp.has("page") ? Number(sp.get("page")) : undefined;
 
   const params = {
     keyword,
-    hits: sp.has("hits") ? Number(sp.get("hits")) : undefined,
-    page: sp.has("page") ? Number(sp.get("page")) : undefined,
+    largeClassCode: middleClassCode ? largeClassCode ?? "japan" : undefined,
+    middleClassCode,
+    smallClassCode,
+    hits,
+    page,
   };
 
   const cacheKey = `search:${JSON.stringify(params)}`;
@@ -44,10 +58,33 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await searchRakutenHotels(params);
+    let result = await searchRakutenHotels(params);
+
+    if (result.hotels.length === 0 && middleClassCode && areaLabel && !keyword) {
+      result = await searchRakutenHotels({ keyword: areaLabel, hits, page });
+    }
+
     setCached(cacheKey, result);
     return NextResponse.json(result);
   } catch (err) {
+    // The hardcoded middleClassCode/smallClassCode values aren't verified
+    // against the live API — if the area-code search itself errors, retry
+    // as a plain keyword search on the area's display name instead of
+    // surfacing an opaque API error to the user.
+    if (err instanceof RakutenApiError && err.kind === "api" && middleClassCode && areaLabel && !keyword) {
+      try {
+        const fallback = await searchRakutenHotels({ keyword: areaLabel, hits, page });
+        setCached(cacheKey, fallback);
+        return NextResponse.json(fallback);
+      } catch (fallbackErr) {
+        if (fallbackErr instanceof RakutenApiError) {
+          const status = fallbackErr.kind === "rate_limited" ? 429 : fallbackErr.kind === "missing_key" ? 503 : 502;
+          return NextResponse.json({ error: fallbackErr.message }, { status });
+        }
+        return NextResponse.json({ error: String(fallbackErr) }, { status: 500 });
+      }
+    }
+
     if (err instanceof RakutenApiError) {
       const status = err.kind === "rate_limited" ? 429 : err.kind === "missing_key" ? 503 : 502;
       return NextResponse.json({ error: err.message }, { status });
