@@ -1,5 +1,6 @@
 import type { IcsEvent } from "@/lib/ics";
-import type { AttendanceStatus, ManualPlan, MemberRole, PaymentStatus } from "./types";
+import { formatJstDateTime, formatJstDateRange } from "@/lib/date/kanjii-time";
+import type { AttendanceStatus, ManualPlan, MemberRole } from "./types";
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: "現金",
@@ -19,34 +20,10 @@ export const ROLE_LABELS: Record<MemberRole, string> = {
   participant: "参加者",
 };
 
-export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-  unpaid: "未払い",
-  paid: "支払い済み",
-};
-
-export function formatDateTime(iso: string | null): string {
-  if (!iso) return "未定";
-  return new Date(iso).toLocaleString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-export function formatDateRange(start: string | null, end: string | null): string {
-  if (!start) return "日時未定";
-  const startLabel = formatDateTime(start);
-  if (!end) return startLabel;
-
-  const sameDay = new Date(start).toDateString() === new Date(end).toDateString();
-  const endLabel = sameDay
-    ? new Date(end).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })
-    : formatDateTime(end);
-
-  return `${startLabel} 〜 ${endLabel}`;
-}
+// 表示はブラウザ/サーバーいずれの実行環境でも常に JST 基準になるよう
+// lib/date/kanjii-time.ts に変換ロジックを集約している。
+export const formatDateTime = formatJstDateTime;
+export const formatDateRange = formatJstDateRange;
 
 // Rounds up so the organizer never collects less than the total fee —
 // any remainder from an uneven split is absorbed by the group rather than

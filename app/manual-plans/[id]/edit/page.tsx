@@ -35,7 +35,7 @@ export default async function EditManualPlanPage({ params }: { params: { id: str
   // <ManualPlanForm>, a Client Component, so guest_secret must be excluded.
   const { data: members } = await supabase
     .from("manual_plan_members")
-    .select("id, plan_id, name, email, role, attendance_status, payment_status, note, created_at, updated_at")
+    .select("id, plan_id, name, email, role, attendance_status, note, created_at, updated_at")
     .eq("plan_id", params.id)
     .order("created_at", { ascending: true });
 

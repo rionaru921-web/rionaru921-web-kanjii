@@ -1,6 +1,5 @@
 export type MemberRole = "organizer" | "participant";
 export type AttendanceStatus = "pending" | "attending" | "declined" | "maybe";
-export type PaymentStatus = "unpaid" | "paid";
 
 export interface ManualPlanMember {
   id: string;
@@ -9,7 +8,6 @@ export interface ManualPlanMember {
   email: string | null;
   role: MemberRole;
   attendance_status: AttendanceStatus;
-  payment_status: PaymentStatus;
   note: string | null;
   created_at: string;
   updated_at: string;

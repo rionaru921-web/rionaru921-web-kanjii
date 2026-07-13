@@ -67,7 +67,7 @@ export default async function SharePlanPage({ params }: { params: { token: strin
   const { data: members } = typedPlan
     ? await supabase
         .from("manual_plan_members")
-        .select("id, plan_id, name, email, role, attendance_status, payment_status, note, created_at, updated_at")
+        .select("id, plan_id, name, email, role, attendance_status, note, created_at, updated_at")
         .eq("plan_id", typedPlan.id)
         .order("created_at", { ascending: true })
     : { data: [] };

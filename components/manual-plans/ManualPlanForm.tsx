@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { FeeBreakdownItem, ManualPlan, ManualPlanMember, MemberRole } from "@/lib/manual-plans/types";
 import { ROLE_LABELS } from "@/lib/manual-plans/format";
+import { toDateTimeLocalValue, fromDateTimeLocalValue } from "@/lib/date/kanjii-time";
 import VenueInput, { type VenueValue } from "./VenueInput";
 import FeeSection from "./FeeSection";
 
@@ -31,18 +32,6 @@ interface ManualPlanFormProps {
   planId?: string;
   initialData?: ManualPlan;
   initialMembers?: ManualPlanMember[];
-}
-
-function toLocalInputValue(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function fromLocalInputValue(value: string): string | null {
-  if (!value) return null;
-  return new Date(value).toISOString();
 }
 
 const inputClass =
@@ -99,8 +88,8 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const router = useRouter();
 
   const [title, setTitle] = useState(initialData?.title ?? "");
-  const [eventDate, setEventDate] = useState(toLocalInputValue(initialData?.event_date));
-  const [endDate, setEndDate] = useState(toLocalInputValue(initialData?.end_date));
+  const [eventDate, setEventDate] = useState(toDateTimeLocalValue(initialData?.event_date));
+  const [endDate, setEndDate] = useState(toDateTimeLocalValue(initialData?.end_date));
 
   const [venue, setVenue] = useState<VenueValue>({
     venueName: initialData?.venue_name ?? "",
@@ -118,7 +107,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     initialData?.fee_breakdown ?? []
   );
   const [paymentMethods, setPaymentMethods] = useState<string[]>(initialData?.payment_methods ?? []);
-  const [paymentDeadline, setPaymentDeadline] = useState(toLocalInputValue(initialData?.payment_deadline));
+  const [paymentDeadline, setPaymentDeadline] = useState(toDateTimeLocalValue(initialData?.payment_deadline));
 
   const [memo, setMemo] = useState(initialData?.memo ?? "");
   const [dietaryNotes, setDietaryNotes] = useState(initialData?.dietary_notes ?? "");
@@ -165,8 +154,8 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     try {
       const payload = {
         title: title.trim(),
-        eventDate: fromLocalInputValue(eventDate),
-        endDate: fromLocalInputValue(endDate),
+        eventDate: fromDateTimeLocalValue(eventDate),
+        endDate: fromDateTimeLocalValue(endDate),
         venueName: venue.venueName.trim() || null,
         venueAddress: venue.venueAddress.trim() || null,
         venueUrl: venue.venueUrl.trim() || null,
@@ -176,7 +165,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         feeAmount: feeAmount.trim() ? Number(feeAmount) : null,
         feeBreakdown: feeBreakdown.filter((item) => item.label.trim()),
         paymentMethods,
-        paymentDeadline: fromLocalInputValue(paymentDeadline),
+        paymentDeadline: fromDateTimeLocalValue(paymentDeadline),
         memo: memo.trim() || null,
         dietaryNotes: dietaryNotes.trim() || null,
         members: members
@@ -227,6 +216,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               step={300}
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.preventDefault();
+              }}
               disabled={saving}
               className={inputClass}
             />
@@ -238,6 +230,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               step={300}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.preventDefault();
+              }}
               disabled={saving}
               className={inputClass}
             />

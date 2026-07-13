@@ -48,7 +48,6 @@ export type Database = {
           id: string
           name: string
           note: string | null
-          payment_status: string
           plan_id: string
           role: string
           updated_at: string
@@ -61,7 +60,6 @@ export type Database = {
           id?: string
           name: string
           note?: string | null
-          payment_status?: string
           plan_id: string
           role?: string
           updated_at?: string
@@ -74,7 +72,6 @@ export type Database = {
           id?: string
           name?: string
           note?: string | null
-          payment_status?: string
           plan_id?: string
           role?: string
           updated_at?: string

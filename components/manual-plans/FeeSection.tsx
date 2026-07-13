@@ -159,6 +159,9 @@ export default function FeeSection({
           step={300}
           value={paymentDeadline}
           onChange={(e) => onPaymentDeadlineChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
           disabled={disabled}
           className={inputClass}
         />

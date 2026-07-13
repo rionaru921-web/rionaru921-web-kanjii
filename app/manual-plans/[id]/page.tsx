@@ -18,7 +18,7 @@ import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBad
 import MemberRoleBadge from "@/components/manual-plans/MemberRoleBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import MemberGuestSecretReset from "@/components/manual-plans/MemberGuestSecretReset";
-import { formatDateRange, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS, perPersonFee } from "@/lib/manual-plans/format";
+import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
 import { yen } from "@/lib/pdf/components";
@@ -247,12 +247,7 @@ export default async function ManualPlanDetailPage({
                   <p className="text-sm font-medium text-ink truncate">{m.name}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <div className="flex gap-1.5">
-                    <AttendanceStatusBadge status={m.attendance_status} />
-                    <span className="text-[11px] rounded-full bg-sage/10 text-sage px-2 py-0.5">
-                      {PAYMENT_STATUS_LABELS[m.payment_status]}
-                    </span>
-                  </div>
+                  <AttendanceStatusBadge status={m.attendance_status} />
                   {m.guest_secret && (
                     <MemberGuestSecretReset planId={typedPlan.id} memberId={m.id} />
                   )}

@@ -4,10 +4,9 @@ import { MizuhikiRule, yen } from "../components";
 import {
   PAYMENT_METHOD_LABELS,
   ATTENDANCE_LABELS,
-  PAYMENT_STATUS_LABELS,
   formatDateRange,
 } from "@/lib/manual-plans/format";
-import { getTimelineStatus, type AttendanceStatus, type PaymentStatus } from "@/lib/manual-plans/types";
+import { getTimelineStatus, type AttendanceStatus } from "@/lib/manual-plans/types";
 
 const TIMELINE_LABELS = {
   upcoming: "予定",
@@ -28,7 +27,7 @@ export interface ManualPlanPDFProps {
   paymentDeadline: string | null;
   memo: string | null;
   dietaryNotes: string | null;
-  members: Array<{ name: string; attendanceStatus: AttendanceStatus; paymentStatus: PaymentStatus }>;
+  members: Array<{ name: string; attendanceStatus: AttendanceStatus }>;
   shareUrl: string;
   qrDataUrl: string;
 }
@@ -131,7 +130,7 @@ export function ManualPlanPDF({
                 <View key={`${m.name}-${i}`} style={pdfStyles.tableRow}>
                   <Text style={{ fontSize: 10 }}>{m.name}</Text>
                   <Text style={{ fontSize: 9, color: COLORS.inkSecondary }}>
-                    {ATTENDANCE_LABELS[m.attendanceStatus]} / {PAYMENT_STATUS_LABELS[m.paymentStatus]}
+                    {ATTENDANCE_LABELS[m.attendanceStatus]}
                   </Text>
                 </View>
               ))}

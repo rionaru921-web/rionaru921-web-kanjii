@@ -63,7 +63,6 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       members={typedMembers.map((m) => ({
         name: m.name,
         attendanceStatus: m.attendance_status,
-        paymentStatus: m.payment_status,
       }))}
       shareUrl={shareUrl}
       qrDataUrl={qrDataUrl}
