@@ -21,6 +21,7 @@ import MemberGuestSecretReset from "@/components/manual-plans/MemberGuestSecretR
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
+import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
 import { yen } from "@/lib/pdf/components";
 import type { AttendanceStatus, ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
@@ -177,7 +178,9 @@ export default async function ManualPlanDetailPage({
         </section>
       )}
 
-      {(typedPlan.fee_amount != null || typedPlan.payment_methods.length > 0) && (
+      {(typedPlan.fee_amount != null ||
+        typedPlan.payment_methods.length > 0 ||
+        typedPlan.fee_breakdown.length > 0) && (
         <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
           <Wallet className="text-gold shrink-0" size={18} />
           <div className="min-w-0 flex-1">
@@ -190,7 +193,7 @@ export default async function ManualPlanDetailPage({
                 {typedPlan.fee_breakdown.map((item, i) => (
                   <li key={i} className="flex items-center justify-between text-sm text-ink-secondary">
                     <span>{item.label}</span>
-                    <span className="font-display-num">{yen(item.amount)}</span>
+                    <span className="font-display-num">{formatFeeValue(item.amount)}</span>
                   </li>
                 ))}
               </ul>

@@ -6,6 +6,7 @@ import AttendanceForm from "@/components/share/AttendanceForm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
+import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
 import { yen } from "@/lib/pdf/components";
 import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
@@ -156,17 +157,19 @@ export default async function SharePlanPage({ params }: { params: { token: strin
               </div>
             )}
 
-            {typedPlan.fee_amount != null && (
+            {(typedPlan.fee_amount != null || typedPlan.fee_breakdown.length > 0) && (
               <div className="flex items-start gap-3">
                 <Wallet className="text-gold shrink-0" size={18} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-display-num font-black text-ink">{yen(typedPlan.fee_amount)}</p>
+                  {typedPlan.fee_amount != null && (
+                    <p className="text-sm font-display-num font-black text-ink">{yen(typedPlan.fee_amount)}</p>
+                  )}
                   {typedPlan.fee_breakdown.length > 0 && (
                     <ul className="mt-1.5 flex flex-col gap-0.5">
                       {typedPlan.fee_breakdown.map((item, i) => (
                         <li key={i} className="flex items-center justify-between text-xs text-ink-secondary">
                           <span>{item.label}</span>
-                          <span className="font-display-num">{yen(item.amount)}</span>
+                          <span className="font-display-num">{formatFeeValue(item.amount)}</span>
                         </li>
                       ))}
                     </ul>

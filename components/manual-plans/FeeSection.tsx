@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
+import { sumFees } from "@/lib/manual-plans/fee-parser";
 import type { FeeBreakdownItem } from "@/lib/manual-plans/types";
 
 interface FeeSectionProps {
@@ -36,21 +37,20 @@ export default function FeeSection({
   disabled,
 }: FeeSectionProps) {
   const totalAmount = feeAmount.trim() ? Number(feeAmount) : null;
-  const breakdownTotal = breakdown.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const { total: breakdownTotal, undeterminedCount } = sumFees(breakdown.map((item) => item.amount));
   const breakdownMismatch =
-    breakdown.length > 0 && totalAmount != null && breakdownTotal !== totalAmount;
+    breakdown.length > 0 &&
+    totalAmount != null &&
+    undeterminedCount === 0 &&
+    breakdownTotal !== totalAmount;
   const perPerson = perPersonFee(totalAmount, memberCount);
 
   function updateItem(index: number, field: keyof FeeBreakdownItem, value: string) {
-    onBreakdownChange(
-      breakdown.map((item, i) =>
-        i === index ? { ...item, [field]: field === "amount" ? Number(value) || 0 : value } : item
-      )
-    );
+    onBreakdownChange(breakdown.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   }
 
   function addItem() {
-    onBreakdownChange([...breakdown, { label: "", amount: 0 }]);
+    onBreakdownChange([...breakdown, { label: "", amount: "" }]);
   }
 
   function removeItem(index: number) {
@@ -62,14 +62,17 @@ export default function FeeSection({
       <div>
         <label className={labelClass}>合計金額(円)</label>
         <input
-          type="number"
-          min={0}
+          type="text"
+          inputMode="numeric"
           value={feeAmount}
           onChange={(e) => onFeeAmountChange(e.target.value)}
           disabled={disabled}
           className={inputClass}
           placeholder="4000"
         />
+        <p className="mt-1 text-xs text-ink-muted">
+          数字のみ集計されます。金額が未定の場合は下の内訳欄をご利用ください。
+        </p>
       </div>
 
       <div>
@@ -86,13 +89,12 @@ export default function FeeSection({
                 placeholder="例: 飲食代"
               />
               <input
-                type="number"
-                min={0}
-                value={item.amount || ""}
+                type="text"
+                value={item.amount}
                 onChange={(e) => updateItem(i, "amount", e.target.value)}
                 disabled={disabled}
                 className="w-28 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
-                placeholder="30000"
+                placeholder="30000 / 未定"
               />
               <button
                 type="button"

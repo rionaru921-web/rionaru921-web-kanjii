@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, X, HelpCircle, Loader2, type LucideIcon } from "lucide-react";
 import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
+import IdentitySelectionNotice from "@/components/share/IdentitySelectionNotice";
 import type { AttendanceStatus, ManualPlanMember } from "@/lib/manual-plans/types";
 
 const OPTIONS: { value: AttendanceStatus; label: string; icon: LucideIcon; activeClass: string }[] = [
@@ -176,6 +177,7 @@ export default function AttendanceForm({
         </>
       ) : (
         <>
+          <IdentitySelectionNotice />
           <p className="text-sm text-ink/70">あなたのお名前を選んでください</p>
           <div className="mt-3 grid gap-2">
             {members.map((m) => (

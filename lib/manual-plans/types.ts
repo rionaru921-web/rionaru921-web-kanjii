@@ -15,7 +15,7 @@ export interface ManualPlanMember {
 
 export interface FeeBreakdownItem {
   label: string;
-  amount: number;
+  amount: string;
 }
 
 export interface ManualPlan {

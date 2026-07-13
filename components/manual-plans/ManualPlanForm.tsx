@@ -104,7 +104,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     initialData?.fee_amount != null ? String(initialData.fee_amount) : ""
   );
   const [feeBreakdown, setFeeBreakdown] = useState<FeeBreakdownItem[]>(
-    initialData?.fee_breakdown ?? []
+    (initialData?.fee_breakdown ?? []).map((item) => ({ ...item, amount: String(item.amount) }))
   );
   const [paymentMethods, setPaymentMethods] = useState<string[]>(initialData?.payment_methods ?? []);
   const [paymentDeadline, setPaymentDeadline] = useState(toDateTimeLocalValue(initialData?.payment_deadline));
