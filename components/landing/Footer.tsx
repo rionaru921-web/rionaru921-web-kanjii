@@ -25,6 +25,7 @@ const FOOTER_COLUMNS = [
     heading: "法務",
     links: [
       { label: "利用規約", href: "/legal/terms" },
+      { label: "ベータ利用規約", href: "/legal/beta" },
       { label: "プライバシーポリシー", href: "/legal/privacy" },
       { label: "特定商取引法に基づく表記", href: "/legal/commerce" },
       { label: "お問い合わせ", href: "/legal/contact" },

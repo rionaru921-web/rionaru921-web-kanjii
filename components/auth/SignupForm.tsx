@@ -13,6 +13,7 @@ export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
@@ -29,6 +30,10 @@ export default function SignupForm() {
     }
     if (password.length < 6) {
       setError("パスワードは6文字以上で入力してください。");
+      return;
+    }
+    if (!agreedToTerms) {
+      setError("利用規約・プライバシーポリシー・ベータ利用規約への同意が必要です。");
       return;
     }
 
@@ -199,6 +204,29 @@ export default function SignupForm() {
           />
         </div>
 
+        <label className="flex items-start gap-2 text-xs text-ink-secondary leading-relaxed">
+          <input
+            type="checkbox"
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            className="mt-0.5 accent-gold"
+          />
+          <span>
+            <Link href="/legal/terms" className="text-gold hover:brightness-125">
+              利用規約
+            </Link>
+            ・
+            <Link href="/legal/privacy" className="text-gold hover:brightness-125">
+              プライバシーポリシー
+            </Link>
+            ・
+            <Link href="/legal/beta" className="text-gold hover:brightness-125">
+              ベータ利用規約
+            </Link>
+            に同意します
+          </span>
+        </label>
+
         {error && (
           <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
             <AlertCircle size={14} className="shrink-0" />
@@ -208,7 +236,7 @@ export default function SignupForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !agreedToTerms}
           className="flex items-center justify-center gap-2 rounded-full bg-gold-gradient text-white font-bold py-3 text-sm hover:brightness-110 transition-all shadow-gold disabled:opacity-50 mt-2"
         >
           <UserPlus size={16} />
