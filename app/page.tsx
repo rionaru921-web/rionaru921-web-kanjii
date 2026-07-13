@@ -3,7 +3,6 @@ import Hero from "@/components/landing/Hero";
 import ServiceCards from "@/components/landing/ServiceCards";
 import Story from "@/components/landing/Story";
 import HowItWorks from "@/components/landing/HowItWorks";
-import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import CTASection from "@/components/landing/CTASection";
@@ -47,7 +46,6 @@ export default async function Home() {
         <ServiceCards />
         <Story />
         <HowItWorks />
-        <Testimonials />
         <Pricing />
         <FAQ />
         <CTASection isLoggedIn={isLoggedIn} />
