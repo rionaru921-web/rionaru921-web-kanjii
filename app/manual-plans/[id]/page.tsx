@@ -17,6 +17,7 @@ import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
 import MemberRoleBadge from "@/components/manual-plans/MemberRoleBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
+import MemberGuestSecretReset from "@/components/manual-plans/MemberGuestSecretReset";
 import { formatDateRange, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
@@ -63,7 +64,11 @@ export default async function ManualPlanDetailPage({
     .order("created_at", { ascending: true });
 
   const typedPlan = plan as ManualPlan;
-  const typedMembers = (members ?? []) as ManualPlanMember[];
+  // This page renders member fields directly (never passes the raw row
+  // objects into a Client Component), so select("*") — and therefore
+  // guest_secret — never reaches the browser. We only ever read it here to
+  // derive the hasGuestSecret boolean passed to <MemberGuestSecretReset>.
+  const typedMembers = (members ?? []) as (ManualPlanMember & { guest_secret: string | null })[];
   const justCreated = searchParams.just_created === "1";
 
   const attendanceCounts = typedMembers.reduce(
@@ -241,11 +246,16 @@ export default async function ManualPlanDetailPage({
                   <MemberRoleBadge role={m.role} />
                   <p className="text-sm font-medium text-ink truncate">{m.name}</p>
                 </div>
-                <div className="flex gap-1.5 shrink-0">
-                  <AttendanceStatusBadge status={m.attendance_status} />
-                  <span className="text-[11px] rounded-full bg-sage/10 text-sage px-2 py-0.5">
-                    {PAYMENT_STATUS_LABELS[m.payment_status]}
-                  </span>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <div className="flex gap-1.5">
+                    <AttendanceStatusBadge status={m.attendance_status} />
+                    <span className="text-[11px] rounded-full bg-sage/10 text-sage px-2 py-0.5">
+                      {PAYMENT_STATUS_LABELS[m.payment_status]}
+                    </span>
+                  </div>
+                  {m.guest_secret && (
+                    <MemberGuestSecretReset planId={typedPlan.id} memberId={m.id} />
+                  )}
                 </div>
               </div>
             ))}

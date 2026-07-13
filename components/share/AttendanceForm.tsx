@@ -15,6 +15,13 @@ function storageKey(shareToken: string) {
   return `kanjii_attendance_member_${shareToken}`;
 }
 
+// Namespaced by both shareToken and memberId — switching to "someone else"
+// via clearSelection() must never let their attendance update reuse a
+// different member's cached secret.
+function guestSecretKey(shareToken: string, memberId: string) {
+  return `kanjii_guest_secret_${shareToken}_${memberId}`;
+}
+
 // Kept as sessionStorage (not localStorage) since attendees may be on a
 // shared/public device — the selected identity shouldn't persist beyond
 // the browser tab's lifetime.
@@ -34,6 +41,9 @@ export default function AttendanceForm({
     const stored = sessionStorage.getItem(storageKey(shareToken));
     if (stored && members.some((m) => m.id === stored)) {
       setSelectedId(stored);
+      if (!sessionStorage.getItem(guestSecretKey(shareToken, stored))) {
+        void ensureGuestSecret(stored);
+      }
     }
     // Only needs to run once on mount to restore a prior selection —
     // re-running on every `members` update (e.g. right after this same
@@ -43,10 +53,38 @@ export default function AttendanceForm({
 
   const selectedMember = members.find((m) => m.id === selectedId) ?? null;
 
-  function selectMember(id: string) {
+  // Claims this member's guest_secret via /identify if we don't already
+  // have one cached. First claim wins server-side — see
+  // app/api/share/plan/[token]/identify/route.ts. On conflict, bounces back
+  // to the name-picker rather than leaving the guest stuck on a member they
+  // can't actually control.
+  async function ensureGuestSecret(memberId: string): Promise<boolean> {
+    if (sessionStorage.getItem(guestSecretKey(shareToken, memberId))) return true;
+
+    try {
+      const res = await fetch(`/api/share/plan/${shareToken}/identify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: memberId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "登録に失敗しました。");
+      sessionStorage.setItem(guestSecretKey(shareToken, memberId), data.guest_secret);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "登録に失敗しました。");
+      setSelectedId(null);
+      sessionStorage.removeItem(storageKey(shareToken));
+      return false;
+    }
+  }
+
+  async function selectMember(id: string) {
+    setError(null);
+    const ok = await ensureGuestSecret(id);
+    if (!ok) return;
     setSelectedId(id);
     sessionStorage.setItem(storageKey(shareToken), id);
-    setError(null);
   }
 
   function clearSelection() {
@@ -57,16 +95,30 @@ export default function AttendanceForm({
 
   async function updateAttendance(status: AttendanceStatus) {
     if (!selectedMember) return;
+    const guestSecret = sessionStorage.getItem(guestSecretKey(shareToken, selectedMember.id));
+    if (!guestSecret) {
+      setError("認証に失敗しました。お名前を選び直してください。");
+      clearSelection();
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
       const res = await fetch(`/api/share/plan/${shareToken}/attendance`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ member_id: selectedMember.id, attendance_status: status }),
+        body: JSON.stringify({
+          member_id: selectedMember.id,
+          attendance_status: status,
+          guest_secret: guestSecret,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
+        if (res.status === 403) {
+          sessionStorage.removeItem(guestSecretKey(shareToken, selectedMember.id));
+          clearSelection();
+        }
         throw new Error(data.error ?? "更新に失敗しました。");
       }
       setMembers((prev) =>

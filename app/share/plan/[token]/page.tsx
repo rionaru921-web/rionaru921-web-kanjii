@@ -60,10 +60,14 @@ export default async function SharePlanPage({ params }: { params: { token: strin
 
   const typedPlan = plan as ManualPlan | null;
 
+  // Explicit column list (not "*") — this result is passed straight into
+  // <AttendanceForm>, a Client Component, so whatever we select here gets
+  // serialized to every visitor's browser. guest_secret must never be in
+  // that list.
   const { data: members } = typedPlan
     ? await supabase
         .from("manual_plan_members")
-        .select("*")
+        .select("id, plan_id, name, email, role, attendance_status, payment_status, note, created_at, updated_at")
         .eq("plan_id", typedPlan.id)
         .order("created_at", { ascending: true })
     : { data: [] };
