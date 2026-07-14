@@ -12,6 +12,7 @@ import {
   Briefcase,
   History,
   Settings,
+  User,
   Menu,
   X,
 } from "lucide-react";
@@ -25,6 +26,12 @@ const MAIN_NAV = [
   { href: "/travel", label: "旅行", icon: Plane },
   { href: "/event", label: "イベント", icon: PartyPopper, disabled: true },
   { href: "/company", label: "会社", icon: Briefcase, disabled: true },
+];
+
+const BOTTOM_NAV = [
+  { href: "/history", label: "履歴", icon: History },
+  { href: "/settings/payment", label: "集金設定", icon: Settings },
+  { href: "/settings/profile", label: "プロフィール", icon: User },
 ];
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
@@ -71,25 +78,29 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
   );
 }
 
-function BottomLinks({ onNavigate }: { onNavigate?: () => void }) {
+function BottomLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
     <div className="flex flex-col gap-1 pt-4 border-t border-gold/10">
-      <Link
-        href="/history"
-        onClick={onNavigate}
-        className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-gold/5 hover:text-ink transition-colors"
-      >
-        <History size={18} />
-        履歴
-      </Link>
-      <Link
-        href="/settings/payment"
-        onClick={onNavigate}
-        className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-gold/5 hover:text-ink transition-colors"
-      >
-        <Settings size={18} />
-        集金設定
-      </Link>
+      {BOTTOM_NAV.map((item) => {
+        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const Icon = item.icon;
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-colors border-l-4 ${
+              active
+                ? "bg-gold/10 text-gold border-gold"
+                : "text-ink-secondary hover:bg-gold/5 hover:text-ink border-transparent"
+            }`}
+          >
+            <Icon size={18} />
+            {item.label}
+          </Link>
+        );
+      })}
       <LogoutButton
         className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-vermilion/5 hover:text-vermilion transition-colors w-full text-left"
       />
@@ -137,7 +148,7 @@ export default function DashboardSidebar() {
             </div>
             <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} />
             <div className="mt-auto">
-              <BottomLinks onNavigate={() => setOpen(false)} />
+              <BottomLinks pathname={pathname} onNavigate={() => setOpen(false)} />
             </div>
           </div>
         </div>
@@ -150,7 +161,7 @@ export default function DashboardSidebar() {
         </div>
         <NavLinks pathname={pathname} />
         <div className="mt-auto">
-          <BottomLinks />
+          <BottomLinks pathname={pathname} />
         </div>
       </aside>
     </>
