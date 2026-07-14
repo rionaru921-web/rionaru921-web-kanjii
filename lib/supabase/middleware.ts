@@ -15,6 +15,17 @@ function isProtectedRoute(pathname: string): boolean {
 }
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isAuthOnlyRoute = AUTH_ONLY_ROUTES.includes(pathname);
+
+  // Every branch below only fires for protected routes or the login/signup
+  // routes — everywhere else the user's session never affects the response,
+  // so skip the Supabase Auth round trip (a network call) entirely there.
+  // This runs on every navigation, so this early-return matters a lot.
+  if (!isProtectedRoute(pathname) && !isAuthOnlyRoute) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -45,8 +56,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-  const isAuthOnlyRoute = AUTH_ONLY_ROUTES.includes(pathname);
   const isConfirmed = !!user?.email_confirmed_at;
 
   if (!user && isProtectedRoute(pathname)) {

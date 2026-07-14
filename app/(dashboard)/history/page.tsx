@@ -10,21 +10,21 @@ export default async function HistoryPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: history } = user
-    ? await supabase
-        .from("history")
-        .select("id, type, title, event_date, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  const { data: manualPlans } = user
-    ? await supabase
-        .from("manual_plans")
-        .select("id, title, event_date, end_date, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-    : { data: [] };
+  // Independent given `user` — fire together instead of one after another.
+  const [{ data: history }, { data: manualPlans }] = user
+    ? await Promise.all([
+        supabase
+          .from("history")
+          .select("id, type, title, event_date, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("manual_plans")
+          .select("id, title, event_date, end_date, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+      ])
+    : [{ data: [] }, { data: [] }];
 
   const historyItems = history ?? [];
   const inProgressPlans = (manualPlans ?? []).filter((p) => !isCompletedPlan(p));

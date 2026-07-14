@@ -47,20 +47,14 @@ export default async function ManualPlanDetailPage({
     redirect(`/login?redirectTo=/manual-plans/${params.id}`);
   }
 
-  const { data: plan } = await supabase
-    .from("manual_plans")
-    .select("*")
-    .eq("id", params.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  // members only depends on params.id, not on the plan row, so it's fetched
+  // alongside plan instead of waiting for it.
+  const [{ data: plan }, { data: members }] = await Promise.all([
+    supabase.from("manual_plans").select("*").eq("id", params.id).eq("user_id", user.id).maybeSingle(),
+    supabase.from("manual_plan_members").select("*").eq("plan_id", params.id).order("created_at", { ascending: true }),
+  ]);
 
   if (!plan) notFound();
-
-  const { data: members } = await supabase
-    .from("manual_plan_members")
-    .select("*")
-    .eq("plan_id", params.id)
-    .order("created_at", { ascending: true });
 
   const typedPlan = plan as ManualPlan;
   // This page renders member fields directly (never passes the raw row

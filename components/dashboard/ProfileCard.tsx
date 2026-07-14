@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Pencil, User as UserIcon, Mail } from "lucide-react";
 import ProfileEditModal from "./ProfileEditModal";
 
@@ -18,11 +17,7 @@ export default function ProfileCard({ userId, email, displayName }: ProfileCardP
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl bg-surface-tertiary shadow-warm p-6 mb-8"
-      >
+      <div className="animate-fade-in-up rounded-3xl bg-surface-tertiary shadow-warm p-6 mb-8">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold-gradient text-xl font-semibold text-white">
@@ -48,7 +43,7 @@ export default function ProfileCard({ userId, email, displayName }: ProfileCardP
             編集
           </button>
         </div>
-      </motion.div>
+      </div>
 
       {editing && (
         <ProfileEditModal

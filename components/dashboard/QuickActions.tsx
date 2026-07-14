@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Sparkles, History, BookOpen, type LucideIcon } from "lucide-react";
 import CreatePlanButton from "@/components/shared/CreatePlanButton";
 
@@ -38,14 +35,13 @@ export default function QuickActions() {
         {ACTIONS.map((action, i) => {
           const Icon = action.icon;
           const card = (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              whileHover={action.disabled ? undefined : { y: -2 }}
-              className={`flex h-full flex-col gap-2 rounded-3xl bg-surface-tertiary shadow-warm p-5 transition-shadow ${
-                action.disabled ? "opacity-60 cursor-not-allowed" : "hover:shadow-warm-hover"
+            <div
+              className={`animate-fade-in-up flex h-full flex-col gap-2 rounded-3xl bg-surface-tertiary shadow-warm p-5 transition-[box-shadow,transform] ${
+                action.disabled
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:shadow-warm-hover hover:-translate-y-0.5"
               }`}
+              style={{ animationDelay: `${0.3 + i * 0.1}s` }}
               title={action.disabled ? "準備中" : undefined}
             >
               <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-gold/10 text-gold">
@@ -53,7 +49,7 @@ export default function QuickActions() {
               </span>
               <p className="text-sm font-semibold text-ink">{action.title}</p>
               <p className="text-xs text-ink-muted">{action.description}</p>
-            </motion.div>
+            </div>
           );
 
           if (action.disabled) {

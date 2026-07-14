@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Wine, Plane, History as HistoryIcon, ChevronRight } from "lucide-react";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
@@ -29,11 +26,7 @@ export type RecentPlanItem = RecentHistoryItem | RecentManualItem;
 
 export default function RecentPlans({ records }: { records: RecentPlanItem[] }) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-    >
+    <section className="animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
       <h2 className="font-serif font-bold text-lg text-ink mb-4">🕐 直近の履歴</h2>
       {records.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-14 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">
@@ -101,6 +94,6 @@ export default function RecentPlans({ records }: { records: RecentPlanItem[] }) 
           </Link>
         </>
       )}
-    </motion.section>
+    </section>
   );
 }

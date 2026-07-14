@@ -22,36 +22,36 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle()
-    : { data: null };
+  // These four queries are all independent given `user`, so they're fired
+  // together instead of awaited one-by-one (was 4 sequential DB round trips).
+  const [profileRes, historyRes, manualPlansRes, manualPlansCountRes] = user
+    ? await Promise.all([
+        supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("history")
+          .select("id, type, title, event_date, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("manual_plans")
+          .select("id, title, event_date, end_date, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("manual_plans")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id),
+      ])
+    : [{ data: null }, { data: [] }, { data: [] }, { count: 0 }];
+
+  const profile = profileRes.data;
+  const history = historyRes.data;
+  const manualPlans = manualPlansRes.data;
+  const manualPlansCount = manualPlansCountRes.count;
 
   const displayName =
     profile?.display_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "ゲスト";
-
-  const { data: history } = user
-    ? await supabase
-        .from("history")
-        .select("id, type, title, event_date, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  const { data: manualPlans } = user
-    ? await supabase
-        .from("manual_plans")
-        .select("id, title, event_date, end_date, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5)
-    : { data: [] };
-
-  const { count: manualPlansCount } = user
-    ? await supabase
-        .from("manual_plans")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-    : { count: 0 };
 
   const historyRecords = history ?? [];
   const totalPlanCount = historyRecords.length + (manualPlansCount ?? 0);

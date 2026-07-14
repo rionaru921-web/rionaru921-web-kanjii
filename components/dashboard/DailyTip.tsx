@@ -1,7 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
-
 const TIPS = [
   "参加者の予算を先に聞いておくと、お店選びがスムーズです",
   "飲めない人がいる場合、ソフトドリンクの充実度もチェックしましょう",
@@ -20,17 +16,15 @@ export default function DailyTip() {
   const tip = TIPS[index];
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      className="rounded-3xl bg-surface-warm border border-gold/10 shadow-warm p-6 flex items-start gap-3"
+    <section
+      className="animate-fade-in-up rounded-3xl bg-surface-warm border border-gold/10 shadow-warm p-6 flex items-start gap-3"
+      style={{ animationDelay: "0.4s" }}
     >
       <span className="text-xl shrink-0">💡</span>
       <div>
         <p className="text-xs font-semibold text-gold mb-1">今日のヒント</p>
         <p className="text-sm text-ink-secondary">{tip}</p>
       </div>
-    </motion.section>
+    </section>
   );
 }

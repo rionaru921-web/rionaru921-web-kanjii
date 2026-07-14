@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 interface StatsSectionProps {
@@ -9,11 +6,9 @@ interface StatsSectionProps {
 
 export default function StatsSection({ totalCount }: StatsSectionProps) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="rounded-3xl bg-surface-tertiary shadow-warm border border-gold/20 p-6"
+    <section
+      className="animate-fade-in-up rounded-3xl bg-surface-tertiary shadow-warm border border-gold/20 p-6"
+      style={{ animationDelay: "0.2s" }}
     >
       <h2 className="flex items-center gap-2 font-serif font-bold text-lg text-ink mb-4">
         <Sparkles className="text-gold" size={18} />
@@ -29,6 +24,6 @@ export default function StatsSection({ totalCount }: StatsSectionProps) {
           <p className="text-xs text-ink-muted mt-1">件のプランを作成</p>
         </div>
       )}
-    </motion.section>
+    </section>
   );
 }

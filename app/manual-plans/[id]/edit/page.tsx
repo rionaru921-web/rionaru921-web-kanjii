@@ -22,22 +22,20 @@ export default async function EditManualPlanPage({ params }: { params: { id: str
     redirect(`/login?redirectTo=/manual-plans/${params.id}/edit`);
   }
 
-  const { data: plan } = await supabase
-    .from("manual_plans")
-    .select("*")
-    .eq("id", params.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  // members only depends on params.id, not on the plan row, so it's fetched
+  // alongside plan instead of waiting for it.
+  const [{ data: plan }, { data: members }] = await Promise.all([
+    supabase.from("manual_plans").select("*").eq("id", params.id).eq("user_id", user.id).maybeSingle(),
+    // Explicit column list (not "*") — this result is passed straight into
+    // <ManualPlanForm>, a Client Component, so guest_secret must be excluded.
+    supabase
+      .from("manual_plan_members")
+      .select("id, plan_id, name, email, role, attendance_status, note, created_at, updated_at")
+      .eq("plan_id", params.id)
+      .order("created_at", { ascending: true }),
+  ]);
 
   if (!plan) notFound();
-
-  // Explicit column list (not "*") — this result is passed straight into
-  // <ManualPlanForm>, a Client Component, so guest_secret must be excluded.
-  const { data: members } = await supabase
-    .from("manual_plan_members")
-    .select("id, plan_id, name, email, role, attendance_status, note, created_at, updated_at")
-    .eq("plan_id", params.id)
-    .order("created_at", { ascending: true });
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto">

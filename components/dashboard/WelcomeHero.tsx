@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 
 interface Greeting {
   emoji: string;
@@ -30,15 +29,11 @@ export default function WelcomeHero({ displayName }: WelcomeHeroProps) {
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-3xl bg-gold-gradient p-6 sm:p-8 shadow-warm text-white"
-    >
+    <div className="animate-fade-in-up rounded-3xl bg-gold-gradient p-6 sm:p-8 shadow-warm text-white">
       <p className="text-2xl sm:text-3xl font-serif font-bold leading-tight">
         {greeting.emoji} {greeting.text}、{displayName}さん
       </p>
       <p className="text-sm sm:text-base mt-2 text-white/90">今日はどんな集まりを企画しますか?</p>
-    </motion.div>
+    </div>
   );
 }
