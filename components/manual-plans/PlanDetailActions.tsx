@@ -14,6 +14,7 @@ import {
   Check,
   MessageCircle,
   CalendarPlus,
+  Lock,
 } from "lucide-react";
 import type { ManualPlan } from "@/lib/manual-plans/types";
 
@@ -22,7 +23,7 @@ import type { ManualPlan } from "@/lib/manual-plans/types";
 // page bundle instead of loading it on every visit.
 const ShareQrModal = dynamic(() => import("./ShareQrModal"), { ssr: false });
 
-export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
+export default function PlanDetailActions({ plan, isCompleted }: { plan: ManualPlan; isCompleted: boolean }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -72,13 +73,23 @@ export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
-        <Link
-          href={`/manual-plans/${plan.id}/edit`}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors"
-        >
-          <Pencil size={14} />
-          編集
-        </Link>
+        {isCompleted ? (
+          <span
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/10 text-ink-muted text-xs font-semibold py-2.5 cursor-not-allowed"
+            title="このプランは完了しています"
+          >
+            <Lock size={14} />
+            編集
+          </span>
+        ) : (
+          <Link
+            href={`/manual-plans/${plan.id}/edit`}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors"
+          >
+            <Pencil size={14} />
+            編集
+          </Link>
+        )}
         <a
           href={`/api/manual-plans/${plan.id}/pdf`}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors"
@@ -118,6 +129,13 @@ export default function PlanDetailActions({ plan }: { plan: ManualPlan }) {
           カレンダーに追加
         </a>
       </div>
+
+      {isCompleted && (
+        <p className="flex items-center justify-center gap-1.5 text-xs text-ink-muted">
+          <Lock size={12} />
+          このプランは完了しています。基本情報の編集はできません。
+        </p>
+      )}
 
       <button
         type="button"

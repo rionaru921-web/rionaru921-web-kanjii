@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, MessageCircle } from "lucide-react";
+import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, MessageCircle, CheckCircle2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
 import AttendanceForm from "@/components/share/AttendanceForm";
@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
+import { isCompletedPlan } from "@/lib/manual-plans/types";
 import { yen } from "@/lib/pdf/components";
 import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
@@ -82,6 +83,7 @@ export default async function SharePlanPage({ params }: { params: { token: strin
     ? [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim()
     : "";
 
+  const isCompleted = typedPlan ? isCompletedPlan(typedPlan) : false;
   const organizers = typedMembers.filter((m) => m.role === "organizer");
   const attendingCount = typedMembers.filter((m) => m.attendance_status === "attending").length;
   const payingMemberCount = attendingCount > 0 ? attendingCount : typedMembers.length;
@@ -197,7 +199,15 @@ export default async function SharePlanPage({ params }: { params: { token: strin
             )}
           </div>
 
-          <AttendanceForm shareToken={params.token} members={typedMembers} />
+          {isCompleted ? (
+            <div className="rounded-2xl border border-gold/20 bg-white p-6 flex flex-col items-center gap-2 text-center">
+              <CheckCircle2 className="text-gold" size={24} />
+              <p className="text-sm font-semibold text-ink">このイベントは終了しました</p>
+              <p className="text-xs text-ink-secondary">ご参加ありがとうございました。</p>
+            </div>
+          ) : (
+            <AttendanceForm shareToken={params.token} members={typedMembers} />
+          )}
 
           {lineUrl && (
             <a

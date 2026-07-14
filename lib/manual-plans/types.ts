@@ -57,3 +57,12 @@ export function getTimelineStatus(plan: Pick<ManualPlan, "event_date" | "end_dat
   if (endDate && now > endDate + ARCHIVE_THRESHOLD_MS) return "archived";
   return "ended";
 }
+
+// A plan counts as "completed" once its end (or start, if no end is set)
+// has passed — i.e. it's no longer upcoming/ongoing. Reuses
+// getTimelineStatus rather than re-deriving the date comparison so the two
+// concepts (4-state timeline badge, 2-state completion) can't drift apart.
+export function isCompletedPlan(plan: Pick<ManualPlan, "event_date" | "end_date">): boolean {
+  const status = getTimelineStatus(plan);
+  return status === "ended" || status === "archived";
+}

@@ -15,9 +15,10 @@ import { createClient } from "@/lib/supabase/server";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import MemberList from "@/components/manual-plans/MemberList";
+import ReceiptsSection from "@/components/manual-plans/ReceiptsSection";
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
-import { getTimelineStatus } from "@/lib/manual-plans/types";
+import { getTimelineStatus, isCompletedPlan } from "@/lib/manual-plans/types";
 import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
 import { yen } from "@/lib/pdf/components";
 import type { AttendanceStatus, ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
@@ -77,6 +78,7 @@ export default async function ManualPlanDetailPage({
     { attending: 0, declined: 0, maybe: 0, pending: 0 } as Record<AttendanceStatus, number>
   );
 
+  const isCompleted = isCompletedPlan(typedPlan);
   const payingMemberCount = attendanceCounts.attending > 0 ? attendanceCounts.attending : typedMembers.length;
   const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
   const mapQuery = [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim();
@@ -122,7 +124,7 @@ export default async function ManualPlanDetailPage({
         </h1>
       </div>
 
-      <PlanDetailActions plan={typedPlan} />
+      <PlanDetailActions plan={typedPlan} isCompleted={isCompleted} />
 
       <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
         <CalendarDays className="text-gold shrink-0" size={18} />
@@ -227,6 +229,8 @@ export default async function ManualPlanDetailPage({
       )}
 
       <MemberList planId={typedPlan.id} members={memberListItems} />
+
+      {isCompleted && <ReceiptsSection />}
 
       {(typedPlan.memo || typedPlan.dietary_notes) && (
         <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
