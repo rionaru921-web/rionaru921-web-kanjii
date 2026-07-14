@@ -56,7 +56,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isConfirmed = !!user?.email_confirmed_at;
+  // Anonymous guest sessions have no email to confirm, so they're
+  // exempt from the confirmation check below.
+  const isConfirmed = !!user?.is_anonymous || !!user?.email_confirmed_at;
 
   if (!user && isProtectedRoute(pathname)) {
     const url = request.nextUrl.clone();
