@@ -6,6 +6,7 @@ import { ChevronDown, PlayCircle } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ChochinIcon from "@/components/shared/ChochinIcon";
 import UseCaseTags from "@/components/landing/UseCaseTags";
+import GuestLoginButton from "@/components/auth/GuestLoginButton";
 
 interface HeroProps {
   isLoggedIn: boolean;
@@ -47,6 +48,12 @@ export default function Hero({ isLoggedIn }: HeroProps) {
               デモを見る
             </GoldButton>
           </div>
+
+          {!isLoggedIn && (
+            <div className="mt-4">
+              <GuestLoginButton />
+            </div>
+          )}
 
           <div className="hidden lg:flex items-center gap-3 mt-16 text-ink-muted">
             <span className="h-px w-10 bg-ink-muted/40" />

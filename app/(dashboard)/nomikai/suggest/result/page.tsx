@@ -21,6 +21,7 @@ function SuggestResult() {
   const searchParams = useSearchParams();
   const [result, setResult] = useState<AISuggestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const people = Number(searchParams.get("people")) || 2;
@@ -56,7 +57,10 @@ function SuggestResult() {
           }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "AI提案の生成に失敗しました。");
+        if (!res.ok) {
+          if (!cancelled) setErrorCode(data.code ?? null);
+          throw new Error(data.error ?? "AI提案の生成に失敗しました。");
+        }
         if (!cancelled) setResult(data);
       } catch (err) {
         if (!cancelled) {
@@ -103,9 +107,18 @@ function SuggestResult() {
         <div className="flex flex-col items-center justify-center text-center py-20 gap-3 rounded-2xl border border-vermilion/20 bg-vermilion/5">
           <AlertTriangle className="text-vermilion" size={40} />
           <p className="text-ink-secondary">{error}</p>
-          <Link href={retryHref} className="text-gold text-sm underline underline-offset-4">
-            条件を変更してやり直す
-          </Link>
+          {errorCode === "GUEST_AI_LIMIT_REACHED" ? (
+            <Link
+              href="/settings/upgrade"
+              className="rounded-full bg-gold-gradient text-white text-sm font-bold px-6 py-2.5 hover:brightness-110 transition-all shadow-gold"
+            >
+              アカウントを作成する
+            </Link>
+          ) : (
+            <Link href={retryHref} className="text-gold text-sm underline underline-offset-4">
+              条件を変更してやり直す
+            </Link>
+          )}
         </div>
       )}
 

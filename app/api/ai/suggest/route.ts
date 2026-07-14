@@ -3,6 +3,8 @@ import { suggestShops } from "@/lib/ai/suggest";
 import { searchHotpepper, HotpepperApiError } from "@/lib/api/hotpepper";
 import { buildHotpepperSearchParams } from "@/lib/api/restaurants";
 import { getCached, setCached } from "@/lib/api/cache";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { SearchParams } from "@/lib/api/types";
 
 export const runtime = "nodejs";
@@ -13,6 +15,11 @@ export const maxDuration = 60;
 const RATE_LIMIT_WINDOW_MS = 30_000;
 const RATE_LIMIT_MAX_REQUESTS = 2;
 const requestLog = new Map<string, number[]>();
+
+// ゲスト(匿名ユーザー)の生涯AI呼び出し上限。ゲストデータ自体が
+// 24〜72hで自動削除される設計のため「1日X回」より説明しやすい
+// 「生涯合計」で管理する(guest_ai_usage テーブル)。
+const GUEST_AI_LIFETIME_LIMIT = 3;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -50,6 +57,34 @@ export async function POST(req: NextRequest) {
       { error: "リクエストが多すぎます。しばらく待ってから再度お試しください。" },
       { status: 429 }
     );
+  }
+
+  // ゲスト(匿名ユーザー)だけ生涯回数を数える。本登録ユーザーと、
+  // このAPIを直接叩いた無セッションのリクエストは対象外(既存の
+  // IPレート制限のみが適用される、従来通りの挙動)。
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isGuest = !!user?.is_anonymous;
+  const admin = isGuest ? createAdminClient() : null;
+
+  if (isGuest && admin && user) {
+    const { data: usage } = await admin
+      .from("guest_ai_usage")
+      .select("used_count")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if ((usage?.used_count ?? 0) >= GUEST_AI_LIFETIME_LIMIT) {
+      return NextResponse.json(
+        {
+          error: `AIプラン作成の無料お試し回数(${GUEST_AI_LIFETIME_LIMIT}回)に達しました。アカウント登録で回数無制限にご利用いただけます。`,
+          code: "GUEST_AI_LIMIT_REACHED",
+        },
+        { status: 403 }
+      );
+    }
   }
 
   let body: SuggestRequestBody;
@@ -105,6 +140,23 @@ export async function POST(req: NextRequest) {
       },
       searchResult.shops
     );
+
+    if (isGuest && admin && user) {
+      // ベストエフォート: カウント更新に失敗しても提案結果は返す
+      // (回数制限は濫用防止のためであり、既に生成済みの結果を
+      // 握りつぶす理由にはならない)。
+      const { data: usage } = await admin
+        .from("guest_ai_usage")
+        .select("used_count")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      await admin
+        .from("guest_ai_usage")
+        .upsert(
+          { user_id: user.id, used_count: (usage?.used_count ?? 0) + 1 },
+          { onConflict: "user_id" }
+        );
+    }
 
     return NextResponse.json(result);
   } catch (err) {

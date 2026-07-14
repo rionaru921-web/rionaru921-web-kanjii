@@ -9,6 +9,7 @@ const TRANSLATIONS: Record<string, string> = {
   "Email not confirmed": "メールアドレスが未確認です。確認メールをご確認ください。",
   "For security purposes, you can only request this after": "セキュリティのため、しばらく時間をおいてから再度お試しください。",
   "Failed to fetch": "通信エラーが発生しました。ネットワーク接続をご確認のうえ再度お試しください。",
+  "Anonymous sign-ins are disabled": "現在ゲストログインはご利用いただけません。通常のサインアップをお試しください。",
 };
 
 export function translateSupabaseError(message: string): string {

@@ -34,6 +34,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
   }
 
+  if (user.is_anonymous) {
+    return NextResponse.json(
+      { error: "集金設定はゲストモードではご利用いただけません。アカウント登録が必要です。" },
+      { status: 403 }
+    );
+  }
+
   const body = await req.json();
 
   const { error } = await supabase.from("payment_settings").upsert(

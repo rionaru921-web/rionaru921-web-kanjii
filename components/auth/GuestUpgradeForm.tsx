@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
 import { UserPlus, Mail, Lock, AlertCircle, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
-import GuestLoginButton from "@/components/auth/GuestLoginButton";
 import { translateSupabaseError } from "@/lib/auth/error-translator";
 
-export default function SignupForm() {
+export default function GuestUpgradeForm() {
   const supabase = createClient();
 
   const [email, setEmail] = useState("");
@@ -18,8 +16,6 @@ export default function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [resent, setResent] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -40,21 +36,21 @@ export default function SignupForm() {
 
     setLoading(true);
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
+      // ゲスト(匿名ユーザー)の auth.users.id は変わらないまま email/password
+      // が付与される。既存の manual_plans 等はすべて user_id で紐づいている
+      // ため、コピー処理なしでそのまま本登録アカウントのデータになる。
+      const { error: updateError } = await supabase.auth.updateUser(
+        { email, password },
+        { emailRedirectTo: `${window.location.origin}/dashboard` }
+      );
 
-      if (signUpError) {
-        console.error("Sign up error:", {
-          message: signUpError.message,
-          status: signUpError.status,
-          code: signUpError.code,
+      if (updateError) {
+        console.error("Guest upgrade error:", {
+          message: updateError.message,
+          status: updateError.status,
+          code: updateError.code,
         });
-        setError(translateSupabaseError(signUpError.message));
+        setError(translateSupabaseError(updateError.message));
         setLoading(false);
         return;
       }
@@ -62,40 +58,13 @@ export default function SignupForm() {
       setSentConfirmation(true);
       setLoading(false);
     } catch (err) {
-      console.error("Sign up error (unexpected):", err);
+      console.error("Guest upgrade error (unexpected):", err);
       const message =
         err instanceof Error
           ? translateSupabaseError(err.message)
-          : "サインアップ中に予期せぬエラーが発生しました。時間をおいて再度お試しください。";
+          : "登録中に予期せぬエラーが発生しました。時間をおいて再度お試しください。";
       setError(message);
       setLoading(false);
-    }
-  }
-
-  async function handleResend() {
-    setResending(true);
-    setError(null);
-    try {
-      const { error: resendError } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-      });
-      if (resendError) {
-        console.error("Resend error:", {
-          message: resendError.message,
-          status: resendError.status,
-          code: resendError.code,
-        });
-        setError(translateSupabaseError(resendError.message));
-      } else {
-        setResent(true);
-      }
-    } catch (err) {
-      console.error("Resend error (unexpected):", err);
-      setError("再送信中に予期せぬエラーが発生しました。時間をおいて再度お試しください。");
-    } finally {
-      setResending(false);
     }
   }
 
@@ -107,50 +76,10 @@ export default function SignupForm() {
             <MailCheck size={26} />
           </span>
           <p className="text-sm text-ink-secondary leading-relaxed">
-            {email} 宛に確認メールを送信しました。メールに記載されたリンクをクリックして登録を完了してください。
+            {email} 宛に確認メールを送信しました。メールに記載されたリンクをクリックすると、これまでのデータを引き継いだまま本登録が完了します。
           </p>
           <p className="text-xs text-ink-muted leading-relaxed">
-            メールが届かない場合は、迷惑メールフォルダをご確認ください。
-          </p>
-          {error && (
-            <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 w-full">
-              <AlertCircle size={14} className="shrink-0" />
-              {error}
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={resending}
-            className="text-sm text-gold hover:brightness-125 disabled:opacity-50"
-          >
-            {resending ? "再送信中..." : resent ? "再送信しました" : "確認メールを再送信する"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSentConfirmation(false);
-              setResent(false);
-              setError(null);
-              setPassword("");
-              setConfirmPassword("");
-            }}
-            className="text-sm text-ink-secondary hover:text-gold"
-          >
-            別のメールアドレスで登録し直す
-          </button>
-          <Link href="/login" className="text-sm text-ink-secondary hover:text-gold">
-            ログイン画面へ戻る
-          </Link>
-          <p className="text-xs text-ink-muted leading-relaxed border-t border-gold/10 pt-4 mt-2">
-            解決しない場合は{" "}
-            <a
-              href="mailto:steplife.contact@gmail.com"
-              className="text-gold hover:brightness-125"
-            >
-              steplife.contact@gmail.com
-            </a>{" "}
-            までご連絡ください。
+            確認後にこのメールアドレスでログインできない場合は、ログイン画面の「パスワードをお忘れですか？」からパスワードを再設定してください。
           </p>
         </div>
       </AuthCard>
@@ -158,7 +87,10 @@ export default function SignupForm() {
   }
 
   return (
-    <AuthCard title="新規登録" subtitle="Kanjiiで幹事業務から解放されましょう">
+    <AuthCard
+      title="アカウントを作成してデータを引き継ぐ"
+      subtitle="メールアドレスとパスワードを設定すると、ゲストとして作成したデータがそのまま本登録アカウントに引き継がれます"
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="flex items-center gap-1.5 text-xs text-ink-secondary mb-1.5">
@@ -213,17 +145,17 @@ export default function SignupForm() {
             className="mt-0.5 accent-gold"
           />
           <span>
-            <Link href="/legal/terms" className="text-gold hover:brightness-125">
+            <a href="/legal/terms" className="text-gold hover:brightness-125">
               利用規約
-            </Link>
+            </a>
             ・
-            <Link href="/legal/privacy" className="text-gold hover:brightness-125">
+            <a href="/legal/privacy" className="text-gold hover:brightness-125">
               プライバシーポリシー
-            </Link>
+            </a>
             ・
-            <Link href="/legal/beta" className="text-gold hover:brightness-125">
+            <a href="/legal/beta" className="text-gold hover:brightness-125">
               ベータ利用規約
-            </Link>
+            </a>
             に同意します
           </span>
         </label>
@@ -241,20 +173,9 @@ export default function SignupForm() {
           className="flex items-center justify-center gap-2 rounded-full bg-gold-gradient text-white font-bold py-3 text-sm hover:brightness-110 transition-all shadow-gold disabled:opacity-50 mt-2"
         >
           <UserPlus size={16} />
-          {loading ? "登録中..." : "無料ではじめる"}
+          {loading ? "登録中..." : "アカウントを作成する"}
         </button>
       </form>
-
-      <p className="text-center text-xs text-ink-muted mt-6">
-        すでにアカウントをお持ちですか？{" "}
-        <Link href="/login" className="text-gold hover:brightness-125">
-          ログイン
-        </Link>
-      </p>
-
-      <div className="mt-4 pt-4 border-t border-gold/10">
-        <GuestLoginButton className="flex items-center justify-center gap-1.5 w-full text-sm text-ink-secondary hover:text-gold transition-colors disabled:opacity-50" />
-      </div>
     </AuthCard>
   );
 }
