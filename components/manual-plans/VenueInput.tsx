@@ -24,7 +24,7 @@ interface VenueInputProps {
 }
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50";
+  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
 const labelClass = "block text-sm font-medium text-ink";
 
 // Consolidates the old separate 店名/住所/URL/地図URL fields into one smart

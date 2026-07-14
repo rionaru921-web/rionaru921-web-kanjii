@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import WelcomeHero from "@/components/dashboard/WelcomeHero";
-import ProfileCard from "@/components/dashboard/ProfileCard";
 import StatsSection from "@/components/dashboard/StatsSection";
 import QuickActions from "@/components/dashboard/QuickActions";
 import DailyTip from "@/components/dashboard/DailyTip";
@@ -66,8 +65,6 @@ export default async function DashboardPage() {
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-5xl mx-auto space-y-6">
       <WelcomeHero displayName={displayName} />
-
-      {user && <ProfileCard userId={user.id} email={user.email ?? ""} displayName={displayName} />}
 
       <StatsSection totalCount={totalPlanCount} />
 

@@ -21,7 +21,7 @@ interface FeeSectionProps {
 const PAYMENT_METHOD_OPTIONS = ["cash", "paypay", "bank_transfer"];
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50";
+  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
 const labelClass = "block text-sm font-medium text-ink";
 
 export default function FeeSection({
@@ -85,7 +85,7 @@ export default function FeeSection({
                 value={item.label}
                 onChange={(e) => updateItem(i, "label", e.target.value)}
                 disabled={disabled}
-                className="flex-1 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
+                className="flex-1 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                 placeholder="例: 飲食代"
               />
               <input
@@ -93,7 +93,7 @@ export default function FeeSection({
                 value={item.amount}
                 onChange={(e) => updateItem(i, "amount", e.target.value)}
                 disabled={disabled}
-                className="w-28 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
+                className="w-28 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                 placeholder="30000 / 未定"
               />
               <button

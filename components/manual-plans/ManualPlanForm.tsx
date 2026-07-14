@@ -18,8 +18,12 @@ import {
 import type { FeeBreakdownItem, ManualPlan, ManualPlanMember, MemberRole } from "@/lib/manual-plans/types";
 import { ROLE_LABELS } from "@/lib/manual-plans/format";
 import { toDateTimeLocalValue, fromDateTimeLocalValue } from "@/lib/date/kanjii-time";
+import { PLAN_TEMPLATES, formatLocalDateTimeInput, type PlanTemplate } from "@/lib/plan-templates";
 import VenueInput, { type VenueValue } from "./VenueInput";
 import FeeSection from "./FeeSection";
+import TemplateChips from "@/components/plan-form/TemplateChips";
+import MizuhikiDivider from "@/components/shared/MizuhikiDivider";
+import SectionCompleteBadge from "./SectionCompleteBadge";
 
 interface MemberInput {
   name: string;
@@ -35,37 +39,53 @@ interface ManualPlanFormProps {
 }
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50";
+  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
 const labelClass = "block text-sm font-medium text-ink";
 
 function FormSection({
   title,
   icon: Icon,
   defaultOpen = true,
+  emphasized = false,
+  complete = false,
   children,
 }: {
   title: string;
   icon: LucideIcon;
   defaultOpen?: boolean;
+  emphasized?: boolean;
+  complete?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
     <div className="rounded-3xl bg-surface-tertiary shadow-warm overflow-hidden">
+      <div className="pt-4">
+        <MizuhikiDivider />
+      </div>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between gap-3 px-6 py-4"
       >
-        <span className="flex items-center gap-2 font-serif font-bold text-ink">
-          <Icon size={16} className="text-gold" />
+        <span className="flex items-center gap-3 font-serif font-bold text-ink">
+          <span
+            className={`flex shrink-0 items-center justify-center rounded-full ${
+              emphasized ? "h-12 w-12 bg-gold/10" : "h-7 w-7"
+            }`}
+          >
+            <Icon size={emphasized ? 32 : 16} className="text-gold" />
+          </span>
           {title}
         </span>
-        <ChevronDown
-          size={18}
-          className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <span className="flex items-center gap-2">
+          <SectionCompleteBadge filled={complete} />
+          <ChevronDown
+            size={18}
+            className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
@@ -120,6 +140,29 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [venueHint, setVenueHint] = useState<string | null>(null);
+
+  function handleTemplateSelect(template: PlanTemplate) {
+    setSelectedTemplateId(template.id);
+    setTitle(template.title);
+
+    const start = template.getEventDate();
+    setEventDate(start ? formatLocalDateTimeInput(start) : "");
+    setEndDate(
+      start && template.durationHours
+        ? formatLocalDateTimeInput(new Date(start.getTime() + template.durationHours * 3600_000))
+        : ""
+    );
+    setFeeAmount(template.feeAmount);
+    setVenueHint(template.venueHint ?? null);
+  }
+
+  function handleVenueChange(next: VenueValue) {
+    setVenue(next);
+    setVenueHint(null);
+  }
 
   function togglePaymentMethod(method: string) {
     setPaymentMethods((prev) =>
@@ -194,8 +237,17 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <FormSection title="基本情報" icon={CalendarDays}>
+    <>
+      {mode === "create" && (
+        <TemplateChips
+          templates={PLAN_TEMPLATES}
+          selectedId={selectedTemplateId}
+          onSelect={handleTemplateSelect}
+        />
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 pb-24 sm:pb-0">
+      <FormSection title="基本情報" icon={CalendarDays} emphasized complete={title.trim() !== ""}>
         <div>
           <label className={labelClass}>タイトル</label>
           <input
@@ -240,11 +292,16 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         </div>
       </FormSection>
 
-      <FormSection title="場所" icon={MapPin}>
-        <VenueInput value={venue} onChange={setVenue} disabled={saving} />
+      <FormSection title="場所" icon={MapPin} emphasized complete={venue.venueName.trim() !== ""}>
+        <VenueInput value={venue} onChange={handleVenueChange} disabled={saving} />
+        {venueHint && (
+          <p className="rounded-xl bg-gold/5 border border-gold/15 px-4 py-2.5 text-xs text-ink-secondary">
+            💡 {venueHint}
+          </p>
+        )}
       </FormSection>
 
-      <FormSection title="予算・集金" icon={Wallet}>
+      <FormSection title="予算・集金" icon={Wallet} emphasized complete={feeAmount.trim() !== ""}>
         <FeeSection
           feeAmount={feeAmount}
           onFeeAmountChange={setFeeAmount}
@@ -270,7 +327,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                     value={member.name}
                     onChange={(e) => updateMember(i, "name", e.target.value)}
                     disabled={saving}
-                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
+                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                     placeholder="名前"
                   />
                   <input
@@ -278,7 +335,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                     value={member.email}
                     onChange={(e) => updateMember(i, "email", e.target.value)}
                     disabled={saving}
-                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors focus:border-gold disabled:opacity-50"
+                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                     placeholder="メール(任意)"
                   />
                 </div>
@@ -353,7 +410,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         </div>
       )}
 
-      <div className="flex gap-3">
+      <div className="fixed sm:static inset-x-0 bottom-0 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 pr-24 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pr-0 sm:backdrop-blur-none">
         <button
           type="button"
           onClick={() => router.back()}
@@ -371,6 +428,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           {mode === "create" ? "作成する" : "保存する"}
         </button>
       </div>
-    </form>
+      </form>
+    </>
   );
 }
