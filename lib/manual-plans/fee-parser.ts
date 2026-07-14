@@ -9,7 +9,10 @@ export interface ParsedFee {
 // settled yet. Full-width digits are normalized since IME input commonly
 // produces them.
 export function parseFee(input: string): ParsedFee {
-  const trimmed = input.trim();
+  // fee_breakdown is stored as JSONB; rows created before amount became a
+  // string column (see 20260712000000_plan_enhancements.sql) still hold a
+  // raw number here, so this must not assume `input` is actually a string.
+  const trimmed = String(input).trim();
   if (!trimmed) return { amount: null, raw: trimmed, isUndetermined: false };
 
   const normalized = trimmed

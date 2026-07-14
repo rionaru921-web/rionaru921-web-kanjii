@@ -29,7 +29,7 @@ const FAQS = [
 ];
 
 export default function FAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section id="faq" className="px-4 py-24 sm:py-32 bg-surface-secondary">
