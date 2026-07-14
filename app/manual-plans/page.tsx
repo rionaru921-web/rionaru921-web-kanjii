@@ -27,22 +27,27 @@ export default async function ManualPlansPage() {
     redirect("/login?redirectTo=/manual-plans");
   }
 
-  // Single embedded query (plan + member ids) instead of a plan fetch
-  // followed by N separate member-count fetches — the FK on
+  // Single embedded query (plan + member ids/attendance) instead of a plan
+  // fetch followed by N separate member-count fetches — the FK on
   // manual_plan_members.plan_id lets PostgREST join both in one round trip.
   // Ordered by event_date descending (nulls last) so upcoming/recent plans
   // lead the list regardless of when they were created.
   const { data: plans } = await supabase
     .from("manual_plans")
-    .select("*, manual_plan_members(id)")
+    .select("*, manual_plan_members(id, attendance_status)")
     .eq("user_id", user.id)
     .order("event_date", { ascending: false, nullsFirst: false });
 
   const items: ManualPlanListItem[] = (plans ?? []).map((row) => {
     const { manual_plan_members, ...planFields } = row as ManualPlan & {
-      manual_plan_members: Pick<ManualPlanMember, "id">[];
+      manual_plan_members: Pick<ManualPlanMember, "id" | "attendance_status">[];
     };
-    return { ...(planFields as ManualPlan), memberCount: manual_plan_members?.length ?? 0 };
+    const members = manual_plan_members ?? [];
+    return {
+      ...(planFields as ManualPlan),
+      memberCount: members.length,
+      attendingCount: members.filter((m) => m.attendance_status === "attending").length,
+    };
   });
 
   return (

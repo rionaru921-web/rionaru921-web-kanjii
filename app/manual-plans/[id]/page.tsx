@@ -18,6 +18,7 @@ import MemberList from "@/components/manual-plans/MemberList";
 import ReceiptsSection from "@/components/manual-plans/ReceiptsSection";
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
+import { calculateAttendanceRate } from "@/lib/manual-plans/attendance-stats";
 import { getTimelineStatus, isCompletedPlan } from "@/lib/manual-plans/types";
 import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
 import { yen } from "@/lib/pdf/components";
@@ -72,6 +73,7 @@ export default async function ManualPlanDetailPage({
     { attending: 0, declined: 0, maybe: 0, pending: 0 } as Record<AttendanceStatus, number>
   );
 
+  const attendanceRate = calculateAttendanceRate(attendanceCounts.attending, typedMembers.length);
   const isCompleted = isCompletedPlan(typedPlan);
   const payingMemberCount = attendanceCounts.attending > 0 ? attendanceCounts.attending : typedMembers.length;
   const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
@@ -110,8 +112,13 @@ export default async function ManualPlanDetailPage({
       )}
 
       <div>
-        <div className="mb-2">
+        <div className="mb-2 flex items-center gap-2">
           <TimelineBadge status={getTimelineStatus(typedPlan)} />
+          {attendanceRate.rate !== null && (
+            <span className="inline-flex items-center rounded-full text-[11px] font-bold px-2.5 py-1 border shrink-0 text-gold bg-gold/5 border-gold/25">
+              {attendanceRate.attending}/{attendanceRate.total}名 参加 ({attendanceRate.rate}%)
+            </span>
+          )}
         </div>
         <h1 className="font-serif font-bold text-2xl sm:text-3xl text-ink leading-tight">
           {typedPlan.title}

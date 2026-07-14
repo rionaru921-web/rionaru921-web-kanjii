@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ChevronDown, PlayCircle } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ChochinIcon from "@/components/shared/ChochinIcon";
+import UseCaseTags from "@/components/landing/UseCaseTags";
 
 interface HeroProps {
   isLoggedIn: boolean;
@@ -31,10 +32,12 @@ export default function Hero({ isLoggedIn }: HeroProps) {
           </h1>
 
           <p className="mt-6 text-base sm:text-lg text-ink-secondary text-balance max-w-xl">
-            飲み会・旅行・イベント。
+            URLを送るだけ。
             <br className="sm:hidden" />
-            もう幹事はやめませんか？
+            日程調整も、お店選びも、割り勘も。
           </p>
+
+          <UseCaseTags />
 
           <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
             <GoldButton href={isLoggedIn ? "/dashboard" : "/signup"} size="lg">

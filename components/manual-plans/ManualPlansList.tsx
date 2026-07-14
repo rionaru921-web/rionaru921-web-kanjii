@@ -6,9 +6,11 @@ import { CalendarPlus, ChevronDown, Users as UsersIcon } from "lucide-react";
 import TimelineBadge from "./TimelineBadge";
 import { formatDateRange } from "@/lib/manual-plans/format";
 import { getTimelineStatus, type ManualPlan } from "@/lib/manual-plans/types";
+import { calculateAttendanceRate } from "@/lib/manual-plans/attendance-stats";
 
 export interface ManualPlanListItem extends ManualPlan {
   memberCount: number;
+  attendingCount: number;
 }
 
 export default function ManualPlansList({ plans }: { plans: ManualPlanListItem[] }) {
@@ -75,6 +77,7 @@ export default function ManualPlansList({ plans }: { plans: ManualPlanListItem[]
 }
 
 function PlanCard({ plan }: { plan: ManualPlanListItem }) {
+  const { rate, attending, total } = calculateAttendanceRate(plan.attendingCount, plan.memberCount);
   return (
     <Link
       href={`/manual-plans/${plan.id}`}
@@ -93,7 +96,7 @@ function PlanCard({ plan }: { plan: ManualPlanListItem }) {
         )}
         <span className="flex items-center gap-1 text-[11px] text-ink-muted shrink-0">
           <UsersIcon size={12} />
-          {plan.memberCount}
+          {rate === null ? "-" : `${attending}/${total}名 参加 (${rate}%)`}
         </span>
       </div>
     </Link>
