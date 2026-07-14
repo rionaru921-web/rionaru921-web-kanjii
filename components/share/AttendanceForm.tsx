@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check, X, HelpCircle, Loader2, type LucideIcon } from "lucide-react";
 import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
 import IdentitySelectionNotice from "@/components/share/IdentitySelectionNotice";
+import { useToasts, ToastStack } from "@/components/ui/RealtimeToast";
 import type { AttendanceStatus, ManualPlanMember } from "@/lib/manual-plans/types";
 
 const OPTIONS: { value: AttendanceStatus; label: string; icon: LucideIcon; activeClass: string }[] = [
@@ -35,8 +36,11 @@ export default function AttendanceForm({
 }) {
   const [members, setMembers] = useState(initialMembers);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<AttendanceStatus | null>(null);
+  const [isEditing, setIsEditing] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toasts, pushToast } = useToasts();
 
   useEffect(() => {
     const stored = sessionStorage.getItem(storageKey(shareToken));
@@ -53,6 +57,20 @@ export default function AttendanceForm({
   }, [shareToken]);
 
   const selectedMember = members.find((m) => m.id === selectedId) ?? null;
+
+  // Enters edit mode fresh whenever a (new or restored) identity is picked —
+  // a first-time member starts on the picker, a returning member who already
+  // answered starts on the "決定済み" summary instead. Deliberately keyed
+  // only on selectedId (not attendance_status) so this doesn't re-fire and
+  // kick the form back into edit mode right after confirmSelection's own
+  // successful save updates `members`.
+  useEffect(() => {
+    if (!selectedMember) return;
+    const alreadyAnswered = selectedMember.attendance_status !== "pending";
+    setIsEditing(!alreadyAnswered);
+    setSelectedStatus(alreadyAnswered ? selectedMember.attendance_status : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   // Claims this member's guest_secret via /identify if we don't already
   // have one cached. First claim wins server-side — see
@@ -94,13 +112,20 @@ export default function AttendanceForm({
     setError(null);
   }
 
-  async function updateAttendance(status: AttendanceStatus) {
+  function startEditing() {
     if (!selectedMember) return;
+    setIsEditing(true);
+    setSelectedStatus(selectedMember.attendance_status === "pending" ? null : selectedMember.attendance_status);
+    setError(null);
+  }
+
+  async function updateAttendance(status: AttendanceStatus): Promise<boolean> {
+    if (!selectedMember) return false;
     const guestSecret = sessionStorage.getItem(guestSecretKey(shareToken, selectedMember.id));
     if (!guestSecret) {
       setError("認証に失敗しました。お名前を選び直してください。");
       clearSelection();
-      return;
+      return false;
     }
     setSaving(true);
     setError(null);
@@ -125,10 +150,21 @@ export default function AttendanceForm({
       setMembers((prev) =>
         prev.map((m) => (m.id === selectedMember.id ? { ...m, attendance_status: status } : m))
       );
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "更新に失敗しました。");
+      return false;
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function confirmSelection() {
+    if (!selectedStatus) return;
+    const ok = await updateAttendance(selectedStatus);
+    if (ok) {
+      setIsEditing(false);
+      pushToast("回答を保存しました");
     }
   }
 
@@ -147,13 +183,15 @@ export default function AttendanceForm({
           <div className="mt-4 grid grid-cols-3 gap-2">
             {OPTIONS.map((opt) => {
               const Icon = opt.icon;
-              const active = selectedMember.attendance_status === opt.value;
+              const active = isEditing
+                ? selectedStatus === opt.value
+                : selectedMember.attendance_status === opt.value;
               return (
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => updateAttendance(opt.value)}
-                  disabled={saving}
+                  onClick={() => isEditing && setSelectedStatus(opt.value)}
+                  disabled={saving || !isEditing}
                   className={`flex flex-col items-center gap-1 rounded-xl px-2 py-3 text-xs font-semibold border transition-colors disabled:opacity-60 ${
                     active ? opt.activeClass : "border-gold/15 text-ink-secondary hover:border-gold/30"
                   }`}
@@ -166,6 +204,28 @@ export default function AttendanceForm({
           </div>
 
           {error && <p className="text-xs text-vermilion mt-2 text-center">{error}</p>}
+
+          {isEditing ? (
+            <button
+              type="button"
+              onClick={confirmSelection}
+              disabled={!selectedStatus || saving}
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-gold-gradient py-3 text-sm font-semibold text-white shadow-gold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {saving && <Loader2 size={16} className="animate-spin" />}
+              {saving ? "保存中..." : "この内容で決定する"}
+            </button>
+          ) : (
+            <>
+              <p className="mt-4 flex items-center gap-1.5 text-sm text-emerald-600">
+                <Check size={16} />
+                回答を保存しました
+              </p>
+              <button type="button" onClick={startEditing} className="mt-2 text-sm text-gold underline">
+                編集する
+              </button>
+            </>
+          )}
 
           <button
             type="button"
@@ -194,6 +254,8 @@ export default function AttendanceForm({
           </div>
         </>
       )}
+
+      <ToastStack toasts={toasts} />
     </div>
   );
 }

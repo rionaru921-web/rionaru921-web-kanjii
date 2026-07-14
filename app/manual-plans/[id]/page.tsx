@@ -5,7 +5,6 @@ import {
   CalendarDays,
   MapPin,
   Wallet,
-  Users as UsersIcon,
   FileText,
   Home,
   ChevronRight,
@@ -14,10 +13,8 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
-import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
-import MemberRoleBadge from "@/components/manual-plans/MemberRoleBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
-import MemberGuestSecretReset from "@/components/manual-plans/MemberGuestSecretReset";
+import MemberList from "@/components/manual-plans/MemberList";
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { getTimelineStatus } from "@/lib/manual-plans/types";
@@ -80,10 +77,19 @@ export default async function ManualPlanDetailPage({
     { attending: 0, declined: 0, maybe: 0, pending: 0 } as Record<AttendanceStatus, number>
   );
 
-  const organizers = typedMembers.filter((m) => m.role === "organizer");
   const payingMemberCount = attendanceCounts.attending > 0 ? attendanceCounts.attending : typedMembers.length;
   const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
   const mapQuery = [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim();
+
+  // Sanitized shape handed to the Client Component below — never the raw
+  // row with guest_secret (see the comment on typedMembers above).
+  const memberListItems = typedMembers.map((m) => ({
+    id: m.id,
+    name: m.name,
+    role: m.role,
+    attendance_status: m.attendance_status,
+    hasGuestSecret: m.guest_secret != null,
+  }));
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto space-y-6">
@@ -220,46 +226,7 @@ export default async function ManualPlanDetailPage({
         </section>
       )}
 
-      <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6">
-        <div className="flex items-center gap-2 mb-1.5">
-          <UsersIcon className="text-gold" size={18} />
-          <p className="text-xs text-ink-muted">メンバー ({typedMembers.length}人)</p>
-        </div>
-        {organizers.length > 0 && (
-          <p className="text-xs text-ink-muted mb-1.5">
-            👑 幹事({organizers.length}人): {organizers.map((m) => m.name).join("、")}
-          </p>
-        )}
-        {typedMembers.length > 0 && (
-          <p className="text-xs text-ink-muted mb-4">
-            参加{attendanceCounts.attending}人 / 不参加{attendanceCounts.declined}人 / 未定
-            {attendanceCounts.maybe}人 / 未回答{attendanceCounts.pending}人
-          </p>
-        )}
-        {typedMembers.length === 0 ? (
-          <p className="text-sm text-ink-secondary">まだメンバーが登録されていません</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {typedMembers.map((m) => (
-              <div
-                key={m.id}
-                className="flex items-center justify-between gap-3 border-b border-gold/10 pb-3 last:border-0 last:pb-0"
-              >
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <MemberRoleBadge role={m.role} />
-                  <p className="text-sm font-medium text-ink truncate">{m.name}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <AttendanceStatusBadge status={m.attendance_status} />
-                  {m.guest_secret && (
-                    <MemberGuestSecretReset planId={typedPlan.id} memberId={m.id} />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <MemberList planId={typedPlan.id} members={memberListItems} />
 
       {(typedPlan.memo || typedPlan.dietary_notes) && (
         <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
