@@ -3,7 +3,7 @@ import LegalContent from "@/components/legal/LegalContent";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
-  description: "Kanjiiのプライバシーポリシーです。",
+  description: "幹事ラボのプライバシーポリシーです。",
 };
 
 const TOC = [
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
   return (
     <LegalContent title="プライバシーポリシー" lastUpdated="2026年7月13日" toc={TOC}>
       <p className="mb-8">
-        リオ（以下「当方」といいます）は、当方が運営するウェブサービス「Kanjii」（以下「本サービス」といいます）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下「本ポリシー」といいます）を定めます。
+        リオ（以下「当方」といいます）は、当方が運営するウェブサービス「幹事ラボ」（以下「本サービス」といいます）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下「本ポリシー」といいます）を定めます。
       </p>
 
       <section>

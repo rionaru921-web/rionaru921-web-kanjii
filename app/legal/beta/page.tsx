@@ -4,7 +4,7 @@ import LegalContent from "@/components/legal/LegalContent";
 
 export const metadata: Metadata = {
   title: "ベータ版特別規約",
-  description: "Kanjiiのベータ版特別規約です。",
+  description: "幹事ラボのベータ版特別規約です。",
 };
 
 const TOC = [
@@ -23,8 +23,8 @@ export default function BetaTermsPage() {
   return (
     <LegalContent title="ベータ版特別規約" lastUpdated="2026年7月13日" toc={TOC}>
       <p className="mb-8">
-        本規約（以下「本ベータ規約」といいます）は、リオ（以下「当方」といいます）が提供するウェブサービス「Kanjii」のベータ版（以下「本ベータ版」といいます）の利用条件を定めるものです。本ベータ版を利用するユーザーは、
-        <Link href="/legal/terms">Kanjii利用規約</Link>（以下「通常規約」といいます）および
+        本規約（以下「本ベータ規約」といいます）は、リオ（以下「当方」といいます）が提供するウェブサービス「幹事ラボ」のベータ版（以下「本ベータ版」といいます）の利用条件を定めるものです。本ベータ版を利用するユーザーは、
+        <Link href="/legal/terms">幹事ラボ利用規約</Link>（以下「通常規約」といいます）および
         <Link href="/legal/privacy">プライバシーポリシー</Link>に加え、本ベータ規約に同意したものとみなします。
       </p>
 

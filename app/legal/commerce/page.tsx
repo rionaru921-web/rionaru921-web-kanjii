@@ -4,7 +4,7 @@ import LegalContent from "@/components/legal/LegalContent";
 
 export const metadata: Metadata = {
   title: "特定商取引法に基づく表記",
-  description: "Kanjiiの特定商取引法に基づく表記です。",
+  description: "幹事ラボの特定商取引法に基づく表記です。",
 };
 
 const ROWS: Array<[string, React.ReactNode]> = [

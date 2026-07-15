@@ -17,7 +17,7 @@ export default function ContactPage() {
     e.preventDefault();
     const body = `お名前: ${name}\nメールアドレス: ${email}\n件名: ${subject}\n\n${message}`;
     const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-      `[Kanjii お問い合わせ] ${subject}`
+      `[幹事ラボ お問い合わせ] ${subject}`
     )}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   }
@@ -25,7 +25,7 @@ export default function ContactPage() {
   return (
     <LegalContent title="お問い合わせ" lastUpdated="2026年3月">
       <p className="mb-8">
-        Kanjiiに関するご質問・ご要望・不具合報告は、以下のフォームよりお送りください。送信ボタンを押すとお使いのメールソフトが起動し、内容が入力された状態でメールを作成できます。
+        幹事ラボに関するご質問・ご要望・不具合報告は、以下のフォームよりお送りください。送信ボタンを押すとお使いのメールソフトが起動し、内容が入力された状態でメールを作成できます。
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md">
