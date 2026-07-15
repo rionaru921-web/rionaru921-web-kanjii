@@ -93,6 +93,16 @@ export const viewport: Viewport = {
   themeColor: "#F5F0E8",
 };
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Kanjii",
+  alternateName: "カンジー",
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://kanjii.app",
+  description: "あらゆる集まりを、AIが幹事します。URLを送るだけ。",
+  inLanguage: "ja",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -103,6 +113,10 @@ export default function RootLayout({
       <body
         className={`${notoSansJP.variable} ${notoSerifJP.variable} ${playfairDisplay.variable} antialiased bg-[#F5F0E8] text-[#2B2420] min-h-screen font-sans`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         {children}
         <FloatingBottomNav />
         <FeedbackButton />
