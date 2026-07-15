@@ -47,7 +47,7 @@ export default function ServiceCards() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="font-serif font-bold text-2xl sm:text-3xl text-ink mb-4">
-            幹事の全てを、Kanjiiが担います
+            幹事の全てを、幹事ラボが担います
           </h2>
           <MizuhikiDivider />
         </div>

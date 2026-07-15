@@ -68,25 +68,25 @@ export default async function SharePage({ params }: { params: { token: string } 
               <PDFPreviewButton
                 kind="nomikai"
                 data={(history!.payload as HistoryPayload & { kind: "nomikai" }).pdf}
-                filename={`Kanjii_${history!.title}.pdf`}
+                filename={`KanjiLabo_${history!.title}.pdf`}
               />
             ) : (
               <PDFPreviewButton
                 kind="travel"
                 data={(history!.payload as HistoryPayload & { kind: "travel" }).pdf}
-                filename={`Kanjii_${history!.title}.pdf`}
+                filename={`KanjiLabo_${history!.title}.pdf`}
               />
             )}
 
             <GoldButton href="/signup" icon={Sparkles}>
-              Kanjiiで自分も幹事してみる
+              幹事ラボで自分も幹事してみる
             </GoldButton>
           </div>
         </div>
       )}
 
       <Link href="/" className="mt-10 text-xs text-ink-muted hover:text-gold transition-colors">
-        Kanjii トップへ
+        幹事ラボ トップへ
       </Link>
     </div>
   );

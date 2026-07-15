@@ -110,7 +110,7 @@ function LoginFields() {
   }
 
   return (
-    <AuthCard title="ログイン" subtitle="Kanjiiへおかえりなさい">
+    <AuthCard title="ログイン" subtitle="幹事ラボへおかえりなさい">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {needsVerification && !error && (
           <div className="flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20 rounded-xl px-3 py-2.5">

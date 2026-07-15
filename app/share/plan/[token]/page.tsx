@@ -311,13 +311,13 @@ export default async function SharePlanPage({ params }: { params: { token: strin
           )}
 
           <GoldButton href="/signup" icon={Sparkles}>
-            Kanjiiで自分も幹事してみる
+            幹事ラボで自分も幹事してみる
           </GoldButton>
         </div>
       )}
 
       <Link href="/" className="mt-10 text-xs text-ink-muted hover:text-gold transition-colors">
-        Kanjii トップへ
+        幹事ラボ トップへ
       </Link>
     </div>
   );

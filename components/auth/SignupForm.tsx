@@ -158,7 +158,7 @@ export default function SignupForm() {
   }
 
   return (
-    <AuthCard title="新規登録" subtitle="Kanjiiで幹事業務から解放されましょう">
+    <AuthCard title="新規登録" subtitle="幹事ラボで幹事業務から解放されましょう">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="flex items-center gap-1.5 text-xs text-ink-secondary mb-1.5">

@@ -52,7 +52,7 @@ export default function Logo({
         <line x1="20" y1="36" x2="20" y2="39" stroke="url(#kanjii-logo-gold)" strokeWidth="1.5" />
       </svg>
       <span className={`font-serif font-bold tracking-wide text-gold-gradient ${dims.text}`}>
-        Kanjii
+        幹事ラボ
       </span>
     </Link>
   );

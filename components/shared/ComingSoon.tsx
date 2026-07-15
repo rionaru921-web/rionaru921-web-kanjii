@@ -27,7 +27,7 @@ export default function ComingSoon({
         ダッシュボードに戻る
       </GoldButton>
       <Link href="/" className="text-xs text-ink-muted hover:text-gold mt-4 transition-colors">
-        Kanjii トップへ
+        幹事ラボ トップへ
       </Link>
     </main>
   );

@@ -92,7 +92,7 @@ export default function Footer() {
         </div>
 
         <p className="text-center text-xs text-ink-muted">
-          © 2026 Kanjii. All rights reserved.
+          © 2026 幹事ラボ. All rights reserved.
         </p>
       </div>
     </footer>

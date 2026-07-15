@@ -17,7 +17,7 @@ export default async function PaymentSettingsPage() {
         集金設定
       </h1>
       <p className="text-sm text-ink-secondary mb-6">
-        オプション: 幹事の集金情報をPDFに自動挿入したい場合に設定してください。未設定でもKanjiiの全機能はご利用いただけます。
+        オプション: 幹事の集金情報をPDFに自動挿入したい場合に設定してください。未設定でも幹事ラボの全機能はご利用いただけます。
       </p>
 
       {isGuest ? (
