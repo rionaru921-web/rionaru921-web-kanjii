@@ -12,8 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Kanjii",
-  alternateName: "カンジー",
+  name: "幹事ラボ",
   description:
     "AIが飲み会・旅行・イベントの幹事を代行。参加者の好み・予算・エリアから最適なお店を提案し、日程調整・割り勘・集金までサポートします。",
   url: "https://kanjii.app",

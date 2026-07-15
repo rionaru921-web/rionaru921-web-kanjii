@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "edge";
-export const alt = "Kanjii プラン招待";
+export const alt = "幹事ラボ プラン招待";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,7 +19,7 @@ export default async function PlanOGImage({ params }: { params: { token: string 
     fetch(NOTO_SANS_JP_URL).then((res) => res.arrayBuffer()),
   ]);
 
-  const title = plan?.title ?? "Kanjii";
+  const title = plan?.title ?? "幹事ラボ";
   const subtitle = plan?.venue_name ?? "あらゆる集まりを、AIが幹事します";
 
   return new ImageResponse(
@@ -36,7 +36,7 @@ export default async function PlanOGImage({ params }: { params: { token: string 
           fontFamily: "Noto Sans JP",
         }}
       >
-        <div style={{ fontSize: 28, color: "#C4633F", fontWeight: 700 }}>Kanjii</div>
+        <div style={{ fontSize: 28, color: "#C4633F", fontWeight: 700 }}>幹事ラボ</div>
         <div
           style={{
             fontSize: 64,

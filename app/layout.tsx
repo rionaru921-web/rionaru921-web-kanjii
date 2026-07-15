@@ -29,11 +29,12 @@ const playfairDisplay = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kanjii.app"),
   title: {
-    default: "Kanjii - あらゆる集まりを、AIが幹事します",
-    template: "%s | Kanjii",
+    default: "幹事ラボ - あらゆる集まりを、AIが幹事します",
+    template: "%s | 幹事ラボ",
   },
   description:
-    "飲み会・旅行・イベントの幹事業務をAIが自動化。お店選び、割り勘計算、参加者への共有まで、Kanjiiがすべてサポートします。",
+    "飲み会・旅行・イベントの幹事業務をAIが自動化。お店選び、割り勘計算、参加者への共有まで、幹事ラボがすべてサポートします。",
+  applicationName: "幹事ラボ",
   keywords: [
     "幹事",
     "飲み会",
@@ -53,24 +54,24 @@ export const metadata: Metadata = {
     "日程調整",
     "集金アプリ",
   ],
-  authors: [{ name: "Kanjii" }],
-  creator: "Kanjii",
-  publisher: "Kanjii",
+  authors: [{ name: "幹事ラボ" }],
+  creator: "幹事ラボ",
+  publisher: "幹事ラボ",
   formatDetection: { email: false, address: false, telephone: false },
   verification: {
     google: "fqx0-Oh0qtrop4k0Tt4jKm_v-jcc3vCh6kt2zMSafVc",
   },
   openGraph: {
-    title: "Kanjii - あらゆる集まりを、AIが幹事します",
+    title: "幹事ラボ - あらゆる集まりを、AIが幹事します",
     description: "飲み会・旅行・イベントの幹事業務をAIが自動化",
     url: "/",
-    siteName: "Kanjii",
+    siteName: "幹事ラボ",
     locale: "ja_JP",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kanjii - あらゆる集まりを、AIが幹事します",
+    title: "幹事ラボ - あらゆる集まりを、AIが幹事します",
     description: "飲み会・旅行・イベントの幹事業務をAIが自動化",
     creator: "@kanjii_app",
   },
@@ -96,8 +97,7 @@ export const viewport: Viewport = {
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Kanjii",
-  alternateName: "カンジー",
+  name: "幹事ラボ",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://kanjii.app",
   description: "あらゆる集まりを、AIが幹事します。URLを送るだけ。",
   inLanguage: "ja",

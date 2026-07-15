@@ -3,7 +3,7 @@ import LoginForm from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
   title: "ログイン",
-  description: "Kanjiiにログインして、AIによる幹事代行サービスをご利用ください。",
+  description: "幹事ラボにログインして、AIによる幹事代行サービスをご利用ください。",
 };
 
 export default function LoginPage() {

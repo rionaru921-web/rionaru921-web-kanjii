@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Kanjii - あらゆる集まりを、AIが幹事します";
+export const alt = "幹事ラボ - あらゆる集まりを、AIが幹事します";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -31,14 +31,14 @@ export default async function OGImage() {
       >
         <div
           style={{
-            fontSize: 120,
+            fontSize: 100,
             fontWeight: 700,
             color: "#C4633F",
             letterSpacing: "-0.02em",
             fontFamily: "serif",
           }}
         >
-          Kanjii
+          幹事ラボ
         </div>
         <div
           style={{
