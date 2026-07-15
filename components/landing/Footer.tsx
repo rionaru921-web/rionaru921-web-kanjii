@@ -81,6 +81,16 @@ export default function Footer() {
 
         <HotpepperAttribution />
 
+        <div className="text-center">
+          <a
+            href="mailto:steplife.contact@gmail.com"
+            className="text-xs text-ink-secondary hover:text-gold transition-colors"
+          >
+            お問い合わせ: steplife.contact@gmail.com
+          </a>
+          <p className="mt-1 text-xs text-ink-muted">ご意見・不具合報告はこちら</p>
+        </div>
+
         <p className="text-center text-xs text-ink-muted">
           © 2026 Kanjii. All rights reserved.
         </p>

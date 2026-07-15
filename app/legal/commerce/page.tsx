@@ -45,6 +45,9 @@ export default function CommercePage() {
       <p className="text-xs text-ink-muted mt-10">
         ※ Premium機能は現在準備中です。正式提供の際には、価格・支払方法等の詳細を本ページにて更新いたします。
       </p>
+      <p className="text-xs text-ink-muted mt-4">
+        本表記に関するお問い合わせ先: リオ（steplife.contact@gmail.com）
+      </p>
     </LegalContent>
   );
 }

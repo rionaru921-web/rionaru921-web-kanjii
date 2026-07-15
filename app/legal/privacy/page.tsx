@@ -202,6 +202,9 @@ export default function PrivacyPage() {
       </section>
 
       <p className="text-xs text-ink-muted mt-10">制定日: 2026年7月13日</p>
+      <p className="text-xs text-ink-muted">
+        本ポリシーに関するお問い合わせ先: リオ（steplife.contact@gmail.com）
+      </p>
     </LegalContent>
   );
 }
