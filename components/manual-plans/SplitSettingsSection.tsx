@@ -10,6 +10,7 @@ import {
   type TierLevel,
   type OrganizerDiscount,
 } from "@/lib/manual-plans/split-types";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 
 export interface SplitPreviewMember {
   name: string;
@@ -50,22 +51,17 @@ export default function SplitSettingsSection({
     <div className="flex flex-col gap-3">
       <div>
         <label className="block text-sm font-medium text-ink">割り方</label>
-        <div className="mt-1.5 flex gap-2">
-          {(["equal", "tiered"] as SplitMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => onSplitModeChange(mode)}
-              disabled={disabled}
-              className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold border transition-colors disabled:opacity-50 ${
-                splitMode === mode
-                  ? "bg-gold-gradient border-transparent text-white"
-                  : "border-gold/15 text-ink-secondary hover:border-gold/30"
-              }`}
-            >
-              {SPLIT_MODE_LABELS[mode]}
-            </button>
-          ))}
+        <div className="mt-1.5">
+          <SegmentedControl
+            aria-label="割り方"
+            options={(["equal", "tiered"] as SplitMode[]).map((mode) => ({
+              value: mode,
+              label: SPLIT_MODE_LABELS[mode],
+            }))}
+            value={splitMode}
+            onChange={onSplitModeChange}
+            disabled={disabled}
+          />
         </div>
       </div>
 
@@ -80,22 +76,17 @@ export default function SplitSettingsSection({
           >
             <div>
               <label className="block text-sm font-medium text-ink">端数の丸め単位</label>
-              <div className="mt-1.5 flex gap-2">
-                {ROUNDING_UNITS.map((unit) => (
-                  <button
-                    key={unit}
-                    type="button"
-                    onClick={() => onRoundingUnitChange(unit)}
-                    disabled={disabled}
-                    className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold border transition-colors disabled:opacity-50 ${
-                      roundingUnit === unit
-                        ? "bg-gold-gradient border-transparent text-white"
-                        : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                    }`}
-                  >
-                    {unit}円
-                  </button>
-                ))}
+              <div className="mt-1.5">
+                <SegmentedControl
+                  aria-label="端数の丸め単位"
+                  options={ROUNDING_UNITS.map((unit) => ({
+                    value: String(unit),
+                    label: `${unit}円`,
+                  }))}
+                  value={String(roundingUnit)}
+                  onChange={(v) => onRoundingUnitChange(Number(v) as RoundingUnit)}
+                  disabled={disabled}
+                />
               </div>
             </div>
 

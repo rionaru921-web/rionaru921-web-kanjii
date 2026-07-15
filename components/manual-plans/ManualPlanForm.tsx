@@ -36,7 +36,9 @@ import VenueInput, { type VenueValue } from "./VenueInput";
 import FeeSection from "./FeeSection";
 import TemplateChips from "@/components/plan-form/TemplateChips";
 import MizuhikiDivider from "@/components/shared/MizuhikiDivider";
-import SectionCompleteBadge from "./SectionCompleteBadge";
+import NumberedSectionHeader from "@/components/plan-form/NumberedSectionHeader";
+import SegmentedControl from "@/components/ui/SegmentedControl";
+import PlanPreviewCard from "@/components/plan-form/PlanPreviewCard";
 
 interface MemberInput {
   name: string;
@@ -59,17 +61,19 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-ink";
 
 function FormSection({
+  number,
   title,
+  subtitle,
   icon: Icon,
   defaultOpen = true,
-  emphasized = false,
   complete = false,
   children,
 }: {
+  number: number;
   title: string;
+  subtitle?: string;
   icon: LucideIcon;
   defaultOpen?: boolean;
-  emphasized?: boolean;
   complete?: boolean;
   children: ReactNode;
 }) {
@@ -85,23 +89,11 @@ function FormSection({
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between gap-3 px-6 py-4"
       >
-        <span className="flex items-center gap-3 font-serif font-bold text-ink">
-          <span
-            className={`flex shrink-0 items-center justify-center rounded-full ${
-              emphasized ? "h-12 w-12 bg-gold/10" : "h-7 w-7"
-            }`}
-          >
-            <Icon size={emphasized ? 32 : 16} className="text-gold" />
-          </span>
-          {title}
-        </span>
-        <span className="flex items-center gap-2">
-          <SectionCompleteBadge filled={complete} />
-          <ChevronDown
-            size={18}
-            className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </span>
+        <NumberedSectionHeader number={number} icon={Icon} title={title} subtitle={subtitle} filled={complete} />
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       <AnimatePresence initial={false}>
         {open && (
@@ -300,8 +292,15 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         />
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 pb-24 sm:pb-0">
-      <FormSection title="基本情報" icon={CalendarDays} emphasized complete={title.trim() !== ""}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <form onSubmit={handleSubmit} className="lg:col-span-7 flex flex-col gap-4 pb-44 sm:pb-0">
+      <FormSection
+        number={1}
+        title="基本情報"
+        subtitle="イベント名や日時など"
+        icon={CalendarDays}
+        complete={title.trim() !== ""}
+      >
         <div>
           <label className={labelClass}>タイトル</label>
           <input
@@ -346,7 +345,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         </div>
       </FormSection>
 
-      <FormSection title="場所" icon={MapPin} emphasized complete={venue.venueName.trim() !== ""}>
+      <FormSection
+        number={2}
+        title="場所"
+        subtitle="会場やお店の情報"
+        icon={MapPin}
+        complete={venue.venueName.trim() !== ""}
+      >
         <VenueInput value={venue} onChange={handleVenueChange} disabled={saving} />
         {venueHint && (
           <p className="rounded-xl bg-gold/5 border border-gold/15 px-4 py-2.5 text-xs text-ink-secondary">
@@ -355,7 +360,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         )}
       </FormSection>
 
-      <FormSection title="予算・集金" icon={Wallet} emphasized complete={feeAmount.trim() !== ""}>
+      <FormSection
+        number={3}
+        title="予算・集金"
+        subtitle="金額・割り勘・支払い方法"
+        icon={Wallet}
+        complete={feeAmount.trim() !== ""}
+      >
         <FeeSection
           feeAmount={feeAmount}
           onFeeAmountChange={setFeeAmount}
@@ -381,7 +392,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         />
       </FormSection>
 
-      <FormSection title="メンバー" icon={UsersIcon}>
+      <FormSection
+        number={4}
+        title="メンバー"
+        subtitle="参加者の登録と傾斜設定"
+        icon={UsersIcon}
+        complete={members.some((m) => m.name.trim() !== "")}
+      >
         <div className="flex flex-col gap-3">
           {members.map((member, i) => (
             <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
@@ -465,23 +482,17 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                     </div>
 
                     {member.tierLevel === "organizer" && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {ORGANIZER_DISCOUNTS.map((discount) => (
-                          <button
-                            key={discount}
-                            type="button"
-                            onClick={() => updateMember(i, { organizerDiscount: discount })}
-                            disabled={saving}
-                            className={`rounded-lg px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
-                              member.organizerDiscount === discount
-                                ? "bg-gold-gradient border-transparent text-white"
-                                : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                            }`}
-                          >
-                            {ORGANIZER_DISCOUNT_LABELS[discount]}
-                          </button>
-                        ))}
-                      </div>
+                      <SegmentedControl
+                        aria-label="幹事枠割引"
+                        size="sm"
+                        options={ORGANIZER_DISCOUNTS.map((discount) => ({
+                          value: discount,
+                          label: ORGANIZER_DISCOUNT_LABELS[discount],
+                        }))}
+                        value={member.organizerDiscount ?? "none"}
+                        onChange={(discount) => updateMember(i, { organizerDiscount: discount })}
+                        disabled={saving}
+                      />
                     )}
 
                     <div className="flex items-center gap-2">
@@ -541,7 +552,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         </button>
       </FormSection>
 
-      <FormSection title="メモ" icon={FileText} defaultOpen={false}>
+      <FormSection
+        number={5}
+        title="メモ"
+        subtitle="自由記入欄(任意)"
+        icon={FileText}
+        defaultOpen={false}
+      >
         <div>
           <label className={labelClass}>自由メモ</label>
           <textarea
@@ -571,7 +588,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         </div>
       )}
 
-      <div className="fixed sm:static inset-x-0 bottom-0 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 pr-24 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pr-0 sm:backdrop-blur-none">
+      <div className="fixed sm:static inset-x-0 bottom-24 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
         <button
           type="button"
           onClick={() => router.back()}
@@ -590,6 +607,28 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         </button>
       </div>
       </form>
+
+      <aside className="hidden lg:block lg:col-span-5">
+        <div className="sticky top-6">
+          <PlanPreviewCard
+            title={title}
+            eventDate={eventDate}
+            venueName={venue.venueName}
+            feeAmount={feeAmount}
+            splitMode={splitMode}
+            roundingUnit={roundingUnit}
+            members={members
+              .filter((m) => m.name.trim())
+              .map((m) => ({
+                name: m.name,
+                tierLevel: m.tierLevel,
+                weightOverride: m.weightOverride,
+                organizerDiscount: m.organizerDiscount,
+              }))}
+          />
+        </div>
+      </aside>
+      </div>
     </>
   );
 }

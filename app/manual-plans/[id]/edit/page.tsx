@@ -40,7 +40,7 @@ export default async function EditManualPlanPage({ params }: { params: { id: str
   if (!plan) notFound();
 
   return (
-    <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto">
+    <main className="px-4 sm:px-8 pt-8 sm:pt-10 pb-28 max-w-2xl lg:max-w-6xl mx-auto">
       <h1 className="font-serif font-bold text-2xl text-ink mb-1">プランを編集</h1>
       <p className="text-sm text-ink-secondary mb-6">内容を変更して保存できます</p>
       <ManualPlanForm
