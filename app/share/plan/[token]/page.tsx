@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, MessageCircle, CheckCircle2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
@@ -49,6 +50,35 @@ function buildGoogleCalendarUrl(plan: ManualPlan): string {
   });
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { token: string };
+}): Promise<Metadata> {
+  const supabase = createAdminClient();
+  const { data: plan } = await supabase
+    .from("manual_plans")
+    .select("title, venue_name")
+    .eq("share_token", params.token)
+    .maybeSingle();
+
+  if (!plan) {
+    return { title: "プランが見つかりません" };
+  }
+
+  const title = plan.title;
+  const description = plan.venue_name
+    ? `${plan.venue_name}での集まりに招待されています`
+    : "集まりに招待されています";
+
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 export default async function SharePlanPage({ params }: { params: { token: string } }) {
