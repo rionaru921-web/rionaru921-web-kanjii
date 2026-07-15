@@ -47,9 +47,9 @@ export async function POST(req: NextRequest) {
   const { error } = await resend.emails.send({
     // Falls back to Resend's shared sandbox sender when no verified domain
     // is configured yet, so feedback still delivers in early deployments.
-    from: process.env.RESEND_FROM_EMAIL || "Kanjii <onboarding@resend.dev>",
+    from: process.env.RESEND_FROM_EMAIL || "幹事ラボ <onboarding@resend.dev>",
     to: FEEDBACK_TO_EMAIL,
-    subject: `[Kanjii] 新しいフィードバック(★${rating})`,
+    subject: `[幹事ラボ] 新しいフィードバック(★${rating})`,
     text: [
       `送信者メールアドレス: ${user.email ?? "不明"}`,
       `表示名: ${profile?.display_name ?? "未設定"}`,

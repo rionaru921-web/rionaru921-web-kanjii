@@ -52,10 +52,10 @@ export async function POST(req: NextRequest) {
   const sentAt = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
   const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || "Kanjii <onboarding@resend.dev>",
+    from: process.env.RESEND_FROM_EMAIL || "幹事ラボ <onboarding@resend.dev>",
     to: FEEDBACK_TO_EMAIL,
     replyTo: email || undefined,
-    subject: `[Kanjii Feedback] ${CATEGORY_LABELS[category]}`,
+    subject: `[幹事ラボ Feedback] ${CATEGORY_LABELS[category]}`,
     text: [
       `カテゴリ: ${CATEGORY_LABELS[category]}`,
       `返信先メールアドレス: ${email || "未入力"}`,
