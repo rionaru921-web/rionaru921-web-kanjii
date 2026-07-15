@@ -6,6 +6,8 @@ import { sumFees } from "@/lib/manual-plans/fee-parser";
 import type { FeeBreakdownItem } from "@/lib/manual-plans/types";
 import type { SplitMode, RoundingUnit } from "@/lib/manual-plans/split-types";
 import SplitSettingsSection, { type SplitPreviewMember } from "./SplitSettingsSection";
+import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 
 interface FeeSectionProps {
   feeAmount: string;
@@ -179,17 +181,13 @@ export default function FeeSection({
 
       <div>
         <label className={labelClass}>支払い期限</label>
-        <input
-          type="datetime-local"
-          step={300}
-          value={paymentDeadline}
-          onChange={(e) => onPaymentDeadlineChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.preventDefault();
-          }}
-          disabled={disabled}
-          className={inputClass}
-        />
+        <div className="mt-1.5">
+          <CalendarPopover
+            value={dateTimeLocalToDate(paymentDeadline)}
+            onChange={(d) => onPaymentDeadlineChange(dateToDateTimeLocal(d))}
+            disabled={disabled}
+          />
+        </div>
       </div>
     </>
   );

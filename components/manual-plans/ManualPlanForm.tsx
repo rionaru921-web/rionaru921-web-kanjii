@@ -39,6 +39,8 @@ import MizuhikiDivider from "@/components/shared/MizuhikiDivider";
 import NumberedSectionHeader from "@/components/plan-form/NumberedSectionHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import PlanPreviewCard from "@/components/plan-form/PlanPreviewCard";
+import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 
 interface MemberInput {
   name: string;
@@ -316,31 +318,23 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>開始日時</label>
-            <input
-              type="datetime-local"
-              step={300}
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") e.preventDefault();
-              }}
-              disabled={saving}
-              className={inputClass}
-            />
+            <div className="mt-1.5">
+              <CalendarPopover
+                value={dateTimeLocalToDate(eventDate)}
+                onChange={(d) => setEventDate(dateToDateTimeLocal(d))}
+                disabled={saving}
+              />
+            </div>
           </div>
           <div>
             <label className={labelClass}>終了日時</label>
-            <input
-              type="datetime-local"
-              step={300}
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") e.preventDefault();
-              }}
-              disabled={saving}
-              className={inputClass}
-            />
+            <div className="mt-1.5">
+              <CalendarPopover
+                value={dateTimeLocalToDate(endDate)}
+                onChange={(d) => setEndDate(dateToDateTimeLocal(d))}
+                disabled={saving}
+              />
+            </div>
           </div>
         </div>
       </FormSection>
