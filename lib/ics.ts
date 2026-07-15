@@ -28,7 +28,7 @@ export function generateIcs(event: IcsEvent): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Kanjii//JP",
+    "PRODID:-//KanjiLabo//JP",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

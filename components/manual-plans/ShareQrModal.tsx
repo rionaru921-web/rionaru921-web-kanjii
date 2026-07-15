@@ -84,7 +84,7 @@ export default function ShareQrModal({
             {dataUrl && (
               <a
                 href={dataUrl}
-                download={`Kanjii_${title}_QR.png`}
+                download={`KanjiLabo_${title}_QR.png`}
                 className="flex items-center justify-center gap-2 w-full rounded-xl bg-gold-gradient py-2.5 text-sm font-semibold text-white shadow-gold transition-opacity hover:opacity-90"
               >
                 <Download size={16} />

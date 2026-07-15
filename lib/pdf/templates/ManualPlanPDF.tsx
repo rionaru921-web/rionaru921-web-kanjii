@@ -55,10 +55,10 @@ export function ManualPlanPDF({
   const timelineLabel = TIMELINE_LABELS[getTimelineStatus({ event_date: eventDate, end_date: endDate })];
 
   return (
-    <Document title={`Kanjii_${title}`}>
+    <Document title={`KanjiLabo_${title}`}>
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>Kanjii</Text>
+          <Text style={pdfStyles.brand}>幹事ラボ</Text>
           <Text style={pdfStyles.headerDate}>{timelineLabel}</Text>
         </View>
 
@@ -175,7 +175,7 @@ export function ManualPlanPDF({
         </View>
 
         <View style={pdfStyles.footer} fixed>
-          <Text style={pdfStyles.footerText}>Powered by Kanjii</Text>
+          <Text style={pdfStyles.footerText}>Powered by 幹事ラボ</Text>
           <Text style={pdfStyles.footerText}>https://kanjii.app</Text>
         </View>
       </Page>

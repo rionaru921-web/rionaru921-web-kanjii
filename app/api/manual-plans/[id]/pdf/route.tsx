@@ -94,7 +94,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="Kanjii_${encodeURIComponent(typedPlan.title)}.pdf"`,
+      "Content-Disposition": `attachment; filename="KanjiLabo_${encodeURIComponent(typedPlan.title)}.pdf"`,
       // "private" (not "public"): this PDF is gated by an auth check above,
       // so a shared/CDN cache must never serve one user's cached response
       // to another user. "private" still lets the requesting browser skip

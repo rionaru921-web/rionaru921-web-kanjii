@@ -30,11 +30,11 @@ export function TravelPDF({
   payment,
 }: TravelPDFProps) {
   return (
-    <Document title={`Kanjii_${title}`}>
+    <Document title={`KanjiLabo_${title}`}>
       {/* Page 1: overview */}
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>Kanjii</Text>
+          <Text style={pdfStyles.brand}>幹事ラボ</Text>
           <Text style={pdfStyles.headerDate}>{dateRange}</Text>
         </View>
 
@@ -78,7 +78,7 @@ export function TravelPDF({
         )}
 
         <View style={pdfStyles.footer} fixed>
-          <Text style={pdfStyles.footerText}>Powered by Kanjii</Text>
+          <Text style={pdfStyles.footerText}>Powered by 幹事ラボ</Text>
           <Text style={pdfStyles.footerText}>https://kanjii.app</Text>
         </View>
       </Page>
@@ -86,7 +86,7 @@ export function TravelPDF({
       {/* Page 2+: itinerary (auto-flows to further pages if it overflows) */}
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>Kanjii</Text>
+          <Text style={pdfStyles.brand}>幹事ラボ</Text>
           <Text style={pdfStyles.headerDate}>{title}</Text>
         </View>
         <Text style={pdfStyles.sectionLabel}>【日程表】</Text>
@@ -109,7 +109,7 @@ export function TravelPDF({
           </View>
         ))}
         <View style={pdfStyles.footer} fixed>
-          <Text style={pdfStyles.footerText}>Powered by Kanjii</Text>
+          <Text style={pdfStyles.footerText}>Powered by 幹事ラボ</Text>
           <Text style={pdfStyles.footerText}>https://kanjii.app</Text>
         </View>
       </Page>
@@ -117,7 +117,7 @@ export function TravelPDF({
       {/* Final page: cost breakdown detail */}
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>Kanjii</Text>
+          <Text style={pdfStyles.brand}>幹事ラボ</Text>
           <Text style={pdfStyles.headerDate}>{title}</Text>
         </View>
         <Text style={pdfStyles.sectionLabel}>【費用分担詳細】</Text>
@@ -145,7 +145,7 @@ export function TravelPDF({
           </View>
         </View>
         <View style={pdfStyles.footer} fixed>
-          <Text style={pdfStyles.footerText}>Powered by Kanjii</Text>
+          <Text style={pdfStyles.footerText}>Powered by 幹事ラボ</Text>
           <Text style={pdfStyles.footerText}>https://kanjii.app</Text>
         </View>
       </Page>

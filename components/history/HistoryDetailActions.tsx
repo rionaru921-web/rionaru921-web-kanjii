@@ -20,7 +20,7 @@ export default function HistoryDetailActions({ record }: { record: HistoryRecord
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const filename = `Kanjii_${record.title}_${record.created_at.slice(0, 10)}.pdf`;
+  const filename = `KanjiLabo_${record.title}_${record.created_at.slice(0, 10)}.pdf`;
 
   async function handleDelete() {
     if (!confirmDelete) {

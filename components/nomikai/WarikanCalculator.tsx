@@ -320,7 +320,7 @@ export default function WarikanCalculator({
             <PDFPreviewButton
               kind="nomikai"
               data={pdfData}
-              filename={`Kanjii_${title}_${new Date().toISOString().slice(0, 10)}.pdf`}
+              filename={`KanjiLabo_${title}_${new Date().toISOString().slice(0, 10)}.pdf`}
             />
             <button
               type="button"
