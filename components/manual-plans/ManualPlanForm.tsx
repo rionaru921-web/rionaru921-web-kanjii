@@ -19,6 +19,19 @@ import type { FeeBreakdownItem, ManualPlan, ManualPlanMember, MemberRole } from 
 import { ROLE_LABELS } from "@/lib/manual-plans/format";
 import { toDateTimeLocalValue, fromDateTimeLocalValue } from "@/lib/date/kanjii-time";
 import { PLAN_TEMPLATES, formatLocalDateTimeInput, type PlanTemplate } from "@/lib/plan-templates";
+import { resolveMemberWeight } from "@/lib/manual-plans/calculate-split";
+import {
+  TIER_LEVELS,
+  TIER_LABELS,
+  ORGANIZER_DISCOUNTS,
+  ORGANIZER_DISCOUNT_LABELS,
+  DEFAULT_TIER_LEVEL,
+  DEFAULT_ROUNDING_UNIT,
+  type SplitMode,
+  type RoundingUnit,
+  type TierLevel,
+  type OrganizerDiscount,
+} from "@/lib/manual-plans/split-types";
 import VenueInput, { type VenueValue } from "./VenueInput";
 import FeeSection from "./FeeSection";
 import TemplateChips from "@/components/plan-form/TemplateChips";
@@ -29,6 +42,9 @@ interface MemberInput {
   name: string;
   email: string;
   role: MemberRole;
+  tierLevel: TierLevel;
+  weightOverride: number | null;
+  organizerDiscount: OrganizerDiscount | null;
 }
 
 interface ManualPlanFormProps {
@@ -132,10 +148,31 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const [memo, setMemo] = useState(initialData?.memo ?? "");
   const [dietaryNotes, setDietaryNotes] = useState(initialData?.dietary_notes ?? "");
 
+  const [splitMode, setSplitMode] = useState<SplitMode>(initialData?.split_mode ?? "equal");
+  const [roundingUnit, setRoundingUnit] = useState<RoundingUnit>(
+    initialData?.rounding_unit ?? DEFAULT_ROUNDING_UNIT
+  );
+
   const [members, setMembers] = useState<MemberInput[]>(
     initialMembers && initialMembers.length > 0
-      ? initialMembers.map((m) => ({ name: m.name, email: m.email ?? "", role: m.role }))
-      : [{ name: "", email: "", role: "participant" }]
+      ? initialMembers.map((m) => ({
+          name: m.name,
+          email: m.email ?? "",
+          role: m.role,
+          tierLevel: m.tier_level,
+          weightOverride: m.weight_override,
+          organizerDiscount: m.organizer_discount,
+        }))
+      : [
+          {
+            name: "",
+            email: "",
+            role: "participant",
+            tierLevel: DEFAULT_TIER_LEVEL,
+            weightOverride: null,
+            organizerDiscount: null,
+          },
+        ]
   );
 
   const [saving, setSaving] = useState(false);
@@ -170,19 +207,27 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     );
   }
 
-  function updateMember(index: number, field: keyof MemberInput, value: string) {
-    setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, [field]: value } : m)));
+  function updateMember(index: number, patch: Partial<MemberInput>) {
+    setMembers((prev) => prev.map((m, i) => (i === index ? { ...m, ...patch } : m)));
   }
 
   function addMember() {
-    setMembers((prev) => [...prev, { name: "", email: "", role: "participant" }]);
+    setMembers((prev) => [
+      ...prev,
+      {
+        name: "",
+        email: "",
+        role: "participant",
+        tierLevel: DEFAULT_TIER_LEVEL,
+        weightOverride: null,
+        organizerDiscount: null,
+      },
+    ]);
   }
 
   function removeMember(index: number) {
     setMembers((prev) => prev.filter((_, i) => i !== index));
   }
-
-  const filledMemberCount = members.filter((m) => m.name.trim()).length;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -211,9 +256,18 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         paymentDeadline: fromDateTimeLocalValue(paymentDeadline),
         memo: memo.trim() || null,
         dietaryNotes: dietaryNotes.trim() || null,
+        splitMode,
+        roundingUnit,
         members: members
           .filter((m) => m.name.trim())
-          .map((m) => ({ name: m.name.trim(), email: m.email.trim() || null, role: m.role })),
+          .map((m) => ({
+            name: m.name.trim(),
+            email: m.email.trim() || null,
+            role: m.role,
+            tierLevel: m.tierLevel,
+            weightOverride: m.weightOverride,
+            organizerDiscount: m.tierLevel === "organizer" ? m.organizerDiscount : null,
+          })),
       };
 
       const res = await fetch(
@@ -311,7 +365,18 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           onTogglePaymentMethod={togglePaymentMethod}
           paymentDeadline={paymentDeadline}
           onPaymentDeadlineChange={setPaymentDeadline}
-          memberCount={filledMemberCount}
+          splitMode={splitMode}
+          onSplitModeChange={setSplitMode}
+          roundingUnit={roundingUnit}
+          onRoundingUnitChange={setRoundingUnit}
+          members={members
+            .filter((m) => m.name.trim())
+            .map((m) => ({
+              name: m.name,
+              tierLevel: m.tierLevel,
+              weightOverride: m.weightOverride,
+              organizerDiscount: m.organizerDiscount,
+            }))}
           disabled={saving}
         />
       </FormSection>
@@ -325,7 +390,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                   <input
                     type="text"
                     value={member.name}
-                    onChange={(e) => updateMember(i, "name", e.target.value)}
+                    onChange={(e) => updateMember(i, { name: e.target.value })}
                     disabled={saving}
                     className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                     placeholder="名前"
@@ -333,7 +398,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                   <input
                     type="email"
                     value={member.email}
-                    onChange={(e) => updateMember(i, "email", e.target.value)}
+                    onChange={(e) => updateMember(i, { email: e.target.value })}
                     disabled={saving}
                     className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                     placeholder="メール(任意)"
@@ -354,7 +419,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                   <button
                     key={role}
                     type="button"
-                    onClick={() => updateMember(i, "role", role)}
+                    onClick={() => updateMember(i, { role })}
                     disabled={saving}
                     className={`rounded-xl px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50 ${
                       member.role === role
@@ -366,6 +431,102 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                   </button>
                 ))}
               </div>
+
+              <AnimatePresence initial={false}>
+                {splitMode === "tiered" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden flex flex-col gap-2"
+                  >
+                    <div className="flex flex-wrap gap-1.5">
+                      {TIER_LEVELS.map((tier) => (
+                        <button
+                          key={tier}
+                          type="button"
+                          onClick={() =>
+                            updateMember(i, {
+                              tierLevel: tier,
+                              ...(tier !== "organizer" ? { organizerDiscount: null } : {}),
+                            })
+                          }
+                          disabled={saving}
+                          className={`rounded-lg px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
+                            member.tierLevel === tier
+                              ? "bg-gold-gradient border-transparent text-white"
+                              : "border-gold/15 text-ink-secondary hover:border-gold/30"
+                          }`}
+                        >
+                          {TIER_LABELS[tier]}
+                        </button>
+                      ))}
+                    </div>
+
+                    {member.tierLevel === "organizer" && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {ORGANIZER_DISCOUNTS.map((discount) => (
+                          <button
+                            key={discount}
+                            type="button"
+                            onClick={() => updateMember(i, { organizerDiscount: discount })}
+                            disabled={saving}
+                            className={`rounded-lg px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
+                              member.organizerDiscount === discount
+                                ? "bg-gold-gradient border-transparent text-white"
+                                : "border-gold/15 text-ink-secondary hover:border-gold/30"
+                            }`}
+                          >
+                            {ORGANIZER_DISCOUNT_LABELS[discount]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-ink-muted shrink-0">重み調整</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={3}
+                        step={0.1}
+                        value={
+                          member.weightOverride ??
+                          resolveMemberWeight({
+                            tierLevel: member.tierLevel,
+                            weightOverride: null,
+                            organizerDiscount: member.organizerDiscount,
+                          })
+                        }
+                        onChange={(e) => updateMember(i, { weightOverride: Number(e.target.value) })}
+                        disabled={saving}
+                        className="flex-1 accent-gold h-1.5"
+                      />
+                      <span className="text-[11px] font-display-num text-gold w-8 text-right shrink-0">
+                        {(
+                          member.weightOverride ??
+                          resolveMemberWeight({
+                            tierLevel: member.tierLevel,
+                            weightOverride: null,
+                            organizerDiscount: member.organizerDiscount,
+                          })
+                        ).toFixed(1)}
+                      </span>
+                      {member.weightOverride != null && (
+                        <button
+                          type="button"
+                          onClick={() => updateMember(i, { weightOverride: null })}
+                          disabled={saving}
+                          className="text-[11px] text-ink-muted underline shrink-0"
+                        >
+                          リセット
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ))}
         </div>

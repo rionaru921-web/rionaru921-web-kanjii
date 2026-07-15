@@ -7,6 +7,7 @@ import {
   formatDateRange,
 } from "@/lib/manual-plans/format";
 import { getTimelineStatus, type AttendanceStatus } from "@/lib/manual-plans/types";
+import type { SplitMode } from "@/lib/manual-plans/split-types";
 
 const TIMELINE_LABELS = {
   upcoming: "予定",
@@ -27,7 +28,8 @@ export interface ManualPlanPDFProps {
   paymentDeadline: string | null;
   memo: string | null;
   dietaryNotes: string | null;
-  members: Array<{ name: string; attendanceStatus: AttendanceStatus }>;
+  splitMode: SplitMode;
+  members: Array<{ name: string; attendanceStatus: AttendanceStatus; amount?: number }>;
   shareUrl: string;
   qrDataUrl: string;
 }
@@ -44,6 +46,7 @@ export function ManualPlanPDF({
   paymentDeadline,
   memo,
   dietaryNotes,
+  splitMode,
   members,
   shareUrl,
   qrDataUrl,
@@ -132,6 +135,11 @@ export function ManualPlanPDF({
                   <Text style={{ fontSize: 9, color: COLORS.inkSecondary }}>
                     {ATTENDANCE_LABELS[m.attendanceStatus]}
                   </Text>
+                  {splitMode === "tiered" && m.amount != null && (
+                    <Text style={{ fontSize: 9, color: COLORS.goldDeep, fontFamily: "Noto Serif JP" }}>
+                      {yen(m.amount)}
+                    </Text>
+                  )}
                 </View>
               ))}
             </View>

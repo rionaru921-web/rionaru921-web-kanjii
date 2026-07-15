@@ -16,9 +16,10 @@ import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import MemberList from "@/components/manual-plans/MemberList";
 import ReceiptsSection from "@/components/manual-plans/ReceiptsSection";
-import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
+import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee, getPayingMembers } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { calculateAttendanceRate } from "@/lib/manual-plans/attendance-stats";
+import { calculateSplit, type SplitMemberInput } from "@/lib/manual-plans/calculate-split";
 import { getTimelineStatus, isCompletedPlan } from "@/lib/manual-plans/types";
 import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
 import { yen } from "@/lib/pdf/components";
@@ -75,9 +76,27 @@ export default async function ManualPlanDetailPage({
 
   const attendanceRate = calculateAttendanceRate(attendanceCounts.attending, typedMembers.length);
   const isCompleted = isCompletedPlan(typedPlan);
-  const payingMemberCount = attendanceCounts.attending > 0 ? attendanceCounts.attending : typedMembers.length;
+  const payingMembers = getPayingMembers(typedMembers);
+  const payingMemberCount = payingMembers.length;
   const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
   const mapQuery = [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim();
+
+  const splitResults =
+    typedPlan.split_mode === "tiered"
+      ? calculateSplit(
+          typedPlan.fee_amount,
+          payingMembers.map(
+            (m): SplitMemberInput => ({
+              id: m.id,
+              tierLevel: m.tier_level,
+              weightOverride: m.weight_override,
+              organizerDiscount: m.organizer_discount,
+            })
+          ),
+          typedPlan.rounding_unit
+        )
+      : null;
+  const splitAmountById = new Map((splitResults ?? []).map((r) => [r.id, r.amount]));
 
   // Sanitized shape handed to the Client Component below — never the raw
   // row with guest_secret (see the comment on typedMembers above).
@@ -87,6 +106,7 @@ export default async function ManualPlanDetailPage({
     role: m.role,
     attendance_status: m.attendance_status,
     hasGuestSecret: m.guest_secret != null,
+    amount: typedPlan.split_mode === "tiered" ? splitAmountById.get(m.id) : undefined,
   }));
 
   return (
@@ -125,7 +145,7 @@ export default async function ManualPlanDetailPage({
         </h1>
       </div>
 
-      <PlanDetailActions plan={typedPlan} isCompleted={isCompleted} />
+      <PlanDetailActions plan={typedPlan} members={typedMembers} isCompleted={isCompleted} />
 
       <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
         <CalendarDays className="text-gold shrink-0" size={18} />
@@ -207,12 +227,27 @@ export default async function ManualPlanDetailPage({
                 ))}
               </ul>
             )}
-            {perPerson != null && (
+            {typedPlan.split_mode === "equal" && perPerson != null && (
               <div className="mt-3 rounded-xl bg-gold/5 border border-gold/15 px-4 py-3">
                 <p className="text-xs text-ink-muted">💡 参加人数: {payingMemberCount}人</p>
                 <p className="text-sm font-semibold text-ink mt-0.5">
                   1人あたり: <span className="font-display-num text-gold">{yen(perPerson)}</span>
                 </p>
+              </div>
+            )}
+            {typedPlan.split_mode === "tiered" && payingMembers.length > 0 && (
+              <div className="mt-3 rounded-xl bg-gold/5 border border-gold/15 px-4 py-3">
+                <p className="text-xs text-ink-muted mb-1.5">💡 参加人数: {payingMembers.length}人(傾斜割り)</p>
+                <ul className="flex flex-col gap-1">
+                  {payingMembers.map((m) => (
+                    <li key={m.id} className="flex items-center justify-between text-sm text-ink">
+                      <span className="truncate">{m.name}</span>
+                      <span className="font-display-num text-gold shrink-0">
+                        {yen(splitAmountById.get(m.id) ?? 0)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             {typedPlan.payment_methods.length > 0 && (

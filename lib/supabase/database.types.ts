@@ -48,9 +48,12 @@ export type Database = {
           id: string
           name: string
           note: string | null
+          organizer_discount: string | null
           plan_id: string
           role: string
+          tier_level: string
           updated_at: string
+          weight_override: number | null
         }
         Insert: {
           attendance_status?: string
@@ -60,9 +63,12 @@ export type Database = {
           id?: string
           name: string
           note?: string | null
+          organizer_discount?: string | null
           plan_id: string
           role?: string
+          tier_level?: string
           updated_at?: string
+          weight_override?: number | null
         }
         Update: {
           attendance_status?: string
@@ -72,9 +78,12 @@ export type Database = {
           id?: string
           name?: string
           note?: string | null
+          organizer_discount?: string | null
           plan_id?: string
           role?: string
+          tier_level?: string
           updated_at?: string
+          weight_override?: number | null
         }
         Relationships: [
           {
@@ -99,7 +108,9 @@ export type Database = {
           memo: string | null
           payment_deadline: string | null
           payment_methods: Json
+          rounding_unit: number
           share_token: string
+          split_mode: string
           status: string
           title: string
           updated_at: string
@@ -124,7 +135,9 @@ export type Database = {
           memo?: string | null
           payment_deadline?: string | null
           payment_methods?: Json
+          rounding_unit?: number
           share_token?: string
+          split_mode?: string
           status?: string
           title: string
           updated_at?: string
@@ -149,7 +162,9 @@ export type Database = {
           memo?: string | null
           payment_deadline?: string | null
           payment_methods?: Json
+          rounding_unit?: number
           share_token?: string
+          split_mode?: string
           status?: string
           title?: string
           updated_at?: string

@@ -4,6 +4,8 @@ import { Plus, Trash2 } from "lucide-react";
 import { PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
 import { sumFees } from "@/lib/manual-plans/fee-parser";
 import type { FeeBreakdownItem } from "@/lib/manual-plans/types";
+import type { SplitMode, RoundingUnit } from "@/lib/manual-plans/split-types";
+import SplitSettingsSection, { type SplitPreviewMember } from "./SplitSettingsSection";
 
 interface FeeSectionProps {
   feeAmount: string;
@@ -14,7 +16,11 @@ interface FeeSectionProps {
   onTogglePaymentMethod: (method: string) => void;
   paymentDeadline: string;
   onPaymentDeadlineChange: (value: string) => void;
-  memberCount: number;
+  members: SplitPreviewMember[];
+  splitMode: SplitMode;
+  onSplitModeChange: (mode: SplitMode) => void;
+  roundingUnit: RoundingUnit;
+  onRoundingUnitChange: (unit: RoundingUnit) => void;
   disabled?: boolean;
 }
 
@@ -33,9 +39,14 @@ export default function FeeSection({
   onTogglePaymentMethod,
   paymentDeadline,
   onPaymentDeadlineChange,
-  memberCount,
+  members,
+  splitMode,
+  onSplitModeChange,
+  roundingUnit,
+  onRoundingUnitChange,
   disabled,
 }: FeeSectionProps) {
+  const memberCount = members.length;
   const totalAmount = feeAmount.trim() ? Number(feeAmount) : null;
   const { total: breakdownTotal, undeterminedCount } = sumFees(breakdown.map((item) => item.amount));
   const breakdownMismatch =
@@ -124,7 +135,19 @@ export default function FeeSection({
         )}
       </div>
 
-      {perPerson != null && (
+      {memberCount > 0 && totalAmount != null && totalAmount > 0 && (
+        <SplitSettingsSection
+          splitMode={splitMode}
+          onSplitModeChange={onSplitModeChange}
+          roundingUnit={roundingUnit}
+          onRoundingUnitChange={onRoundingUnitChange}
+          feeAmount={totalAmount}
+          members={members}
+          disabled={disabled}
+        />
+      )}
+
+      {splitMode === "equal" && perPerson != null && (
         <div className="rounded-xl bg-gold/5 border border-gold/15 px-4 py-3">
           <p className="text-xs text-ink-muted">💡 参加人数: {memberCount}人</p>
           <p className="text-sm font-semibold text-ink mt-0.5">

@@ -16,14 +16,23 @@ import {
   CalendarPlus,
   Lock,
 } from "lucide-react";
-import type { ManualPlan } from "@/lib/manual-plans/types";
+import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
+import { buildLineShareText } from "@/lib/manual-plans/format";
 
 // The qrcode dependency pulled in by ShareQrModal is only needed once the
 // user actually opens the QR modal — code-split it out of the main detail
 // page bundle instead of loading it on every visit.
 const ShareQrModal = dynamic(() => import("./ShareQrModal"), { ssr: false });
 
-export default function PlanDetailActions({ plan, isCompleted }: { plan: ManualPlan; isCompleted: boolean }) {
+export default function PlanDetailActions({
+  plan,
+  members,
+  isCompleted,
+}: {
+  plan: ManualPlan;
+  members: ManualPlanMember[];
+  isCompleted: boolean;
+}) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -65,7 +74,7 @@ export default function PlanDetailActions({ plan, isCompleted }: { plan: ManualP
   }
 
   function handleLineShare() {
-    const text = `幹事さんからのお知らせです\n\n${plan.title}\n${shareUrl}`;
+    const text = buildLineShareText(plan, members, shareUrl);
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
     window.open(lineUrl, "_blank");
   }

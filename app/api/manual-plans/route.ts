@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { FeeBreakdownItem, MemberRole } from "@/lib/manual-plans/types";
+import type { SplitMode, RoundingUnit, TierLevel, OrganizerDiscount } from "@/lib/manual-plans/split-types";
 
 interface MemberInput {
   name: string;
   email?: string | null;
   role?: MemberRole;
+  tierLevel?: TierLevel;
+  weightOverride?: number | null;
+  organizerDiscount?: OrganizerDiscount | null;
 }
 
 interface CreateManualPlanBody {
@@ -24,6 +28,8 @@ interface CreateManualPlanBody {
   paymentDeadline?: string | null;
   memo?: string | null;
   dietaryNotes?: string | null;
+  splitMode?: SplitMode;
+  roundingUnit?: RoundingUnit;
   members?: MemberInput[];
 }
 
@@ -61,6 +67,8 @@ export async function POST(req: NextRequest) {
       payment_deadline: body.paymentDeadline ?? null,
       memo: body.memo ?? null,
       dietary_notes: body.dietaryNotes ?? null,
+      split_mode: body.splitMode === "tiered" ? "tiered" : "equal",
+      rounding_unit: body.roundingUnit ?? 100,
     })
     .select("id")
     .single();
@@ -77,6 +85,9 @@ export async function POST(req: NextRequest) {
         name: m.name.trim(),
         email: m.email?.trim() || null,
         role: m.role === "organizer" ? "organizer" : "participant",
+        tier_level: m.tierLevel ?? "peer",
+        weight_override: m.weightOverride ?? null,
+        organizer_discount: m.tierLevel === "organizer" ? (m.organizerDiscount ?? null) : null,
       }))
     );
     if (membersError) {

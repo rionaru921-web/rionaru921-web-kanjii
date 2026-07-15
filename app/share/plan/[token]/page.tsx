@@ -4,7 +4,14 @@ import Logo from "@/components/shared/Logo";
 import GoldButton from "@/components/shared/GoldButton";
 import AttendanceForm from "@/components/share/AttendanceForm";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee } from "@/lib/manual-plans/format";
+import {
+  formatDateRange,
+  PAYMENT_METHOD_LABELS,
+  perPersonFee,
+  getPayingMembers,
+  buildLineShareText,
+} from "@/lib/manual-plans/format";
+import { calculateSplit, type SplitMemberInput } from "@/lib/manual-plans/calculate-split";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
 import { isCompletedPlan } from "@/lib/manual-plans/types";
@@ -44,13 +51,6 @@ function buildGoogleCalendarUrl(plan: ManualPlan): string {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-// Lets an attendee who received this share link forward it to someone else
-// via LINE, without needing to know/copy the URL themselves.
-function buildLineShareUrl(plan: ManualPlan, shareUrl: string): string {
-  const text = `幹事さんからのお知らせです\n\n${plan.title}\n${shareUrl}`;
-  return `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-}
-
 export default async function SharePlanPage({ params }: { params: { token: string } }) {
   const supabase = createAdminClient();
 
@@ -69,7 +69,9 @@ export default async function SharePlanPage({ params }: { params: { token: strin
   const { data: members } = typedPlan
     ? await supabase
         .from("manual_plan_members")
-        .select("id, plan_id, name, email, role, attendance_status, note, created_at, updated_at")
+        .select(
+          "id, plan_id, name, email, role, attendance_status, note, created_at, updated_at, tier_level, weight_override, organizer_discount"
+        )
         .eq("plan_id", typedPlan.id)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -77,7 +79,11 @@ export default async function SharePlanPage({ params }: { params: { token: strin
 
   const gcalUrl = typedPlan ? buildGoogleCalendarUrl(typedPlan) : "";
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
-  const lineUrl = typedPlan ? buildLineShareUrl(typedPlan, `${baseUrl}/share/plan/${params.token}`) : "";
+  const lineUrl = typedPlan
+    ? `https://line.me/R/msg/text/?${encodeURIComponent(
+        buildLineShareText(typedPlan, typedMembers, `${baseUrl}/share/plan/${params.token}`)
+      )}`
+    : "";
   const icsUrl = typedPlan ? `/api/share/plan/${params.token}/ics` : "";
   const mapQuery = typedPlan
     ? [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim()
@@ -85,9 +91,25 @@ export default async function SharePlanPage({ params }: { params: { token: strin
 
   const isCompleted = typedPlan ? isCompletedPlan(typedPlan) : false;
   const organizers = typedMembers.filter((m) => m.role === "organizer");
-  const attendingCount = typedMembers.filter((m) => m.attendance_status === "attending").length;
-  const payingMemberCount = attendingCount > 0 ? attendingCount : typedMembers.length;
+  const payingMembers = getPayingMembers(typedMembers);
+  const payingMemberCount = payingMembers.length;
   const perPerson = typedPlan ? perPersonFee(typedPlan.fee_amount, payingMemberCount) : null;
+  const splitResults =
+    typedPlan && typedPlan.split_mode === "tiered"
+      ? calculateSplit(
+          typedPlan.fee_amount,
+          payingMembers.map(
+            (m): SplitMemberInput => ({
+              id: m.id,
+              tierLevel: m.tier_level,
+              weightOverride: m.weight_override,
+              organizerDiscount: m.organizer_discount,
+            })
+          ),
+          typedPlan.rounding_unit
+        )
+      : null;
+  const splitAmountById = new Map((splitResults ?? []).map((r) => [r.id, r.amount]));
 
   return (
     <div className="min-h-screen ink-wash px-4 py-10 flex flex-col items-center">
@@ -176,11 +198,26 @@ export default async function SharePlanPage({ params }: { params: { token: strin
                       ))}
                     </ul>
                   )}
-                  {perPerson != null && (
+                  {typedPlan.split_mode === "equal" && perPerson != null && (
                     <p className="mt-1.5 text-xs text-ink-secondary">
                       1人あたり <span className="font-semibold text-gold">{yen(perPerson)}</span>({payingMemberCount}
                       人で割り勘)
                     </p>
+                  )}
+                  {typedPlan.split_mode === "tiered" && payingMembers.length > 0 && (
+                    <div className="mt-1.5 rounded-xl bg-gold/5 border border-gold/15 px-3 py-2">
+                      <p className="text-[11px] text-ink-muted mb-1">傾斜割り(一人ずつの金額)</p>
+                      <ul className="flex flex-col gap-0.5">
+                        {payingMembers.map((m) => (
+                          <li key={m.id} className="flex items-center justify-between text-xs text-ink-secondary">
+                            <span className="truncate">{m.name}</span>
+                            <span className="font-display-num text-gold shrink-0">
+                              {yen(splitAmountById.get(m.id) ?? 0)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                   {typedPlan.payment_methods.length > 0 && (
                     <p className="text-xs text-ink-secondary mt-0.5">

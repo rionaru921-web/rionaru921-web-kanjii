@@ -3,6 +3,8 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { createClient } from "@/lib/supabase/server";
 import { generateQRDataUrl } from "@/lib/share/qr";
 import { ManualPlanPDF } from "@/lib/pdf/templates/ManualPlanPDF";
+import { getPayingMembers } from "@/lib/manual-plans/format";
+import { calculateSplit, type SplitMemberInput } from "@/lib/manual-plans/calculate-split";
 import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 
 // Self-contained server-side PDF generation for manual plans. The existing
@@ -47,6 +49,24 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const shareUrl = `${baseUrl}/share/plan/${typedPlan.share_token}`;
   const qrDataUrl = await generateQRDataUrl(shareUrl);
 
+  const payingMembers = getPayingMembers(typedMembers);
+  const splitResults =
+    typedPlan.split_mode === "tiered"
+      ? calculateSplit(
+          typedPlan.fee_amount,
+          payingMembers.map(
+            (m): SplitMemberInput => ({
+              id: m.id,
+              tierLevel: m.tier_level,
+              weightOverride: m.weight_override,
+              organizerDiscount: m.organizer_discount,
+            })
+          ),
+          typedPlan.rounding_unit
+        )
+      : null;
+  const splitAmountById = new Map((splitResults ?? []).map((r) => [r.id, r.amount]));
+
   const buffer = await renderToBuffer(
     <ManualPlanPDF
       title={typedPlan.title}
@@ -60,9 +80,11 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       paymentDeadline={typedPlan.payment_deadline}
       memo={typedPlan.memo}
       dietaryNotes={typedPlan.dietary_notes}
+      splitMode={typedPlan.split_mode}
       members={typedMembers.map((m) => ({
         name: m.name,
         attendanceStatus: m.attendance_status,
+        amount: splitAmountById.get(m.id),
       }))}
       shareUrl={shareUrl}
       qrDataUrl={qrDataUrl}

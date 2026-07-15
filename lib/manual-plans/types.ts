@@ -1,3 +1,5 @@
+import type { SplitMode, RoundingUnit, TierLevel, OrganizerDiscount } from "./split-types";
+
 export type MemberRole = "organizer" | "participant";
 export type AttendanceStatus = "pending" | "attending" | "declined" | "maybe";
 
@@ -11,6 +13,9 @@ export interface ManualPlanMember {
   note: string | null;
   created_at: string;
   updated_at: string;
+  tier_level: TierLevel;
+  weight_override: number | null;
+  organizer_discount: OrganizerDiscount | null;
 }
 
 export interface FeeBreakdownItem {
@@ -38,6 +43,8 @@ export interface ManualPlan {
   memo: string | null;
   dietary_notes: string | null;
   share_token: string;
+  split_mode: SplitMode;
+  rounding_unit: RoundingUnit;
   created_at: string;
   updated_at: string;
 }

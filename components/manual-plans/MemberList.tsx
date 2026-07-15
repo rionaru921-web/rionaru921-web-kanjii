@@ -16,6 +16,7 @@ export interface MemberListItem {
   role: MemberRole;
   attendance_status: AttendanceStatus;
   hasGuestSecret: boolean;
+  amount?: number;
 }
 
 // Client Component so it can hold a live Supabase Realtime subscription —
@@ -103,6 +104,9 @@ export default function MemberList({
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 <AttendanceStatusBadge status={m.attendance_status} />
+                {m.amount != null && (
+                  <span className="text-xs font-display-num text-gold">¥{m.amount.toLocaleString()}</span>
+                )}
                 {m.hasGuestSecret && <MemberGuestSecretReset planId={planId} memberId={m.id} />}
               </div>
             </div>
