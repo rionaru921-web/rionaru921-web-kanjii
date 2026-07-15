@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { HOTPEPPER_GENRES } from "@/lib/constants/genres";
 import { STATIONS } from "@/lib/constants/locations";
+import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 
 const MEMBER_EXAMPLES = [
   "学生サークル、初対面が多い、盛り上げたい",
@@ -131,11 +133,9 @@ export default function SuggestForm({
           <Calendar size={16} />
           日時
         </label>
-        <input
-          type="datetime-local"
-          value={datetime}
-          onChange={(e) => setDatetime(e.target.value)}
-          className="w-full rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 [color-scheme:light]"
+        <CalendarPopover
+          value={dateTimeLocalToDate(datetime)}
+          onChange={(d) => setDatetime(dateToDateTimeLocal(d))}
         />
       </div>
 

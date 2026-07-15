@@ -8,6 +8,8 @@ import {
   TRAVEL_TYPE_OPTIONS,
   TRANSPORT_OPTIONS,
 } from "@/lib/api/types";
+import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import { dateOnlyToDate, dateToDateOnly } from "@/lib/calendar/local-datetime";
 
 export default function TravelPlanForm() {
   const router = useRouter();
@@ -94,20 +96,20 @@ export default function TravelPlanForm() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <span className="text-xs text-ink-muted mb-1 block">開始日</span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 [color-scheme:light]"
+            <CalendarPopover
+              value={dateOnlyToDate(startDate)}
+              onChange={(d) => setStartDate(dateToDateOnly(d))}
+              showTimeSelector={false}
+              placeholder="日付を選択"
             />
           </div>
           <div>
             <span className="text-xs text-ink-muted mb-1 block">終了日</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 [color-scheme:light]"
+            <CalendarPopover
+              value={dateOnlyToDate(endDate)}
+              onChange={(d) => setEndDate(dateToDateOnly(d))}
+              showTimeSelector={false}
+              placeholder="日付を選択"
             />
           </div>
         </div>
