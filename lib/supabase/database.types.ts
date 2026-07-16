@@ -282,6 +282,8 @@ export type Database = {
           display_name: string | null
           id: string
           is_premium: boolean | null
+          plan_tier: string
+          premium_expires_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -290,6 +292,8 @@ export type Database = {
           display_name?: string | null
           id: string
           is_premium?: boolean | null
+          plan_tier?: string
+          premium_expires_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -298,6 +302,8 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_premium?: boolean | null
+          plan_tier?: string
+          premium_expires_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
