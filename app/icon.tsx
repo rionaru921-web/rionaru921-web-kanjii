@@ -18,16 +18,16 @@ export default function Icon() {
           borderRadius: 7,
         }}
       >
-        <div
-          style={{
-            fontFamily: "serif",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "#C4633F",
-          }}
+        <svg
+          width="20"
+          height="26"
+          viewBox="0 0 120 160"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          K
-        </div>
+          <rect x="46" y="18" width="28" height="13" rx="3.5" fill="#C4633F" />
+          <ellipse cx="60" cy="88" rx="49" ry="60" fill="#C4633F" />
+          <rect x="46" y="129" width="28" height="13" rx="3.5" fill="#C4633F" />
+        </svg>
       </div>
     ),
     { ...size }
