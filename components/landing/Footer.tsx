@@ -2,6 +2,7 @@ import Link from "next/link";
 import { X, Camera, Music2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import HotpepperAttribution from "@/components/shared/HotpepperAttribution";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 const FOOTER_COLUMNS = [
   {
@@ -80,6 +81,8 @@ export default function Footer() {
         </div>
 
         <HotpepperAttribution />
+
+        <AdSlot slot="footer" />
 
         <div className="text-center">
           <a

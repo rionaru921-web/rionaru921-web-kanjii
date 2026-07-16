@@ -121,6 +121,16 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
+        {/* Google AdSense 審査通過後、以下のコメントを外して有効化する。
+        import Script from "next/script"; を追加のうえ、
+        client 値は実際の ca-pub-XXXXXXXXXXXXXXXX に置き換えること。
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+        */}
         {children}
         <FloatingBottomNav />
         <FeedbackButton />

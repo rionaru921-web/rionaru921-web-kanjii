@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Logo from "./Logo";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 const MAIN_NAV = [
   { href: "/dashboard", label: "ホーム", icon: Home },
@@ -162,6 +163,7 @@ export default function DashboardSidebar() {
         <NavLinks pathname={pathname} />
         <div className="mt-auto">
           <BottomLinks pathname={pathname} />
+          <AdSlot slot="sidebar" className="mt-4" />
         </div>
       </aside>
     </>
