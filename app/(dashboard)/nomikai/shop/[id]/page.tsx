@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, SearchX } from "lucide-react";
 import { getShopById, HotpepperApiError } from "@/lib/api/hotpepper";
+import { toMoshimoAffiliateUrl } from "@/lib/affiliate/moshimo";
 import ShopDetail from "@/components/nomikai/ShopDetail";
 import HotpepperAttribution from "@/components/shared/HotpepperAttribution";
 
@@ -37,7 +38,7 @@ export default async function ShopPage({
 
       {shop ? (
         <>
-          <ShopDetail shop={shop} people={people} />
+          <ShopDetail shop={shop} people={people} reserveUrl={toMoshimoAffiliateUrl(shop.urls.pc)} />
           <div className="mt-8">
             <HotpepperAttribution />
           </div>

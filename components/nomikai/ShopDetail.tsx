@@ -21,9 +21,11 @@ async function saveToHistory(shopId: string) {
 export default function ShopDetail({
   shop,
   people,
+  reserveUrl,
 }: {
   shop: HotpepperShop;
   people: number;
+  reserveUrl: string;
 }) {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -85,7 +87,7 @@ export default function ShopDetail({
       </div>
 
       <div className="flex flex-col gap-3">
-        <ReserveButton shopUrl={shop.urls.pc} shopId={shop.id} />
+        <ReserveButton shopUrl={reserveUrl} shopId={shop.id} />
 
         <Link
           href={`/nomikai/warikan?total=${total}&shopId=${shop.id}`}

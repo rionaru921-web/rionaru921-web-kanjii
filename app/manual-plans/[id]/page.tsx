@@ -12,6 +12,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { toVenueAffiliateUrl } from "@/lib/affiliate/venue";
 import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import MemberList from "@/components/manual-plans/MemberList";
@@ -80,6 +81,7 @@ export default async function ManualPlanDetailPage({
   const payingMemberCount = payingMembers.length;
   const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
   const mapQuery = [typedPlan.venue_name, typedPlan.venue_address].filter(Boolean).join(" ").trim();
+  const venueHref = toVenueAffiliateUrl(typedPlan.venue_url, typedPlan.venue_hotpepper_id);
 
   const splitResults =
     typedPlan.split_mode === "tiered"
@@ -166,7 +168,7 @@ export default async function ManualPlanDetailPage({
             )}
             {typedPlan.venue_url && (
               <a
-                href={typedPlan.venue_url}
+                href={venueHref ?? typedPlan.venue_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-gold hover:text-gold-deep transition-colors mt-1 inline-block truncate max-w-full"

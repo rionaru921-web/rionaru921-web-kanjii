@@ -23,6 +23,7 @@ export interface ManualPlanPDFProps {
   venueName: string | null;
   venueAddress: string | null;
   venueUrl: string | null;
+  venueHref: string | null;
   feeAmount: number | null;
   paymentMethods: string[];
   paymentDeadline: string | null;
@@ -41,6 +42,7 @@ export function ManualPlanPDF({
   venueName,
   venueAddress,
   venueUrl,
+  venueHref,
   feeAmount,
   paymentMethods,
   paymentDeadline,
@@ -86,7 +88,7 @@ export function ManualPlanPDF({
                 </Text>
               )}
               {venueUrl && (
-                <Link src={venueUrl} style={{ fontSize: 9, color: COLORS.gold }}>
+                <Link src={venueHref ?? venueUrl} style={{ fontSize: 9, color: COLORS.gold }}>
                   {venueUrl}
                 </Link>
               )}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createClient } from "@/lib/supabase/server";
+import { toVenueAffiliateUrl } from "@/lib/affiliate/venue";
 import { generateQRDataUrl } from "@/lib/share/qr";
 import { ManualPlanPDF } from "@/lib/pdf/templates/ManualPlanPDF";
 import { getPayingMembers } from "@/lib/manual-plans/format";
@@ -75,6 +76,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       venueName={typedPlan.venue_name}
       venueAddress={typedPlan.venue_address}
       venueUrl={typedPlan.venue_url}
+      venueHref={toVenueAffiliateUrl(typedPlan.venue_url, typedPlan.venue_hotpepper_id)}
       feeAmount={typedPlan.fee_amount}
       paymentMethods={typedPlan.payment_methods}
       paymentDeadline={typedPlan.payment_deadline}

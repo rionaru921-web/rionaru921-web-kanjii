@@ -16,13 +16,9 @@ export default function ReserveButton({
   shopUrl: string;
   shopId: string;
 }) {
-  const affiliateUrl = process.env.NEXT_PUBLIC_AFFILIATE_URL
-    ? `${process.env.NEXT_PUBLIC_AFFILIATE_URL}?url=${encodeURIComponent(shopUrl)}`
-    : shopUrl;
-
   return (
     <a
-      href={affiliateUrl}
+      href={shopUrl}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackReserveClick(shopId)}
