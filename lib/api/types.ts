@@ -73,8 +73,8 @@ export interface TravelSearchParams {
   startDate?: string;
   endDate?: string;
   budget: number;
-  travelType?: string;
-  transport?: string;
+  travelType?: string[];
+  transport?: string[];
 }
 
 export const DESTINATIONS = [
@@ -88,27 +88,6 @@ export const DESTINATIONS = [
   "大阪",
   "東京",
 ];
-
-export const TRAVEL_TYPE_LABELS: Record<string, string> = {
-  sightseeing: "観光重視",
-  gourmet: "グルメ重視",
-  onsen: "温泉重視",
-  active: "アクティブ",
-};
-
-export const TRAVEL_TYPE_OPTIONS = Object.entries(TRAVEL_TYPE_LABELS).map(
-  ([value, label]) => ({ value, label })
-);
-
-export const TRANSPORT_LABELS: Record<string, string> = {
-  car: "車",
-  train: "電車",
-  flight: "飛行機",
-};
-
-export const TRANSPORT_OPTIONS = Object.entries(TRANSPORT_LABELS).map(
-  ([value, label]) => ({ value, label })
-);
 
 export const DIFFICULTY_LABELS: Record<TravelDifficulty, string> = {
   easy: "のんびり",

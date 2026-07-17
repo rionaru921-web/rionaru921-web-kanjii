@@ -2,13 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Users, Wallet, Calendar, MapPin, Car, Compass } from "lucide-react";
+import { Users, Calendar, MapPin, Car, Compass } from "lucide-react";
+import { DESTINATIONS } from "@/lib/api/types";
+import { TRAVEL_BUDGET_PRESETS } from "@/lib/constants/budget";
+import { TRAVEL_TYPES, TRAVEL_TYPE_CATEGORIES } from "@/lib/constants/travel-types";
 import {
-  DESTINATIONS,
-  TRAVEL_TYPE_OPTIONS,
-  TRANSPORT_OPTIONS,
-} from "@/lib/api/types";
+  TRANSPORTATION_OPTIONS,
+  TRANSPORTATION_CATEGORIES,
+} from "@/lib/constants/transportation";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import BudgetPicker from "@/components/plan-form/BudgetPicker";
+import CategorizedSelect from "@/components/plan-form/CategorizedSelect";
 import { dateOnlyToDate, dateToDateOnly } from "@/lib/calendar/local-datetime";
 
 export default function TravelPlanForm() {
@@ -17,9 +21,9 @@ export default function TravelPlanForm() {
   const [people, setPeople] = useState(4);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [budget, setBudget] = useState(60000);
-  const [travelType, setTravelType] = useState("sightseeing");
-  const [transport, setTransport] = useState("train");
+  const [budget, setBudget] = useState(50000);
+  const [travelTypes, setTravelTypes] = useState<string[]>(["sightseeing"]);
+  const [transports, setTransports] = useState<string[]>(["train"]);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -29,8 +33,8 @@ export default function TravelPlanForm() {
     if (startDate) params.set("startDate", startDate);
     if (endDate) params.set("endDate", endDate);
     params.set("budget", String(budget));
-    params.set("travelType", travelType);
-    params.set("transport", transport);
+    if (travelTypes.length > 0) params.set("travelType", travelTypes.join(","));
+    if (transports.length > 0) params.set("transport", transports.join(","));
     router.push(`/travel/plans?${params.toString()}`);
   }
 
@@ -115,75 +119,34 @@ export default function TravelPlanForm() {
         </div>
       </div>
 
-      <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
-        <div className="flex items-center justify-between mb-3">
-          <label className="flex items-center gap-1.5 text-sm text-ink-secondary">
-            <Wallet size={16} />
-            予算（お一人様）
-          </label>
-          <span className="text-lg font-serif font-bold text-gold">
-            ¥{budget.toLocaleString()}
-          </span>
-        </div>
-        <input
-          type="range"
-          min={10000}
-          max={200000}
-          step={5000}
-          value={budget}
-          onChange={(e) => setBudget(Number(e.target.value))}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs text-ink-muted mt-1">
-          <span>¥10,000</span>
-          <span>¥200,000</span>
-        </div>
-      </div>
+      <BudgetPicker presets={TRAVEL_BUDGET_PRESETS} value={budget} onChange={setBudget} />
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
         <label className="flex items-center gap-1.5 text-sm text-ink-secondary mb-3">
           <Compass size={16} />
-          旅行タイプ
+          旅行タイプ（複数選択可）
         </label>
-        <div className="grid grid-cols-2 gap-2">
-          {TRAVEL_TYPE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setTravelType(opt.value)}
-              className={`rounded-xl px-3 py-2.5 text-xs font-semibold border transition-colors ${
-                travelType === opt.value
-                  ? "bg-gold-gradient border-transparent text-white"
-                  : "border-gold/15 bg-surface-warm text-ink-secondary hover:border-gold/40 hover:bg-gold/5"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <CategorizedSelect
+          categories={TRAVEL_TYPE_CATEGORIES}
+          options={TRAVEL_TYPES}
+          value={travelTypes}
+          onChange={setTravelTypes}
+          ariaLabel="旅行タイプ"
+        />
       </div>
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
         <label className="flex items-center gap-1.5 text-sm text-ink-secondary mb-3">
           <Car size={16} />
-          交通手段
+          交通手段（複数選択可）
         </label>
-        <div className="grid grid-cols-3 gap-2">
-          {TRANSPORT_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setTransport(opt.value)}
-              className={`rounded-xl px-3 py-2.5 text-xs font-semibold border transition-colors ${
-                transport === opt.value
-                  ? "bg-gold-gradient border-transparent text-white"
-                  : "border-gold/15 bg-surface-warm text-ink-secondary hover:border-gold/40 hover:bg-gold/5"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <CategorizedSelect
+          categories={TRANSPORTATION_CATEGORIES}
+          options={TRANSPORTATION_OPTIONS}
+          value={transports}
+          onChange={setTransports}
+          ariaLabel="交通手段"
+        />
       </div>
 
       <button

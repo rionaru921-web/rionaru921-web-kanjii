@@ -1,5 +1,6 @@
 import { mockTravelPlans } from "../mock/travel";
-import { TRAVEL_TYPE_LABELS } from "./types";
+import { TRAVEL_TYPES } from "../constants/travel-types";
+import { TRANSPORTATION_OPTIONS } from "../constants/transportation";
 import type { TravelPlan, TravelSearchParams } from "./types";
 
 // P1: モックデータをフィルタして返す
@@ -18,17 +19,22 @@ export async function searchTravelPlans(
     ) {
       return false;
     }
-    if (params.travelType) {
-      const label = TRAVEL_TYPE_LABELS[params.travelType];
-      if (label && !plan.tags.includes(label)) return false;
+    // Multiple travel types are OR-matched: a plan passes if it carries the
+    // tag for at least one selected type.
+    if (params.travelType && params.travelType.length > 0) {
+      const labels = params.travelType
+        .map((code) => TRAVEL_TYPES.find((t) => t.value === code)?.label)
+        .filter((label): label is string => Boolean(label));
+      if (labels.length > 0 && !labels.some((label) => plan.tags.includes(label))) {
+        return false;
+      }
     }
-    if (params.transport) {
-      const transportMatches: Record<string, string[]> = {
-        car: ["車"],
-        train: ["新幹線", "電車"],
-        flight: ["飛行機"],
-      };
-      const accepted = transportMatches[params.transport] ?? [];
+    if (params.transport && params.transport.length > 0) {
+      const accepted = params.transport.flatMap((code) => {
+        const option = TRANSPORTATION_OPTIONS.find((t) => t.value === code);
+        if (!option) return [];
+        return option.matchLabels ?? [option.label];
+      });
       if (accepted.length > 0 && !accepted.includes(plan.transport)) return false;
     }
     return true;

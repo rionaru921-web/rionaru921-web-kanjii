@@ -9,15 +9,19 @@ export default async function TravelPlansPage({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const people = Number(searchParams.people) || 2;
-  const budget = Number(searchParams.budget) || 60000;
+  const budget = Number(searchParams.budget) || 50000;
   const destination =
     typeof searchParams.destination === "string" && searchParams.destination.trim()
       ? searchParams.destination
       : undefined;
   const travelType =
-    typeof searchParams.travelType === "string" ? searchParams.travelType : undefined;
+    typeof searchParams.travelType === "string" && searchParams.travelType.trim()
+      ? searchParams.travelType.split(",").filter(Boolean)
+      : undefined;
   const transport =
-    typeof searchParams.transport === "string" ? searchParams.transport : undefined;
+    typeof searchParams.transport === "string" && searchParams.transport.trim()
+      ? searchParams.transport.split(",").filter(Boolean)
+      : undefined;
   const startDate =
     typeof searchParams.startDate === "string" ? searchParams.startDate : undefined;
   const endDate =
