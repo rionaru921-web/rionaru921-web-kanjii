@@ -1,4 +1,5 @@
 import type { HotpepperShop } from "@/lib/api/hotpepper";
+import { DRINK_BUDGET_PRESETS, findBudgetPresetDescription } from "@/lib/constants/budget";
 
 export interface SuggestContext {
   // Basic search conditions
@@ -17,13 +18,18 @@ export function buildSuggestPrompt(
   context: SuggestContext,
   candidates: HotpepperShop[]
 ): string {
+  const presetDescription = findBudgetPresetDescription(
+    DRINK_BUDGET_PRESETS,
+    context.budgetPerPerson
+  );
+
   return `あなたは経験豊富な飲み会・宴会の幹事プロフェッショナルです。
 以下の情報をもとに、候補店舗の中から最適な3〜5店を厳選し、それぞれ推薦理由を提示してください。
 
 ## 開催条件
 - 場所: ${context.station}周辺
 - 人数: ${context.peopleCount}名
-- 予算: 一人あたり${context.budgetPerPerson.toLocaleString()}円
+- 予算: 一人あたり${context.budgetPerPerson.toLocaleString()}円${presetDescription ? `（${presetDescription}）` : ""}
 ${context.datetime ? `- 日時: ${context.datetime}` : ""}
 
 ## 参加者について
