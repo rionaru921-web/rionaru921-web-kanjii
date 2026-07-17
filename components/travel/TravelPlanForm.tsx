@@ -13,7 +13,7 @@ import { dateOnlyToDate, dateToDateOnly } from "@/lib/calendar/local-datetime";
 
 export default function TravelPlanForm() {
   const router = useRouter();
-  const [destination, setDestination] = useState("京都");
+  const [destination, setDestination] = useState("");
   const [people, setPeople] = useState(4);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -24,7 +24,7 @@ export default function TravelPlanForm() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const params = new URLSearchParams();
-    params.set("destination", destination);
+    if (destination.trim()) params.set("destination", destination.trim());
     params.set("people", String(people));
     if (startDate) params.set("startDate", startDate);
     if (endDate) params.set("endDate", endDate);

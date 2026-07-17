@@ -11,7 +11,9 @@ export default async function TravelPlansPage({
   const people = Number(searchParams.people) || 2;
   const budget = Number(searchParams.budget) || 60000;
   const destination =
-    typeof searchParams.destination === "string" ? searchParams.destination : undefined;
+    typeof searchParams.destination === "string" && searchParams.destination.trim()
+      ? searchParams.destination
+      : undefined;
   const travelType =
     typeof searchParams.travelType === "string" ? searchParams.travelType : undefined;
   const transport =
