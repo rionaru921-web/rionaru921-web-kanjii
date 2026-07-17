@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import {
   Users,
-  Wallet,
   Calendar,
   MapPin,
   DoorClosed,
@@ -14,6 +13,8 @@ import {
 } from "lucide-react";
 import { HOTPEPPER_GENRES } from "@/lib/constants/genres";
 import { STATIONS } from "@/lib/constants/locations";
+import { DRINK_BUDGET_PRESETS } from "@/lib/constants/budget";
+import BudgetPicker from "@/components/plan-form/BudgetPicker";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 
@@ -80,30 +81,7 @@ export default function SearchForm() {
         </div>
       </div>
 
-      <div className="rounded-3xl bg-surface-tertiary shadow-warm p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <label className="flex items-center gap-1.5 text-sm text-ink-secondary">
-            <Wallet size={16} />
-            予算（お一人様）
-          </label>
-          <span className="text-lg font-serif font-bold text-gold">
-            ¥{budget.toLocaleString()}
-          </span>
-        </div>
-        <input
-          type="range"
-          min={1000}
-          max={10000}
-          step={500}
-          value={budget}
-          onChange={(e) => setBudget(Number(e.target.value))}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs text-ink-muted mt-1">
-          <span>¥1,000</span>
-          <span>¥10,000</span>
-        </div>
-      </div>
+      <BudgetPicker presets={DRINK_BUDGET_PRESETS} value={budget} onChange={setBudget} />
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-5 sm:p-6">
         <label className="flex items-center gap-1.5 text-sm text-ink-secondary mb-2">
