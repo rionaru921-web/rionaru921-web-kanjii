@@ -33,7 +33,21 @@ export const HOTPEPPER_BUDGETS: BudgetOption[] = [
   { code: "B014", label: "30,001円〜", min: 30000, max: 999999 },
 ];
 
+// Treats budget as a ceiling ("up to this much per person"), matching how
+// it's presented in the UI and how the mock-data search path already
+// filters (lib/api/restaurants.ts excludes anything whose budgetMin exceeds
+// params.budget). Returns every HotPepper budget code whose range is fully
+// at or under that ceiling, comma-joined — HotPepper's `budget=` param
+// accepts a comma-separated code list and searches across all of them.
+//
+// This intentionally does NOT use `budget >= b.min && budget < b.max` to
+// pick a single bucket: for a round number like 5000, HOTPEPPER_BUDGETS'
+// "4,001〜5,000円" bucket has max=5000 (exclusive), so that comparison
+// skips it and lands on "5,001〜6,000円" instead — a bucket that is, by
+// its own label, entirely over the requested budget. Every STEP2 preset
+// value (2000/3000/4000/5000/6000/8000/10000/12000/15000/20000/30000) sits
+// exactly on a bucket boundary and was affected.
 export function budgetPerPersonToCode(budget: number): string {
-  const found = HOTPEPPER_BUDGETS.find((b) => budget >= b.min && budget < b.max);
-  return found?.code ?? "B002";
+  const codes = HOTPEPPER_BUDGETS.filter((b) => b.min < budget).map((b) => b.code);
+  return codes.length > 0 ? codes.join(",") : "B002";
 }

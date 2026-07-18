@@ -33,9 +33,22 @@ export async function suggestShops(
     return { recommendations: [], summary: "候補店舗がありません" };
   }
 
+  // Hard-filter on party size before the AI ever sees these candidates.
+  // The prompt also tells Claude to avoid too-small venues, but that's a
+  // soft instruction — HotPepper's own party_capacity search param isn't a
+  // strict guarantee either, so this is the one place that's actually
+  // enforced in code rather than left to the model.
+  const eligible = candidates.filter((s) => s.partyCapacity >= context.peopleCount);
+  if (eligible.length === 0) {
+    return {
+      recommendations: [],
+      summary: `${context.peopleCount}名を収容できる候補店舗が見つかりませんでした。人数を減らすか条件を変更してお試しください。`,
+    };
+  }
+
   // Trim to keep the prompt (and cost) bounded regardless of how many shops
   // the HotPepper search returned.
-  const trimmed = candidates.slice(0, 20);
+  const trimmed = eligible.slice(0, 20);
 
   console.log(
     `[ai/suggest] calling ${AI_MODEL} with ${trimmed.length} candidates for "${context.station}"`
