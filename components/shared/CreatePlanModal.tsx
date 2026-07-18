@@ -28,20 +28,20 @@ function OptionCard({ href, icon: Icon, title, description, iconStyle, onClose }
     <Link
       href={href}
       onClick={onClose}
-      className="group flex flex-col items-start gap-3 rounded-xl border border-gold/20 bg-surface-tertiary p-5 transition-all hover:border-gold/40 hover:shadow-md"
+      className="group flex flex-col items-start gap-3 rounded-2xl border border-gold/20 bg-surface-warm p-5 transition-all hover:border-gold/40 hover:shadow-warm"
     >
       <div
         className={`flex h-12 w-12 items-center justify-center rounded-full shadow-sm ${
           iconStyle === "gold"
             ? "bg-gold-gradient text-white"
-            : "bg-white text-gold ring-2 ring-gold/30"
+            : "bg-surface-tertiary text-gold ring-2 ring-gold/30"
         }`}
       >
         <Icon className="h-6 w-6" />
       </div>
       <div className="flex-1">
         <div className="text-base font-semibold text-ink">{title}</div>
-        <p className="mt-1 text-xs leading-relaxed text-ink/60">{description}</p>
+        <p className="mt-1 text-xs leading-relaxed text-ink-secondary">{description}</p>
       </div>
       <div className="flex items-center gap-1 text-sm font-medium text-gold transition-transform group-hover:translate-x-0.5">
         はじめる <ArrowRight className="h-4 w-4" />
@@ -67,18 +67,18 @@ export default function CreatePlanModal({ open, onClose }: CreatePlanModalProps)
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.18 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl sm:p-8"
+            className="relative w-full max-w-3xl rounded-3xl bg-surface-tertiary p-6 shadow-warm-hover sm:p-8"
           >
             <button
               onClick={onClose}
               aria-label="閉じる"
-              className="absolute right-4 top-4 rounded-full p-1 text-ink/60 transition-colors hover:bg-ink/5"
+              className="absolute right-4 top-4 rounded-full p-1 text-ink-muted transition-colors hover:bg-gold/5 hover:text-ink"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <h2 className="text-xl font-semibold text-ink sm:text-2xl">どうやって作りますか？</h2>
-            <p className="mt-1.5 text-sm text-ink/60">集まりの計画方法を選んでください</p>
+            <h2 className="text-xl font-serif font-bold text-ink sm:text-2xl">どうやって作りますか？</h2>
+            <p className="mt-1.5 text-sm text-ink-secondary">集まりの計画方法を選んでください</p>
 
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <OptionCard
@@ -110,7 +110,7 @@ export default function CreatePlanModal({ open, onClose }: CreatePlanModalProps)
             <div className="mt-6 flex justify-center">
               <button
                 onClick={onClose}
-                className="text-sm text-ink/50 transition-colors hover:text-ink/70"
+                className="text-sm text-ink-muted transition-colors hover:text-gold"
               >
                 キャンセル
               </button>
