@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle } from "lucide-react";
-import FeedbackModal from "./FeedbackModal";
+import FeedbackModal from "@/components/feedback/FeedbackModal";
 import { useToasts, ToastStack } from "@/components/ui/RealtimeToast";
 
-export default function FeedbackButton() {
+export default function FooterFeedbackTrigger() {
   const [open, setOpen] = useState(false);
   const { toasts, pushToast } = useToasts();
 
@@ -14,11 +13,9 @@ export default function FeedbackButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="フィードバックを送る"
-        className="fixed bottom-24 right-4 sm:right-6 z-40 flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-gold-gradient text-white shadow-gold-lg transition-all hover:brightness-110 sm:h-auto sm:w-auto sm:px-5 sm:py-3"
+        className="mt-1 text-xs text-ink-muted hover:text-gold transition-colors underline underline-offset-4"
       >
-        <MessageCircle size={20} />
-        <span className="hidden text-sm font-semibold sm:inline">フィードバック</span>
+        ご意見・不具合報告はこちら
       </button>
 
       {open && (
@@ -30,7 +27,6 @@ export default function FeedbackButton() {
           }}
         />
       )}
-
       <ToastStack toasts={toasts} />
     </>
   );

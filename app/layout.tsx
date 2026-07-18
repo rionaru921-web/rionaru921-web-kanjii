@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Noto_Serif_JP, Playfair_Display } from "next/font/google";
 import { Analytics } from "@/components/shared/Analytics";
 import FloatingBottomNav from "@/components/layout/FloatingBottomNav";
-import FeedbackButton from "@/components/feedback/FeedbackButton";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -133,7 +132,6 @@ export default function RootLayout({
         */}
         {children}
         <FloatingBottomNav />
-        <FeedbackButton />
         <Analytics />
       </body>
     </html>

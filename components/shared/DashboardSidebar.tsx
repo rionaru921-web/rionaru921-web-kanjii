@@ -15,10 +15,13 @@ import {
   User,
   Menu,
   X,
+  MessageSquare,
 } from "lucide-react";
 import Logo from "./Logo";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { AdSlot } from "@/components/ads/AdSlot";
+import FeedbackModal from "@/components/feedback/FeedbackModal";
+import { useToasts, ToastStack } from "@/components/ui/RealtimeToast";
 
 const MAIN_NAV = [
   { href: "/dashboard", label: "ホーム", icon: Home },
@@ -79,7 +82,15 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
   );
 }
 
-function BottomLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function BottomLinks({
+  pathname,
+  onNavigate,
+  onOpenFeedback,
+}: {
+  pathname: string;
+  onNavigate?: () => void;
+  onOpenFeedback: () => void;
+}) {
   return (
     <div className="flex flex-col gap-1 pt-4 border-t border-gold/10">
       {BOTTOM_NAV.map((item) => {
@@ -102,6 +113,17 @@ function BottomLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: 
           </Link>
         );
       })}
+      <button
+        type="button"
+        onClick={() => {
+          onNavigate?.();
+          onOpenFeedback();
+        }}
+        className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-gold/5 hover:text-ink transition-colors border-l-4 border-transparent w-full text-left"
+      >
+        <MessageSquare size={18} />
+        フィードバック
+      </button>
       <LogoutButton
         className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-vermilion/5 hover:text-vermilion transition-colors w-full text-left"
       />
@@ -112,6 +134,8 @@ function BottomLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: 
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const { toasts, pushToast } = useToasts();
 
   return (
     <>
@@ -149,7 +173,11 @@ export default function DashboardSidebar() {
             </div>
             <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} />
             <div className="mt-auto">
-              <BottomLinks pathname={pathname} onNavigate={() => setOpen(false)} />
+              <BottomLinks
+                pathname={pathname}
+                onNavigate={() => setOpen(false)}
+                onOpenFeedback={() => setFeedbackOpen(true)}
+              />
             </div>
           </div>
         </div>
@@ -162,10 +190,21 @@ export default function DashboardSidebar() {
         </div>
         <NavLinks pathname={pathname} />
         <div className="mt-auto">
-          <BottomLinks pathname={pathname} />
+          <BottomLinks pathname={pathname} onOpenFeedback={() => setFeedbackOpen(true)} />
           <AdSlot slot="sidebar" className="mt-4" />
         </div>
       </aside>
+
+      {feedbackOpen && (
+        <FeedbackModal
+          onClose={() => setFeedbackOpen(false)}
+          onSuccess={() => {
+            setFeedbackOpen(false);
+            pushToast("フィードバックありがとうございます！");
+          }}
+        />
+      )}
+      <ToastStack toasts={toasts} />
     </>
   );
 }

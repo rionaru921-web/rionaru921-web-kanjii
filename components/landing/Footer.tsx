@@ -3,6 +3,7 @@ import { X, Camera, Music2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import HotpepperAttribution from "@/components/shared/HotpepperAttribution";
 import { AdSlot } from "@/components/ads/AdSlot";
+import FooterFeedbackTrigger from "./FooterFeedbackTrigger";
 
 const FOOTER_COLUMNS = [
   {
@@ -91,7 +92,9 @@ export default function Footer() {
           >
             お問い合わせ: steplife.contact@gmail.com
           </a>
-          <p className="mt-1 text-xs text-ink-muted">ご意見・不具合報告はこちら</p>
+          <div>
+            <FooterFeedbackTrigger />
+          </div>
         </div>
 
         <p className="text-center text-xs text-ink-muted">

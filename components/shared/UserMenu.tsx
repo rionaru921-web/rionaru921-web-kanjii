@@ -5,7 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, MessageSquare, ChevronDown } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import FeedbackModal from "./FeedbackModal";
+import FeedbackModal from "@/components/feedback/FeedbackModal";
+import { useToasts, ToastStack } from "@/components/ui/RealtimeToast";
 
 interface UserMenuProps {
   displayName: string;
@@ -15,6 +16,7 @@ export default function UserMenu({ displayName }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { toasts, pushToast } = useToasts();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -82,7 +84,16 @@ export default function UserMenu({ displayName }: UserMenuProps) {
         )}
       </AnimatePresence>
 
-      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
+      {feedbackOpen && (
+        <FeedbackModal
+          onClose={() => setFeedbackOpen(false)}
+          onSuccess={() => {
+            setFeedbackOpen(false);
+            pushToast("フィードバックありがとうございます！");
+          }}
+        />
+      )}
+      <ToastStack toasts={toasts} />
     </div>
   );
 }
