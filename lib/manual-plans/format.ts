@@ -80,7 +80,7 @@ export function buildPlanIcsEvent(plan: ManualPlan, shareUrl: string): IcsEvent 
   const location = [plan.venue_name, plan.venue_address].filter(Boolean).join(" ") || undefined;
 
   return {
-    uid: `manual-plan-${plan.id}@kanjii.app`,
+    uid: `manual-plan-${plan.id}@kanji-lab.com`,
     title: plan.title,
     description: plan.memo ?? undefined,
     location,

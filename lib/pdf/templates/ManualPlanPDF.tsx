@@ -178,7 +178,7 @@ export function ManualPlanPDF({
 
         <View style={pdfStyles.footer} fixed>
           <Text style={pdfStyles.footerText}>Powered by 幹事ラボ</Text>
-          <Text style={pdfStyles.footerText}>https://kanjii.app</Text>
+          <Text style={pdfStyles.footerText}>https://kanji-lab.com</Text>
         </View>
       </Page>
     </Document>
