@@ -34,11 +34,18 @@ export async function suggestShops(
   }
 
   // Hard-filter on party size before the AI ever sees these candidates.
-  // The prompt also tells Claude to avoid too-small venues, but that's a
-  // soft instruction — HotPepper's own party_capacity search param isn't a
-  // strict guarantee either, so this is the one place that's actually
-  // enforced in code rather than left to the model.
-  const eligible = candidates.filter((s) => s.partyCapacity >= context.peopleCount);
+  // The search request already sent party_capacity=peopleCount to HotPepper
+  // (see buildHotpepperSearchParams), so every candidate here already
+  // cleared that bar server-side. What we exclude here is only shops that
+  // *report* a capacity smaller than the party — partyCapacity resolves to
+  // 0 (see mapShop in hotpepper.ts) when HotPepper simply didn't return
+  // capacity data for that shop, which is common and not a signal the shop
+  // is too small. Treating 0 as "too small" was wiping out most/all
+  // candidates for larger groups, so only a known-too-small capacity is
+  // excluded here.
+  const eligible = candidates.filter(
+    (s) => s.partyCapacity === 0 || s.partyCapacity >= context.peopleCount
+  );
   if (eligible.length === 0) {
     return {
       recommendations: [],
