@@ -66,7 +66,7 @@ export default async function OGImage() {
             color: "#A89B8E",
           }}
         >
-          kanjii.app
+          kanji-lab.com
         </div>
       </div>
     ),

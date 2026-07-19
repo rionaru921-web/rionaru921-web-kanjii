@@ -26,7 +26,7 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kanjii.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kanji-lab.com"),
   title: {
     default: "幹事ラボ - あらゆる集まりを、AIが幹事します",
     template: "%s | 幹事ラボ",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   publisher: "幹事ラボ",
   formatDetection: { email: false, address: false, telephone: false },
   verification: {
-    google: "fqx0-Oh0qtrop4k0Tt4jKm_v-jcc3vCh6kt2zMSafVc",
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   openGraph: {
     title: "幹事ラボ - あらゆる集まりを、AIが幹事します",
@@ -101,7 +101,7 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "幹事ラボ",
-  url: process.env.NEXT_PUBLIC_APP_URL || "https://kanjii.app",
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://kanji-lab.com",
   description: "あらゆる集まりを、AIが幹事します。URLを送るだけ。",
   inLanguage: "ja",
 };
