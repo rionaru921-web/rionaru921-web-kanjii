@@ -14,24 +14,16 @@ import { HOTPEPPER_GENRES } from "@/lib/constants/genres";
 import { STATIONS } from "@/lib/constants/locations";
 import { DRINK_BUDGET_PRESETS } from "@/lib/constants/budget";
 import { MOOD_TAGS, MOOD_CATEGORIES } from "@/lib/constants/moods";
+import {
+  PARTICIPANT_TAGS,
+  PARTICIPANT_CATEGORIES,
+  composeMemberProfile,
+} from "@/lib/constants/participant-tags";
+import { SITUATION_TAGS, SITUATION_CATEGORIES, composeSituation } from "@/lib/constants/situation-tags";
 import BudgetPicker from "@/components/plan-form/BudgetPicker";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
 import CategorizedSelect from "@/components/plan-form/CategorizedSelect";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
-
-const MEMBER_EXAMPLES = [
-  "学生サークル、初対面が多い、盛り上げたい",
-  "会社の上司・取引先、失礼のないお店",
-  "大学のゼミ、少人数で落ち着いて話したい",
-  "久しぶりに集まる同窓会、思い出話をゆっくり",
-];
-
-const SITUATION_EXAMPLES = [
-  "歓迎会。新メンバーに好印象を残したい",
-  "送別会。しっとりと感謝を伝えたい",
-  "打ち上げ。とにかく楽しく盛り上がる",
-  "デート後の食事。落ち着いた雰囲気で",
-];
 
 function firstParam(v: string | string[] | undefined): string | undefined {
   return typeof v === "string" ? v : undefined;
@@ -54,10 +46,16 @@ export default function SuggestForm({
     firstParam(initialParams?.privateRoom) === "true"
   );
 
-  const [memberProfile, setMemberProfile] = useState(
-    firstParam(initialParams?.memberProfile) ?? ""
-  );
-  const [situation, setSituation] = useState(firstParam(initialParams?.situation) ?? "");
+  // memberProfile/situation are structured (tags) + an optional supplementary
+  // note, composed into the plain-text strings the AI prompt expects on
+  // submit (see composeMemberProfile/composeSituation). When arriving from
+  // the "条件を変更" retry link, the previously-composed string can't be
+  // reliably split back into tags, so it's kept as-is in the note field and
+  // tags start unselected.
+  const [participantTags, setParticipantTags] = useState<string[]>([]);
+  const [memberNote, setMemberNote] = useState(firstParam(initialParams?.memberProfile) ?? "");
+  const [situationTags, setSituationTags] = useState<string[]>([]);
+  const [situationNote, setSituationNote] = useState(firstParam(initialParams?.situation) ?? "");
   const [preferences, setPreferences] = useState(firstParam(initialParams?.preferences) ?? "");
   const [moodTags, setMoodTags] = useState<string[]>(() => {
     const raw = firstParam(initialParams?.moodTags);
@@ -72,11 +70,14 @@ export default function SuggestForm({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!memberProfile.trim() || !situation.trim()) {
-      setError("「参加者について」と「シチュエーション」は必須項目です。");
+    if (participantTags.length === 0 || situationTags.length === 0) {
+      setError("「参加者について」と「シチュエーション」はタグを1つ以上選んでください。");
       return;
     }
     setError(null);
+
+    const memberProfile = composeMemberProfile(participantTags, memberNote);
+    const situation = composeSituation(situationTags, situationNote);
 
     const params = new URLSearchParams();
     params.set("people", String(people));
@@ -86,8 +87,8 @@ export default function SuggestForm({
     if (genre) params.set("genre", genre);
     if (privateRoom) params.set("privateRoom", "true");
     if (moodTags.length > 0) params.set("moodTags", moodTags.join(","));
-    params.set("memberProfile", memberProfile.trim());
-    params.set("situation", situation.trim());
+    params.set("memberProfile", memberProfile);
+    params.set("situation", situation);
     if (preferences.trim()) params.set("preferences", preferences.trim());
 
     router.push(`/nomikai/suggest/result?${params.toString()}`);
@@ -238,50 +239,42 @@ export default function SuggestForm({
         <label className="block text-sm text-ink-secondary mb-2">
           参加者について <span className="text-vermilion">*</span>
         </label>
-        <textarea
-          value={memberProfile}
-          onChange={(e) => setMemberProfile(e.target.value)}
-          placeholder="例: 20代後半の会社の同期5人。全員お酒好き。〇〇さんは辛いものが苦手。"
-          rows={3}
-          className="w-full rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 placeholder:text-ink-muted resize-none"
+        <CategorizedSelect
+          categories={PARTICIPANT_CATEGORIES}
+          options={PARTICIPANT_TAGS}
+          value={participantTags}
+          onChange={setParticipantTags}
+          multiple
+          ariaLabel="参加者について"
         />
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {MEMBER_EXAMPLES.map((ex) => (
-            <button
-              key={ex}
-              type="button"
-              onClick={() => setMemberProfile(ex)}
-              className="text-[11px] rounded-full border border-gold/15 text-ink-muted px-2.5 py-1 hover:border-gold/40 hover:text-gold transition-colors"
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
+        <textarea
+          value={memberNote}
+          onChange={(e) => setMemberNote(e.target.value)}
+          placeholder="補足があれば（任意）例: 〇〇さんは辛いものが苦手"
+          rows={2}
+          className="w-full mt-3 rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 placeholder:text-ink-muted resize-none"
+        />
       </div>
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
         <label className="block text-sm text-ink-secondary mb-2">
           シチュエーション <span className="text-vermilion">*</span>
         </label>
-        <textarea
-          value={situation}
-          onChange={(e) => setSituation(e.target.value)}
-          placeholder="例: 送別会。○○さんが主役なので少し豪華に。二次会もあるので長時間にならない方がいい。"
-          rows={3}
-          className="w-full rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 placeholder:text-ink-muted resize-none"
+        <CategorizedSelect
+          categories={SITUATION_CATEGORIES}
+          options={SITUATION_TAGS}
+          value={situationTags}
+          onChange={setSituationTags}
+          multiple
+          ariaLabel="シチュエーション"
         />
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {SITUATION_EXAMPLES.map((ex) => (
-            <button
-              key={ex}
-              type="button"
-              onClick={() => setSituation(ex)}
-              className="text-[11px] rounded-full border border-gold/15 text-ink-muted px-2.5 py-1 hover:border-gold/40 hover:text-gold transition-colors"
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
+        <textarea
+          value={situationNote}
+          onChange={(e) => setSituationNote(e.target.value)}
+          placeholder="補足があれば（任意）例: ○○さんが主役なので少し豪華に"
+          rows={2}
+          className="w-full mt-3 rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 placeholder:text-ink-muted resize-none"
+        />
       </div>
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
