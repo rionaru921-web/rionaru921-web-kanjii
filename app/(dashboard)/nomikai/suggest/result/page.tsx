@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 import AILoadingAnimation from "@/components/ai/AILoadingAnimation";
 import AIRecommendation from "@/components/ai/AIRecommendation";
+import EmptyResultsFallback from "@/components/ai/EmptyResultsFallback";
 import MizuhikiDivider from "@/components/shared/MizuhikiDivider";
 import type { AISuggestResult } from "@/lib/ai/suggest";
 
@@ -30,6 +31,7 @@ function SuggestResult() {
   const genre = searchParams.get("genre") ?? undefined;
   const datetime = searchParams.get("datetime") ?? undefined;
   const privateRoom = searchParams.get("privateRoom") === "true";
+  const moodTags = searchParams.get("moodTags")?.split(",").filter(Boolean) ?? [];
   const memberProfile = searchParams.get("memberProfile") ?? "";
   const situation = searchParams.get("situation") ?? "";
   const preferences = searchParams.get("preferences") ?? undefined;
@@ -51,6 +53,7 @@ function SuggestResult() {
             datetime,
             genreCode: genre,
             privateRoom,
+            moodTags,
             memberProfile,
             situation,
             preferences,
@@ -90,6 +93,46 @@ function SuggestResult() {
     if (datetime) p.set("datetime", datetime);
     return `/nomikai/results?${p.toString()}`;
   })();
+
+  // One-click condition relaxation for the "no candidates" state: re-runs
+  // the same AI search with one condition loosened, instead of sending the
+  // user all the way back to the form.
+  function relaxedRetryHref(overrides: Record<string, string | null>) {
+    const p = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value === null) p.delete(key);
+      else p.set(key, value);
+    }
+    return `/nomikai/suggest/result?${p.toString()}`;
+  }
+
+  const relaxSuggestions: { label: string; icon: string; href: string }[] = [];
+  if (privateRoom) {
+    relaxSuggestions.push({
+      label: "個室縛りを外して再検索",
+      icon: "🚪",
+      href: relaxedRetryHref({ privateRoom: null }),
+    });
+  }
+  if (genre) {
+    relaxSuggestions.push({
+      label: "ジャンル指定なしで再検索",
+      icon: "🍽️",
+      href: relaxedRetryHref({ genre: null }),
+    });
+  }
+  if (moodTags.length > 0) {
+    relaxSuggestions.push({
+      label: "雰囲気タグを外して再検索",
+      icon: "🎨",
+      href: relaxedRetryHref({ moodTags: null }),
+    });
+  }
+  relaxSuggestions.push({
+    label: "予算を+2,000円で再検索",
+    icon: "💰",
+    href: relaxedRetryHref({ budget: String(budget + 2000) }),
+  });
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto">
@@ -136,12 +179,7 @@ function SuggestResult() {
           </div>
 
           {result.recommendations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center py-16 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">
-              <p className="text-ink-secondary">条件に合う店舗が見つかりませんでした</p>
-              <Link href={retryHref} className="text-gold text-sm underline underline-offset-4">
-                条件を変更する
-              </Link>
-            </div>
+            <EmptyResultsFallback relaxSuggestions={relaxSuggestions} retryHref={retryHref} />
           ) : (
             <div className="flex flex-col gap-4">
               {result.recommendations.map((rec) => (

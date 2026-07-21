@@ -13,8 +13,10 @@ import {
 import { HOTPEPPER_GENRES } from "@/lib/constants/genres";
 import { STATIONS } from "@/lib/constants/locations";
 import { DRINK_BUDGET_PRESETS } from "@/lib/constants/budget";
+import { MOOD_TAGS, MOOD_CATEGORIES } from "@/lib/constants/moods";
 import BudgetPicker from "@/components/plan-form/BudgetPicker";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import CategorizedSelect from "@/components/plan-form/CategorizedSelect";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 
 const MEMBER_EXAMPLES = [
@@ -57,6 +59,10 @@ export default function SuggestForm({
   );
   const [situation, setSituation] = useState(firstParam(initialParams?.situation) ?? "");
   const [preferences, setPreferences] = useState(firstParam(initialParams?.preferences) ?? "");
+  const [moodTags, setMoodTags] = useState<string[]>(() => {
+    const raw = firstParam(initialParams?.moodTags);
+    return raw ? raw.split(",").filter(Boolean) : [];
+  });
   const [error, setError] = useState<string | null>(null);
 
   const stationSuggestions = useMemo(() => {
@@ -79,6 +85,7 @@ export default function SuggestForm({
     if (station) params.set("station", station);
     if (genre) params.set("genre", genre);
     if (privateRoom) params.set("privateRoom", "true");
+    if (moodTags.length > 0) params.set("moodTags", moodTags.join(","));
     params.set("memberProfile", memberProfile.trim());
     params.set("situation", situation.trim());
     if (preferences.trim()) params.set("preferences", preferences.trim());
@@ -212,6 +219,20 @@ export default function SuggestForm({
       <p className="text-xs font-semibold text-ink-muted tracking-wide mt-3">
         STEP 2・AIに伝える情報
       </p>
+
+      <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
+        <label className="block text-sm text-ink-secondary mb-2">
+          雰囲気・シーン（任意、複数選択可）
+        </label>
+        <CategorizedSelect
+          categories={MOOD_CATEGORIES}
+          options={MOOD_TAGS}
+          value={moodTags}
+          onChange={setMoodTags}
+          multiple
+          ariaLabel="雰囲気・シーンタグ"
+        />
+      </div>
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
         <label className="block text-sm text-ink-secondary mb-2">

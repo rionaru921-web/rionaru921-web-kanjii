@@ -1,5 +1,6 @@
 import type { HotpepperShop } from "@/lib/api/hotpepper";
 import { DRINK_BUDGET_PRESETS, findBudgetPresetDescription } from "@/lib/constants/budget";
+import { moodLabelsFromValues } from "@/lib/constants/moods";
 
 export interface SuggestContext {
   // Basic search conditions
@@ -12,6 +13,7 @@ export interface SuggestContext {
   memberProfile: string; // e.g. "20代大学生、初対面、お酒はほどほどが好き"
   situation: string; // e.g. "サークルの新歓、盛り上げたい、失敗したくない"
   preferences?: string; // e.g. "個室希望、静かすぎない、コスパ重視"
+  moodTags?: string[]; // e.g. ["welcome", "lively"] — see lib/constants/moods.ts
 }
 
 export function buildSuggestPrompt(
@@ -22,6 +24,7 @@ export function buildSuggestPrompt(
     DRINK_BUDGET_PRESETS,
     context.budgetPerPerson
   );
+  const moodLabels = moodLabelsFromValues(context.moodTags);
 
   return `あなたは経験豊富な飲み会・宴会の幹事プロフェッショナルです。
 以下の情報をもとに、候補店舗の中から最適な3〜5店を厳選し、それぞれ推薦理由を提示してください。
@@ -31,6 +34,7 @@ export function buildSuggestPrompt(
 - 人数: ${context.peopleCount}名
 - 予算: 一人あたり${context.budgetPerPerson.toLocaleString()}円${presetDescription ? `（${presetDescription}）` : ""}
 ${context.datetime ? `- 日時: ${context.datetime}` : ""}
+${moodLabels.length > 0 ? `- 雰囲気・シーン: ${moodLabels.join("、")}` : ""}
 
 ## 参加者について
 ${context.memberProfile}

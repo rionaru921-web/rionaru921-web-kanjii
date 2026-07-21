@@ -38,6 +38,7 @@ interface SuggestRequestBody {
   datetime?: string;
   genreCode?: string;
   privateRoom?: boolean;
+  moodTags?: string[];
   memberProfile: string;
   situation: string;
   preferences?: string;
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // 1. Find candidate shops via HotPepper (cached, same as /api/hotpepper/search).
-    const hpParams = { ...buildHotpepperSearchParams(searchParams), count: 20 };
+    const hpParams = buildHotpepperSearchParams(searchParams);
     const cacheKey = `search:${JSON.stringify(hpParams)}`;
     let searchResult = getCached<Awaited<ReturnType<typeof searchHotpepper>>>(cacheKey);
     if (!searchResult) {
@@ -137,6 +138,7 @@ export async function POST(req: NextRequest) {
         memberProfile: body.memberProfile,
         situation: body.situation,
         preferences: body.preferences,
+        moodTags: body.moodTags,
       },
       searchResult.shops
     );
