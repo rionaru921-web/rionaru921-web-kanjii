@@ -27,7 +27,11 @@ export function buildHotpepperSearchParams(
     genre: params.genre,
     privateRoom: params.privateRoom,
     partyCapacity: params.people,
-    count: 20,
+    // 20 was tight enough that the AI's post-search capacity filter
+    // (suggestShops) sometimes had too few candidates left to pick 3-5
+    // good ones from. genre/privateRoom are already optional (undefined
+    // unless the user picks one), so this is the one real lever here.
+    count: 30,
   };
 }
 

@@ -55,7 +55,7 @@ export async function suggestShops(
 
   // Trim to keep the prompt (and cost) bounded regardless of how many shops
   // the HotPepper search returned.
-  const trimmed = eligible.slice(0, 20);
+  const trimmed = eligible.slice(0, 30);
 
   console.log(
     `[ai/suggest] calling ${AI_MODEL} with ${trimmed.length} candidates for "${context.station}"`
