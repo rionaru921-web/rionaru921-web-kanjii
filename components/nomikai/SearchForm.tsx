@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import {
   Users,
   Calendar,
@@ -12,10 +12,10 @@ import {
   FlaskConical,
 } from "lucide-react";
 import { HOTPEPPER_GENRES } from "@/lib/constants/genres";
-import { STATIONS } from "@/lib/constants/locations";
 import { DRINK_BUDGET_PRESETS } from "@/lib/constants/budget";
 import BudgetPicker from "@/components/plan-form/BudgetPicker";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
+import StationAutocomplete from "@/components/shared/StationAutocomplete";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 
 const RADIUS_STEPS: { value: 1 | 2 | 3 | 4 | 5; label: string }[] = [
@@ -32,16 +32,10 @@ export default function SearchForm() {
   const [budget, setBudget] = useState(5000);
   const [datetime, setDatetime] = useState("");
   const [station, setStation] = useState("");
-  const [stationFocused, setStationFocused] = useState(false);
   const [genre, setGenre] = useState("");
   const [privateRoom, setPrivateRoom] = useState(false);
   const [radiusIndex, setRadiusIndex] = useState(2); // "1000m" default
   const [useMock, setUseMock] = useState(false);
-
-  const stationSuggestions = useMemo(() => {
-    if (!station.trim()) return [];
-    return STATIONS.filter((s) => s.name.includes(station.trim())).slice(0, 6);
-  }, [station]);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -94,39 +88,12 @@ export default function SearchForm() {
         />
       </div>
 
-      <div className="rounded-3xl bg-surface-tertiary shadow-warm p-5 sm:p-6 relative">
+      <div className="rounded-3xl bg-surface-tertiary shadow-warm p-5 sm:p-6">
         <label className="flex items-center gap-1.5 text-sm text-ink-secondary mb-2">
           <MapPin size={16} />
           場所（駅名）
         </label>
-        <input
-          type="text"
-          value={station}
-          onChange={(e) => setStation(e.target.value)}
-          onFocus={() => setStationFocused(true)}
-          onBlur={() => setTimeout(() => setStationFocused(false), 120)}
-          placeholder="例: 名古屋、栄"
-          autoComplete="off"
-          className="w-full rounded-xl bg-surface-warm border border-gold/15 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 placeholder:text-ink-muted"
-        />
-        {stationFocused && stationSuggestions.length > 0 && (
-          <ul className="absolute left-5 right-5 top-[5rem] z-10 rounded-xl border border-gold/15 bg-surface-tertiary shadow-warm-hover overflow-hidden">
-            {stationSuggestions.map((s) => (
-              <li key={s.name}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStation(s.name);
-                    setStationFocused(false);
-                  }}
-                  className="w-full text-left px-3 py-2.5 text-sm text-ink-secondary hover:bg-gold/10 hover:text-gold transition-colors"
-                >
-                  {s.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <StationAutocomplete value={station} onChange={setStation} placeholder="例: 名古屋、栄" />
       </div>
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-5 sm:p-6">

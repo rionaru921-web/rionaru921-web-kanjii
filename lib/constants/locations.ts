@@ -2,6 +2,10 @@ export interface Station {
   name: string;
   lat: number;
   lng: number;
+  // Only set for stations resolved via the HeartRails API (lib/api/heartrails.ts) —
+  // this curated list is small enough that its entries don't need disambiguating.
+  line?: string;
+  prefecture?: string;
 }
 
 export const STATIONS: Station[] = [
