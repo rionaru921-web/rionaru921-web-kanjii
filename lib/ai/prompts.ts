@@ -36,10 +36,10 @@ export function buildSuggestPrompt(
 ${context.datetime ? `- 日時: ${context.datetime}` : ""}
 ${moodLabels.length > 0 ? `- 雰囲気・シーン: ${moodLabels.join("、")}` : ""}
 
-## 参加者について
+## 参加者について（タグ＋補足）
 ${context.memberProfile}
 
-## シチュエーション・目的
+## シチュエーション・目的（タグ＋補足）
 ${context.situation}
 
 ${context.preferences ? `## 追加の希望\n${context.preferences}` : ""}
@@ -88,6 +88,7 @@ ${candidates
 }
 
 ## 選定の注意点
+- 「参加者について」「シチュエーション」は短いタグの箇条書き（＋任意の補足）です。テンプレート的な言い回しにせず、そのタグから具体的に読み取れる文脈（関係性・年齢層・お酒のペース・目的・重視点）を推薦理由に反映する
 - 参加者の年齢層・関係性・お酒の量に合わせる
 - シチュエーションに合った雰囲気を優先
 - 予算オーバーは避ける
