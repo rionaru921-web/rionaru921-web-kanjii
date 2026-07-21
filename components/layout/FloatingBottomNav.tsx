@@ -1,21 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Plus, History } from "lucide-react";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 const HIDE_PATHS = ["/", "/dashboard", "/login", "/signup"];
 
+// Editing an existing plan is the one case where the "+作成" shortcut is
+// destructive: it navigates to a blank /manual-plans/new, discarding
+// whatever's unsaved in the edit form. Home/history don't get this guard —
+// they're not reported as an issue and scope is kept to the one bad path.
+const EDIT_EXISTING_PLAN_PATTERN = /^\/manual-plans\/[^/]+\/edit$/;
+
 export default function FloatingBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const shouldHide = HIDE_PATHS.includes(pathname) || pathname.startsWith("/share/");
 
   if (shouldHide) return null;
 
+  const isEditingExistingPlan = EDIT_EXISTING_PLAN_PATTERN.test(pathname);
   const isCreateActive = pathname.startsWith("/manual-plans/new");
   const isHistoryActive = pathname === "/manual-plans";
+
+  function handleCreateClick(e: React.MouseEvent) {
+    if (isEditingExistingPlan) {
+      e.preventDefault();
+      setShowDiscardConfirm(true);
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -41,6 +59,7 @@ export default function FloatingBottomNav() {
 
         <Link
           href="/manual-plans/new"
+          onClick={handleCreateClick}
           aria-label="プランを作成"
           className={`flex shrink-0 items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-2.5 text-xs font-semibold text-white shadow-gold transition-opacity hover:opacity-90 ${
             isCreateActive ? "ring-2 ring-gold/40 ring-offset-2 ring-offset-surface-tertiary" : ""
@@ -61,6 +80,20 @@ export default function FloatingBottomNav() {
           <span className="hidden sm:inline">履歴</span>
         </Link>
       </motion.nav>
+
+      {showDiscardConfirm && (
+        <ConfirmDialog
+          title="編集内容が破棄されます"
+          message="このプランの編集を終了して、新しいプランを作成しますか？編集中の内容は保存されません。"
+          confirmLabel="新規作成する"
+          cancelLabel="編集を続ける"
+          onConfirm={() => {
+            setShowDiscardConfirm(false);
+            router.push("/manual-plans/new");
+          }}
+          onCancel={() => setShowDiscardConfirm(false)}
+        />
+      )}
     </AnimatePresence>
   );
 }
