@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronDown,
   CalendarDays,
   MapPin,
   Wallet,
@@ -35,8 +34,6 @@ import {
 import VenueInput, { type VenueValue } from "./VenueInput";
 import FeeSection from "./FeeSection";
 import TemplateChips from "@/components/plan-form/TemplateChips";
-import MizuhikiDivider from "@/components/shared/MizuhikiDivider";
-import NumberedSectionHeader from "@/components/plan-form/NumberedSectionHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import PlanPreviewCard from "@/components/plan-form/PlanPreviewCard";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
@@ -62,54 +59,27 @@ const inputClass =
   "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
 const labelClass = "block text-sm font-medium text-ink";
 
-function FormSection({
-  number,
+function SectionCard({
   title,
   subtitle,
   icon: Icon,
-  defaultOpen = true,
-  complete = false,
   children,
 }: {
-  number: number;
   title: string;
   subtitle?: string;
   icon: LucideIcon;
-  defaultOpen?: boolean;
-  complete?: boolean;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
-
   return (
-    <div className="rounded-3xl bg-surface-tertiary shadow-warm overflow-hidden">
-      <div className="pt-4">
-        <MizuhikiDivider />
+    <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4 sm:p-6 flex flex-col gap-4">
+      <div>
+        <label className="flex items-center gap-1.5 text-sm text-ink-secondary">
+          <Icon size={16} />
+          {title}
+        </label>
+        {subtitle && <p className="mt-0.5 text-xs text-ink-muted">{subtitle}</p>}
       </div>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 px-6 py-4"
-      >
-        <NumberedSectionHeader number={number} icon={Icon} title={title} subtitle={subtitle} filled={complete} />
-        <ChevronDown
-          size={18}
-          className={`shrink-0 text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-6 pb-6 flex flex-col gap-4">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {children}
     </div>
   );
 }
@@ -296,13 +266,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <form onSubmit={handleSubmit} className="lg:col-span-7 flex flex-col gap-4 pb-44 sm:pb-0">
-      <FormSection
-        number={1}
-        title="基本情報"
-        subtitle="イベント名や日時など"
-        icon={CalendarDays}
-        complete={title.trim() !== ""}
-      >
+      <SectionCard title="基本情報" subtitle="イベント名や日時など" icon={CalendarDays}>
         <div>
           <label className={labelClass}>タイトル</label>
           <input
@@ -337,30 +301,18 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             </div>
           </div>
         </div>
-      </FormSection>
+      </SectionCard>
 
-      <FormSection
-        number={2}
-        title="場所"
-        subtitle="会場やお店の情報"
-        icon={MapPin}
-        complete={venue.venueName.trim() !== ""}
-      >
+      <SectionCard title="場所" subtitle="会場やお店の情報" icon={MapPin}>
         <VenueInput value={venue} onChange={handleVenueChange} disabled={saving} />
         {venueHint && (
           <p className="rounded-xl bg-gold/5 border border-gold/15 px-4 py-2.5 text-xs text-ink-secondary">
             💡 {venueHint}
           </p>
         )}
-      </FormSection>
+      </SectionCard>
 
-      <FormSection
-        number={3}
-        title="予算・集金"
-        subtitle="金額・割り勘・支払い方法"
-        icon={Wallet}
-        complete={feeAmount.trim() !== ""}
-      >
+      <SectionCard title="予算・集金" subtitle="金額・割り勘・支払い方法" icon={Wallet}>
         <FeeSection
           feeAmount={feeAmount}
           onFeeAmountChange={setFeeAmount}
@@ -384,15 +336,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             }))}
           disabled={saving}
         />
-      </FormSection>
+      </SectionCard>
 
-      <FormSection
-        number={4}
-        title="メンバー"
-        subtitle="参加者の登録と傾斜設定"
-        icon={UsersIcon}
-        complete={members.some((m) => m.name.trim() !== "")}
-      >
+      <SectionCard title="メンバー" subtitle="参加者の登録と傾斜設定" icon={UsersIcon}>
         <div className="flex flex-col gap-3">
           {members.map((member, i) => (
             <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
@@ -544,15 +490,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           <Plus size={16} />
           メンバーを追加
         </button>
-      </FormSection>
+      </SectionCard>
 
-      <FormSection
-        number={5}
-        title="メモ"
-        subtitle="自由記入欄(任意)"
-        icon={FileText}
-        defaultOpen={false}
-      >
+      <SectionCard title="メモ" subtitle="自由記入欄(任意)" icon={FileText}>
         <div>
           <label className={labelClass}>自由メモ</label>
           <textarea
@@ -574,7 +514,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             className={inputClass}
           />
         </div>
-      </FormSection>
+      </SectionCard>
 
       {error && (
         <div className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion">
