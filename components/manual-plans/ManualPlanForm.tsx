@@ -246,7 +246,12 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       if (!res.ok) throw new Error(data.error ?? "保存に失敗しました。");
 
       const targetId = data.id ?? planId;
-      router.push(mode === "create" ? `/manual-plans/${targetId}?just_created=1` : `/manual-plans/${targetId}`);
+      // The query marker isn't just for the confirmation banner: it also
+      // guarantees this exact URL was never visited/cached before, so the
+      // client Router Cache can't serve stale (pre-save) data for a plan
+      // detail page the user was just looking at seconds ago.
+      const marker = mode === "create" ? "just_created" : "just_updated";
+      router.push(`/manual-plans/${targetId}?${marker}=1`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存に失敗しました。");
