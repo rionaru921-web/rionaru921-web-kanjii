@@ -265,7 +265,19 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <form onSubmit={handleSubmit} className="lg:col-span-7 flex flex-col gap-4 pb-44 sm:pb-0">
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          // Prevent Enter in any <input> from implicitly submitting the form
+          // (native HTML behavior) — only the explicit "作成する"/"保存する"
+          // button should submit. textarea is untouched so Enter still
+          // inserts a newline there.
+          if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
+            e.preventDefault();
+          }
+        }}
+        className="lg:col-span-7 flex flex-col gap-4 pb-44 sm:pb-0"
+      >
       <SectionCard title="基本情報" subtitle="イベント名や日時など" icon={CalendarDays}>
         <div>
           <label className={labelClass}>タイトル</label>
