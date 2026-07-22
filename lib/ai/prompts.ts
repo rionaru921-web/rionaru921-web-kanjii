@@ -16,6 +16,42 @@ export interface SuggestContext {
   moodTags?: string[]; // e.g. ["welcome", "lively"] — see lib/constants/moods.ts
 }
 
+// Role definition + reasoning process live in the system prompt (sent via
+// the Anthropic SDK's `system` param — see lib/ai/suggest.ts), separate
+// from the per-request user prompt below. Previously everything was crammed
+// into a single user-role message with no system prompt at all.
+//
+// Field names in the JSON schema described here (shopId/rank/matchScore/
+// title/warnings/summary) MUST stay in sync with AIRecommendation
+// (lib/ai/suggest.ts) and the card UI (components/ai/AIRecommendation.tsx),
+// which render those fields directly (rank badge, match-score bar, etc).
+export const SUGGEST_SYSTEM_PROMPT = `あなたは日本の飲み会・宴会に精通したプロの幹事アシスタントです。
+
+# あなたの役割
+ユーザーの要望と、HotPepper APIから取得した実在するお店のリストをもとに、最適な店を選び、それぞれに推薦理由を添えて提案します。
+
+# 提案の進め方（必ずこの順で考える）
+
+## Step 1: 候補を全て見渡す
+渡された候補リストの全店にまず目を通します。候補が少ない、予算にぴったり合う店がない、といった場合でも「該当なし」「候補が見つかりません」とは絶対に返しません。リストが1件でもあれば、必ずその中から選びます。
+
+## Step 2: 優先順位で絞り込む
+以下の優先順位で判断してください。
+1. 参加人数を収容できるか（候補は事前にこの条件でフィルタ済みです）
+2. 予算に近いか（多少の超過があっても、他の条件が良ければ選択肢に残す）
+3. エリア・アクセスが条件に合うか
+4. 参加者タグ・シチュエーションタグと、お店のジャンル・雰囲気の相性
+
+## Step 3: バランスを考える
+複数店を選ぶ場合は、可能な範囲でジャンルや雰囲気に多様性を持たせ、似た系統の店ばかりに偏らないようにします。
+
+# 絶対ルール
+- リストにない架空の店舗を作り出さない
+- shopId は候補リストのIDを1文字も変えずに正確にコピーする
+- 「該当なし」「候補が見つかりません」とは返さない。候補が少なくても、リストにある店の中から必ず選ぶ
+- 目立った短所（駅から遠い、個室なし、予算やや超過等）があれば隠さず warnings に書く。なければ空文字にする
+- 出力は指定のJSON形式のみ。前置き・後書き・コードブロック外のテキストは一切含めない`;
+
 export function buildSuggestPrompt(
   context: SuggestContext,
   candidates: HotpepperShop[]
@@ -26,8 +62,7 @@ export function buildSuggestPrompt(
   );
   const moodLabels = moodLabelsFromValues(context.moodTags);
 
-  return `あなたは経験豊富な飲み会・宴会の幹事プロフェッショナルです。
-以下の情報をもとに、候補店舗の中から最適な3〜5店を厳選し、それぞれ推薦理由を提示してください。
+  return `# ユーザーの要望
 
 ## 開催条件
 - 場所: ${context.station}周辺
@@ -69,6 +104,11 @@ ${candidates
   )
   .join("\n")}
 
+## 選定の注意点
+- 「参加者について」「シチュエーション」は短いタグの箇条書き（＋任意の補足）です。テンプレート的な言い回しにせず、そのタグから具体的に読み取れる文脈（関係性・年齢層・お酒のペース・目的・重視点）を推薦理由に反映する
+- ランクは matchScore の高い順に1から付与
+- ${candidates.length < 3 ? `候補が${candidates.length}件しかないため、リストにある全店を返す` : "3〜5店を選ぶ"}
+
 ## 出力形式
 以下の厳密なJSON形式で返してください。他の文章は一切含めないこと。
 
@@ -87,13 +127,20 @@ ${candidates
   "summary": "全体の選定方針を100文字以内で説明"
 }
 
-## 選定の注意点
-- 「参加者について」「シチュエーション」は短いタグの箇条書き（＋任意の補足）です。テンプレート的な言い回しにせず、そのタグから具体的に読み取れる文脈（関係性・年齢層・お酒のペース・目的・重視点）を推薦理由に反映する
-- 参加者の年齢層・関係性・お酒の量に合わせる
-- シチュエーションに合った雰囲気を優先
-- 予算オーバーは避ける
-- 人数に対して狭すぎる店は避ける
-- 目立った短所がある店は正直に "warnings" で伝える
-- ランクは matchScore の高い順に1から付与
+## 参考例: 候補が少なく、予算をやや超える店も含めて返す場合
+{
+  "recommendations": [
+    {
+      "shopId": "J002345678",
+      "rank": 1,
+      "matchScore": 78,
+      "title": "候補は少ないが雰囲気重視で厳選",
+      "reason": "このエリアは候補が限られていますが、予算をやや超える程度でシチュエーションに合う落ち着いた個室があります。参加者のタグに沿って選びました。",
+      "highlights": ["雰囲気重視", "駅チカ"],
+      "warnings": "予算をやや超過します"
+    }
+  ],
+  "summary": "エリアの候補が少ないため、予算を若干上回る店も含めています。エリアを広げると選択肢が増えます。"
+}
 `;
 }

@@ -1,6 +1,8 @@
 import "server-only";
 import { anthropic, AI_MODEL } from "./client";
-import { buildSuggestPrompt, type SuggestContext } from "./prompts";
+import { buildSuggestPrompt, SUGGEST_SYSTEM_PROMPT, type SuggestContext } from "./prompts";
+import { parseAiResponse } from "./parseResponse";
+import { parseYenAmount } from "@/lib/api/restaurant-utils";
 import type { HotpepperShop } from "@/lib/api/hotpepper";
 
 export interface AIRecommendation {
@@ -20,15 +22,14 @@ export interface AISuggestResult {
   degraded?: boolean; // true when the AI call failed and we fell back to a plain top-N list
 }
 
-interface RawAIResponse {
-  recommendations: Omit<AIRecommendation, "shop">[];
-  summary: string;
-}
-
 export async function suggestShops(
   context: SuggestContext,
   candidates: HotpepperShop[]
 ): Promise<AISuggestResult> {
+  console.log(
+    `[ai/suggest] "${context.station}" people=${context.peopleCount} budget=${context.budgetPerPerson} candidates=${candidates.length}`
+  );
+
   if (candidates.length === 0) {
     return { recommendations: [], summary: "候補店舗がありません" };
   }
@@ -47,6 +48,7 @@ export async function suggestShops(
     (s) => s.partyCapacity === 0 || s.partyCapacity >= context.peopleCount
   );
   if (eligible.length === 0) {
+    console.log(`[ai/suggest] all ${candidates.length} candidates too small for ${context.peopleCount} people`);
     return {
       recommendations: [],
       summary: `${context.peopleCount}名を収容できる候補店舗が見つかりませんでした。人数を減らすか条件を変更してお試しください。`,
@@ -57,26 +59,28 @@ export async function suggestShops(
   // the HotPepper search returned.
   const trimmed = eligible.slice(0, 30);
 
-  console.log(
-    `[ai/suggest] calling ${AI_MODEL} with ${trimmed.length} candidates for "${context.station}"`
-  );
-
   try {
-    const prompt = buildSuggestPrompt(context, trimmed);
+    const userPrompt = buildSuggestPrompt(context, trimmed);
+    console.log(`[ai/suggest] calling ${AI_MODEL} with ${trimmed.length} candidates`);
+    console.log(`[ai/suggest] user prompt (first 500 chars): ${userPrompt.slice(0, 500)}...`);
 
     const response = await anthropic.messages.create({
       model: AI_MODEL,
       max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
+      system: SUGGEST_SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userPrompt }],
     });
 
     const textBlock = response.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") {
       throw new Error("AIからのレスポンスが不正です");
     }
+    console.log(`[ai/suggest] raw response (first 500 chars): ${textBlock.text.slice(0, 500)}...`);
 
-    const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleaned) as RawAIResponse;
+    const parsed = parseAiResponse(textBlock.text);
+    if (!parsed) {
+      throw new Error("AIレスポンスのJSONパースに失敗しました");
+    }
 
     const recommendations = parsed.recommendations
       .map((rec) => ({ ...rec, shop: trimmed.find((s) => s.id === rec.shopId) }))
@@ -84,18 +88,28 @@ export async function suggestShops(
       .filter((rec): rec is AIRecommendation & { shop: HotpepperShop } => rec.shop !== undefined)
       .sort((a, b) => a.rank - b.rank);
 
+    console.log(`[ai/suggest] source=ai count=${recommendations.length}`);
     return { recommendations, summary: parsed.summary };
   } catch (err) {
     console.error("[ai/suggest] AI call failed, falling back to plain list:", err);
-    return buildFallbackResult(trimmed);
+    const fallback = buildFallbackResult(trimmed, context.budgetPerPerson);
+    console.log(`[ai/suggest] source=fallback count=${fallback.recommendations.length}`);
+    return fallback;
   }
 }
 
 // If the AI call or JSON parsing fails, still give the user something
-// useful instead of a dead end: the top candidates, unranked by AI but
-// still filtered by the search itself.
-function buildFallbackResult(candidates: HotpepperShop[]): AISuggestResult {
-  const top = candidates.slice(0, 5);
+// useful instead of a dead end: the candidates closest to their budget,
+// unranked by AI but still filtered by the search itself.
+function buildFallbackResult(candidates: HotpepperShop[], targetBudget: number): AISuggestResult {
+  const top = [...candidates]
+    .sort(
+      (a, b) =>
+        Math.abs(parseYenAmount(a.budget.average) - targetBudget) -
+        Math.abs(parseYenAmount(b.budget.average) - targetBudget)
+    )
+    .slice(0, 5);
+
   return {
     summary:
       "AIによる分析に失敗したため、検索条件に合う店舗をそのまま表示しています。",
