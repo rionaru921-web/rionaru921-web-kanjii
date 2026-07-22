@@ -13,6 +13,7 @@ import {
 import { HOTPEPPER_GENRES } from "@/lib/constants/genres";
 import { DRINK_BUDGET_PRESETS } from "@/lib/constants/budget";
 import StationAutocomplete from "@/components/shared/StationAutocomplete";
+import AiUsageBadge from "@/components/ai/AiUsageBadge";
 import { MOOD_TAGS, MOOD_CATEGORIES } from "@/lib/constants/moods";
 import {
   PARTICIPANT_TAGS,
@@ -90,6 +91,7 @@ export default function SuggestForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <AiUsageBadge />
       <p className="text-xs font-semibold text-ink-muted tracking-wide">STEP 1・基本条件</p>
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">

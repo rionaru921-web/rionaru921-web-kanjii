@@ -5,6 +5,8 @@ import { buildHotpepperSearchParams } from "@/lib/api/restaurants";
 import { getCached, setCached } from "@/lib/api/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAiUsageStatus, incrementAiUsage } from "@/lib/plans/checkAiUsage";
+import { PLAN_LIMITS } from "@/lib/plans/limits";
 import type { SearchParams } from "@/lib/api/types";
 
 export const runtime = "nodejs";
@@ -80,8 +82,27 @@ export async function POST(req: NextRequest) {
     if ((usage?.used_count ?? 0) >= GUEST_AI_LIFETIME_LIMIT) {
       return NextResponse.json(
         {
-          error: `AIプラン作成の無料お試し回数(${GUEST_AI_LIFETIME_LIMIT}回)に達しました。アカウント登録で回数無制限にご利用いただけます。`,
+          error: `AIプラン作成の無料お試し回数(${GUEST_AI_LIFETIME_LIMIT}回)に達しました。アカウント登録すると、月${PLAN_LIMITS.free.maxAiSuggestionsPerMonth}回までご利用いただけます。`,
           code: "GUEST_AI_LIMIT_REACHED",
+        },
+        { status: 403 }
+      );
+    }
+  }
+
+  // 登録ユーザー(匿名でない)は月次上限で管理する。ゲストや、このAPIを
+  // 直接叩いた無セッションのリクエストはここでは対象外(既存のIPレート
+  // 制限のみが適用される、従来通りの挙動)。
+  let usageStatus: Awaited<ReturnType<typeof getAiUsageStatus>> | null = null;
+  if (user && !isGuest) {
+    usageStatus = await getAiUsageStatus(user.id);
+    if (!usageStatus.allowed) {
+      return NextResponse.json(
+        {
+          error: `今月のAI提案利用回数(${usageStatus.maxCount}回)を超えました。来月1日にリセットされます。`,
+          code: "AI_USAGE_LIMIT_REACHED",
+          currentCount: usageStatus.currentCount,
+          maxCount: usageStatus.maxCount,
         },
         { status: 403 }
       );
@@ -158,6 +179,16 @@ export async function POST(req: NextRequest) {
           { user_id: user.id, used_count: (usage?.used_count ?? 0) + 1 },
           { onConflict: "user_id" }
         );
+    }
+
+    if (user && !isGuest && usageStatus && usageStatus.maxCount !== -1) {
+      // Best-effort — swallow errors so a failed counter update can't turn
+      // an already-computed result into a 500 for the caller.
+      try {
+        await incrementAiUsage(user.id);
+      } catch (incrementErr) {
+        console.error("[api/ai/suggest] failed to increment usage count:", incrementErr);
+      }
     }
 
     return NextResponse.json(result);

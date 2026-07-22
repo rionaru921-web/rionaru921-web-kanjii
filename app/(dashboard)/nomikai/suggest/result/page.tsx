@@ -157,6 +157,13 @@ function SuggestResult() {
             >
               アカウントを作成する
             </Link>
+          ) : errorCode === "AI_USAGE_LIMIT_REACHED" ? (
+            <Link
+              href="/pricing"
+              className="rounded-full bg-gold-gradient text-white text-sm font-bold px-6 py-2.5 hover:brightness-110 transition-all shadow-gold"
+            >
+              Premiumプランを見る
+            </Link>
           ) : (
             <Link href={retryHref} className="text-gold text-sm underline underline-offset-4">
               条件を変更してやり直す

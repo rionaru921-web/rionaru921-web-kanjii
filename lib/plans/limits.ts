@@ -8,15 +8,14 @@ export interface PlanLimits {
   canUseAdvancedSharing: boolean;
 }
 
-// free の数値上限(maxPlansPerMonth / maxAiSuggestionsPerMonth)は将来の
-// 想定値であり、まだどこからも参照・強制されていない。機能フラグ
+// maxAiSuggestionsPerMonth は lib/plans/checkAiUsage.ts が実際に強制する
+// (app/api/ai/suggest/route.ts 経由)。maxPlansPerMonth 等の他の数値上限は
+// まだどこからも参照・強制されていない将来の想定値。機能フラグ
 // (canUseTieredSplit 等)はベータ期間中につき全ティアで true にしてある。
-// 正式な制限を導入する際はこのテーブルだけ更新すればよい(呼び出し側は
-// getUserPlanLimits() 経由でしか値を見ない想定)。
 export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
   free: {
     maxPlansPerMonth: 10,
-    maxAiSuggestionsPerMonth: 20,
+    maxAiSuggestionsPerMonth: 10,
     canUseTieredSplit: true,
     canExportPdf: true,
     canUseAdvancedSharing: true,
