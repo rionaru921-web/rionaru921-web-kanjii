@@ -1,8 +1,8 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { Clock, MapPin, Wallet, FileText, CalendarPlus, Sparkles, MessageCircle, CheckCircle2 } from "lucide-react";
-import Logo from "@/components/shared/Logo";
-import GoldButton from "@/components/shared/GoldButton";
+import { Clock, MapPin, Wallet, FileText, CalendarPlus, MessageCircle, CheckCircle2 } from "lucide-react";
+import { WashokuShell } from "@/components/share/washoku/WashokuShell";
+import { WashokuPaperCard } from "@/components/share/washoku/WashokuPaperCard";
+import { WashokuCTA } from "@/components/share/washoku/WashokuCTA";
 import AttendanceForm from "@/components/share/AttendanceForm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -141,184 +141,183 @@ export default async function SharePlanPage({ params }: { params: { token: strin
       : null;
   const splitAmountById = new Map((splitResults ?? []).map((r) => [r.id, r.amount]));
 
+  if (!typedPlan) {
+    return (
+      <WashokuShell eyebrow="">
+        <WashokuPaperCard>
+          <p className="text-center text-washoku-ink-muted">このリンクは見つかりませんでした。</p>
+        </WashokuPaperCard>
+      </WashokuShell>
+    );
+  }
+
   return (
-    <div className="min-h-screen ink-wash px-4 py-10 flex flex-col items-center">
-      <Logo size="md" href="/" />
-
-      {!typedPlan ? (
-        <div className="mt-10 w-full max-w-sm text-center rounded-3xl bg-surface-tertiary shadow-warm p-8">
-          <p className="text-ink-secondary">このリンクは見つかりませんでした。</p>
-        </div>
-      ) : (
-        <div className="w-full max-w-lg mt-8 flex flex-col gap-6">
-          <p className="text-center text-sm text-ink-secondary">幹事さんから招待されました</p>
-
-          <div className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex flex-col gap-5">
-            <div>
-              <h1 className="font-serif font-bold text-2xl text-ink text-center">{typedPlan.title}</h1>
-              {organizers.length > 0 && (
-                <p className="mt-2 text-xs text-ink-muted text-center">
-                  👑 幹事({organizers.length}人): {organizers.map((m) => m.name).join("、")}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Clock className="text-gold shrink-0" size={18} />
-              <p className="text-sm text-ink">{formatDateRange(typedPlan.event_date, typedPlan.end_date)}</p>
-            </div>
-
-            {(typedPlan.venue_name || typedPlan.venue_address) && (
-              <div className="flex items-start gap-3">
-                <MapPin className="text-gold shrink-0" size={18} />
-                <div className="min-w-0 flex-1">
-                  {typedPlan.venue_name && (
-                    <p className="text-sm text-ink font-semibold">{typedPlan.venue_name}</p>
-                  )}
-                  {typedPlan.venue_address && (
-                    <p className="text-sm text-ink-secondary">{typedPlan.venue_address}</p>
-                  )}
-                  {mapQuery && (
-                    <>
-                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                        <span className="text-ink/60">地図で開く:</span>
-                        <a
-                          href={buildGoogleMapsUrl(mapQuery)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gold hover:underline"
-                        >
-                          🗺️ Google Maps
-                        </a>
-                        <a
-                          href={buildAppleMapsUrl(mapQuery)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gold hover:underline"
-                        >
-                          🍎 Apple Maps
-                        </a>
-                      </div>
-                      <iframe
-                        src={buildEmbedUrl(mapQuery)}
-                        className="mt-3 h-40 w-full rounded-lg border border-gold/20"
-                        loading="lazy"
-                        title="地図プレビュー"
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
+    <WashokuShell>
+      <WashokuPaperCard>
+        <div className="text-center mb-8">
+          <p className="font-serif text-6xl font-black text-washoku-red leading-none">集</p>
+          <div className="mt-4 border-t border-b border-washoku-brass-soft py-3">
+            <h1 className="font-serif text-xl sm:text-2xl font-bold">{typedPlan.title}</h1>
+            {organizers.length > 0 && (
+              <p className="mt-2 text-xs text-washoku-ink-muted">
+                👑 幹事({organizers.length}人): {organizers.map((m) => m.name).join("、")}
+              </p>
             )}
+          </div>
+        </div>
 
-            {(typedPlan.fee_amount != null || typedPlan.fee_breakdown.length > 0) && (
-              <div className="flex items-start gap-3">
-                <Wallet className="text-gold shrink-0" size={18} />
-                <div className="min-w-0 flex-1">
-                  {typedPlan.fee_amount != null && (
-                    <p className="text-sm font-display-num font-black text-ink">{yen(typedPlan.fee_amount)}</p>
-                  )}
-                  {typedPlan.fee_breakdown.length > 0 && (
-                    <ul className="mt-1.5 flex flex-col gap-0.5">
-                      {typedPlan.fee_breakdown.map((item, i) => (
-                        <li key={i} className="flex items-center justify-between text-xs text-ink-secondary">
-                          <span>{item.label}</span>
-                          <span className="font-display-num">{formatFeeValue(item.amount)}</span>
+        <div className="flex flex-col gap-6">
+          <div className="flex items-start gap-3">
+            <Clock className="text-washoku-brass shrink-0" size={18} />
+            <p className="text-sm">{formatDateRange(typedPlan.event_date, typedPlan.end_date)}</p>
+          </div>
+
+          {(typedPlan.venue_name || typedPlan.venue_address) && (
+            <div className="flex items-start gap-3">
+              <MapPin className="text-washoku-brass shrink-0" size={18} />
+              <div className="min-w-0 flex-1">
+                {typedPlan.venue_name && (
+                  <p className="text-sm font-serif font-semibold">{typedPlan.venue_name}</p>
+                )}
+                {typedPlan.venue_address && (
+                  <p className="text-sm text-washoku-ink-muted">{typedPlan.venue_address}</p>
+                )}
+                {mapQuery && (
+                  <>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                      <span className="text-washoku-ink-muted">地図で開く:</span>
+                      <a
+                        href={buildGoogleMapsUrl(mapQuery)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-washoku-red hover:underline"
+                      >
+                        🗺️ Google Maps
+                      </a>
+                      <a
+                        href={buildAppleMapsUrl(mapQuery)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-washoku-red hover:underline"
+                      >
+                        🍎 Apple Maps
+                      </a>
+                    </div>
+                    <iframe
+                      src={buildEmbedUrl(mapQuery)}
+                      className="mt-3 h-40 w-full rounded-lg border border-washoku-brass-soft"
+                      loading="lazy"
+                      title="地図プレビュー"
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {(typedPlan.fee_amount != null || typedPlan.fee_breakdown.length > 0) && (
+            <div className="flex items-start gap-3">
+              <Wallet className="text-washoku-brass shrink-0" size={18} />
+              <div className="min-w-0 flex-1">
+                {typedPlan.fee_amount != null && (
+                  <p className="text-sm font-serif font-black">{yen(typedPlan.fee_amount)}</p>
+                )}
+                {typedPlan.fee_breakdown.length > 0 && (
+                  <ul className="mt-1.5 flex flex-col gap-0.5">
+                    {typedPlan.fee_breakdown.map((item, i) => (
+                      <li key={i} className="flex items-center justify-between text-xs text-washoku-ink-muted">
+                        <span>{item.label}</span>
+                        <span>{formatFeeValue(item.amount)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {typedPlan.split_mode === "equal" && perPerson != null && (
+                  <p className="mt-1.5 text-xs text-washoku-ink-muted">
+                    1人あたり <span className="font-semibold text-washoku-red">{yen(perPerson)}</span>(
+                    {payingMemberCount}人で割り勘)
+                  </p>
+                )}
+                {typedPlan.split_mode === "tiered" && payingMembers.length > 0 && (
+                  <div className="mt-1.5 border-t border-washoku-brass-soft pt-2">
+                    <p className="text-[11px] text-washoku-ink-muted mb-1">傾斜割り(一人ずつの金額)</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {payingMembers.map((m) => (
+                        <li key={m.id} className="flex items-center justify-between text-xs text-washoku-ink-muted">
+                          <span className="truncate">{m.name}</span>
+                          <span className="text-washoku-red shrink-0">
+                            {yen(splitAmountById.get(m.id) ?? 0)}
+                          </span>
                         </li>
                       ))}
                     </ul>
-                  )}
-                  {typedPlan.split_mode === "equal" && perPerson != null && (
-                    <p className="mt-1.5 text-xs text-ink-secondary">
-                      1人あたり <span className="font-semibold text-gold">{yen(perPerson)}</span>({payingMemberCount}
-                      人で割り勘)
-                    </p>
-                  )}
-                  {typedPlan.split_mode === "tiered" && payingMembers.length > 0 && (
-                    <div className="mt-1.5 rounded-xl bg-gold/5 border border-gold/15 px-3 py-2">
-                      <p className="text-[11px] text-ink-muted mb-1">傾斜割り(一人ずつの金額)</p>
-                      <ul className="flex flex-col gap-0.5">
-                        {payingMembers.map((m) => (
-                          <li key={m.id} className="flex items-center justify-between text-xs text-ink-secondary">
-                            <span className="truncate">{m.name}</span>
-                            <span className="font-display-num text-gold shrink-0">
-                              {yen(splitAmountById.get(m.id) ?? 0)}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {typedPlan.payment_methods.length > 0 && (
-                    <p className="text-xs text-ink-secondary mt-0.5">
-                      {typedPlan.payment_methods.map((m) => PAYMENT_METHOD_LABELS[m] ?? m).join(" / ")}
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
+                {typedPlan.payment_methods.length > 0 && (
+                  <p className="text-xs text-washoku-ink-muted mt-0.5">
+                    {typedPlan.payment_methods.map((m) => PAYMENT_METHOD_LABELS[m] ?? m).join(" / ")}
+                  </p>
+                )}
               </div>
-            )}
-
-            {typedPlan.memo && (
-              <div className="flex items-start gap-3">
-                <FileText className="text-gold shrink-0" size={18} />
-                <p className="text-sm text-ink-secondary whitespace-pre-wrap">{typedPlan.memo}</p>
-              </div>
-            )}
-          </div>
-
-          {isCompleted ? (
-            <div className="rounded-2xl border border-gold/20 bg-white p-6 flex flex-col items-center gap-2 text-center">
-              <CheckCircle2 className="text-gold" size={24} />
-              <p className="text-sm font-semibold text-ink">このイベントは終了しました</p>
-              <p className="text-xs text-ink-secondary">ご参加ありがとうございました。</p>
             </div>
-          ) : (
-            <AttendanceForm shareToken={params.token} members={typedMembers} />
           )}
 
-          {lineUrl && (
-            <a
-              href={lineUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full border border-[#06C755]/40 text-[#06C755] font-semibold text-sm py-3 hover:bg-[#06C755]/5 transition-colors"
-            >
-              <MessageCircle size={16} />
-              LINEで共有
-            </a>
+          {typedPlan.memo && (
+            <div className="flex items-start gap-3">
+              <FileText className="text-washoku-brass shrink-0" size={18} />
+              <p className="text-sm text-washoku-ink-muted whitespace-pre-wrap">{typedPlan.memo}</p>
+            </div>
           )}
-
-          {icsUrl && (
-            <a
-              href={icsUrl}
-              className="flex items-center justify-center gap-2 rounded-full border border-blue-200 text-blue-600 font-semibold text-sm py-3 hover:bg-blue-50 transition-colors"
-            >
-              <CalendarPlus size={16} />
-              カレンダーに追加(.ics)
-            </a>
-          )}
-
-          {gcalUrl && (
-            <a
-              href={gcalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full border border-gold/30 text-gold font-semibold text-sm py-3 hover:bg-gold/5 transition-colors"
-            >
-              <CalendarPlus size={16} />
-              Googleカレンダーに追加
-            </a>
-          )}
-
-          <GoldButton href="/signup" icon={Sparkles}>
-            幹事ラボで自分も幹事してみる
-          </GoldButton>
         </div>
+      </WashokuPaperCard>
+
+      {isCompleted ? (
+        <div className="rounded-lg border border-washoku-brass-soft bg-washoku-paper text-washoku-ink p-6 flex flex-col items-center gap-2 text-center">
+          <CheckCircle2 className="text-washoku-brass" size={24} />
+          <p className="text-sm font-serif font-semibold">このイベントは終了しました</p>
+          <p className="text-xs text-washoku-ink-muted">ご参加ありがとうございました。</p>
+        </div>
+      ) : (
+        <AttendanceForm shareToken={params.token} members={typedMembers} />
       )}
 
-      <Link href="/" className="mt-10 text-xs text-ink-muted hover:text-gold transition-colors">
-        幹事ラボ トップへ
-      </Link>
-    </div>
+      <div className="flex flex-col gap-3">
+        {lineUrl && (
+          <a
+            href={lineUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-full border border-[#06C755]/40 text-[#06C755] font-semibold text-sm py-3 hover:bg-[#06C755]/10 transition-colors"
+          >
+            <MessageCircle size={16} />
+            LINEで共有
+          </a>
+        )}
+
+        {icsUrl && (
+          <a
+            href={icsUrl}
+            className="flex items-center justify-center gap-2 rounded-full border border-washoku-brass-soft text-washoku-brass font-semibold text-sm py-3 hover:bg-washoku-brass-soft transition-colors"
+          >
+            <CalendarPlus size={16} />
+            カレンダーに追加(.ics)
+          </a>
+        )}
+
+        {gcalUrl && (
+          <a
+            href={gcalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-full border border-washoku-brass-soft text-washoku-brass font-semibold text-sm py-3 hover:bg-washoku-brass-soft transition-colors"
+          >
+            <CalendarPlus size={16} />
+            Googleカレンダーに追加
+          </a>
+        )}
+
+        <WashokuCTA>幹事ラボで自分も幹事してみる</WashokuCTA>
+      </div>
+    </WashokuShell>
   );
 }

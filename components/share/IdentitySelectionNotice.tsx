@@ -9,7 +9,7 @@ export default function IdentitySelectionNotice() {
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="mb-4 flex items-start gap-2 rounded-lg border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-xs text-vermilion-text"
+      className="mb-4 flex items-start gap-2 rounded-lg border border-washoku-red-soft bg-washoku-red-soft px-3 py-2.5 text-xs text-washoku-red"
     >
       <AlertTriangle size={14} className="shrink-0 mt-0.5" />
       <p>

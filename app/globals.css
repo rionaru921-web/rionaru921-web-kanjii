@@ -42,6 +42,24 @@
   --shadow-hover: 0 12px 40px rgba(31, 27, 24, 0.1);
 }
 
+/* 「割烹の暖簾」— 参加者向け共有画面(/share/*)専用パレット。
+   運用画面のトークン(--accent-primary 等)とは完全に独立しており、
+   .washoku でスコープした要素の中でしか参照されない。 */
+.washoku {
+  --washoku-paper: #f7f3ea;
+  --washoku-ink: #2a2624;
+  --washoku-ink-muted: #8b8378;
+  --washoku-red: #b85450;
+  --washoku-red-deep: #9f4642;
+  --washoku-brass: #c4a56b;
+  --washoku-brass-bright: #d4a94d;
+  --washoku-border: rgba(196, 165, 107, 0.35);
+
+  background: linear-gradient(180deg, #1f1b18 0%, #2a2420 100%);
+  min-height: 100vh;
+  color: var(--washoku-paper);
+}
+
 * {
   border-color: var(--border-soft);
 }
@@ -99,6 +117,30 @@ h4 {
         rgba(184, 84, 80, 0.05),
         transparent 60%
       );
+  }
+
+  /* 割烹の暖簾テーマ用ユーティリティ。.washoku 配下でのみ意味を持つ。 */
+  .text-washoku-paper { color: var(--washoku-paper); }
+  .text-washoku-paper-muted { color: rgba(247, 243, 234, 0.65); }
+  .text-washoku-paper-faint { color: rgba(247, 243, 234, 0.45); }
+  .text-washoku-ink { color: var(--washoku-ink); }
+  .text-washoku-ink-muted { color: var(--washoku-ink-muted); }
+  .text-washoku-red { color: var(--washoku-red-deep); }
+  .text-washoku-brass { color: var(--washoku-brass); }
+  .bg-washoku-paper { background-color: var(--washoku-paper); }
+  .bg-washoku-red { background-color: var(--washoku-red); }
+  .bg-washoku-red-soft { background-color: rgba(184, 84, 80, 0.1); }
+  .bg-washoku-brass-soft { background-color: rgba(196, 165, 107, 0.12); }
+  .border-washoku-brass { border-color: var(--washoku-brass); }
+  .border-washoku-brass-soft { border-color: rgba(196, 165, 107, 0.35); }
+  .border-washoku-red-soft { border-color: rgba(184, 84, 80, 0.3); }
+
+  .washoku-glow {
+    background: radial-gradient(circle, rgba(212, 169, 77, 0.35) 0%, transparent 70%);
+  }
+
+  .washoku-noise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
 

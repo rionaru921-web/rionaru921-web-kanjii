@@ -6,21 +6,31 @@ export const alt = "幹事ラボ プラン招待";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Same non-subsetted Noto Sans JP woff as app/opengraph-image.tsx — next/og's
-// default font has no CJK glyphs, so Japanese text renders as blank boxes
-// without this.
+// Same non-subsetted Noto Sans JP woff as the other OG image routes —
+// next/og's default font has no CJK glyphs, so Japanese text renders as
+// blank boxes without this.
 const NOTO_SANS_JP_URL =
   "https://fonts.gstatic.com/s/notosansjp/v56/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75g.woff";
 
-export default async function PlanOGImage({ params }: { params: { token: string } }) {
+const TYPE_LABEL: Record<string, string> = {
+  nomikai: "飲み会のご招待",
+  travel: "旅行のご招待",
+};
+
+export default async function ShareOGImage({ params }: { params: { token: string } }) {
   const supabase = createAdminClient();
-  const [{ data: plan }, fontData] = await Promise.all([
-    supabase.from("manual_plans").select("title, venue_name").eq("share_token", params.token).maybeSingle(),
+
+  const [{ data: shareToken }, fontData] = await Promise.all([
+    supabase.from("share_tokens").select("history_id").eq("token", params.token).maybeSingle(),
     fetch(NOTO_SANS_JP_URL).then((res) => res.arrayBuffer()),
   ]);
 
-  const title = plan?.title ?? "幹事ラボ";
-  const subtitle = plan?.venue_name ?? "あらゆる集まりを、AIが幹事します";
+  const { data: history } = shareToken
+    ? await supabase.from("history").select("title, type").eq("id", shareToken.history_id).maybeSingle()
+    : { data: null };
+
+  const title = history?.title ?? "幹事ラボ";
+  const subtitle = history ? TYPE_LABEL[history.type] ?? "集まりのご招待" : "あらゆる集まりを、AIが幹事します";
 
   return new ImageResponse(
     (

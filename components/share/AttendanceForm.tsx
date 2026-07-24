@@ -9,7 +9,7 @@ import type { AttendanceStatus, ManualPlanMember } from "@/lib/manual-plans/type
 
 const OPTIONS: { value: AttendanceStatus; label: string; icon: LucideIcon; activeClass: string }[] = [
   { value: "attending", label: "参加する", icon: Check, activeClass: "bg-emerald-50 border-emerald-400 text-emerald-600" },
-  { value: "declined", label: "不参加", icon: X, activeClass: "bg-gray-100 border-gray-400 text-gray-600" },
+  { value: "declined", label: "不参加", icon: X, activeClass: "bg-washoku-red-soft border-washoku-red-soft text-washoku-red" },
   { value: "maybe", label: "未定", icon: HelpCircle, activeClass: "bg-orange-50 border-orange-400 text-orange-600" },
 ];
 
@@ -171,12 +171,12 @@ export default function AttendanceForm({
   if (members.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-gold/20 bg-white p-6">
+    <div className="rounded-lg border border-washoku-brass-soft bg-washoku-paper text-washoku-ink p-6">
       {selectedMember ? (
         <>
-          <p className="text-sm text-ink/60">こんにちは、{selectedMember.name}さん</p>
+          <p className="text-sm text-washoku-ink-muted">こんにちは、{selectedMember.name}さん</p>
           <div className="mt-2 flex items-center justify-between gap-2">
-            <p className="text-lg font-semibold text-ink">出欠を教えてください</p>
+            <p className="font-serif text-lg font-semibold">出欠を教えてください</p>
             <AttendanceStatusBadge status={selectedMember.attendance_status} />
           </div>
 
@@ -192,8 +192,8 @@ export default function AttendanceForm({
                   type="button"
                   onClick={() => isEditing && setSelectedStatus(opt.value)}
                   disabled={saving || !isEditing}
-                  className={`flex flex-col items-center gap-1 rounded-xl px-2 py-3 text-xs font-semibold border transition-colors disabled:opacity-60 ${
-                    active ? opt.activeClass : "border-gold/15 text-ink-secondary hover:border-gold/30"
+                  className={`flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-xs font-semibold border transition-colors disabled:opacity-60 ${
+                    active ? opt.activeClass : "border-washoku-brass-soft text-washoku-ink-muted hover:border-washoku-brass"
                   }`}
                 >
                   {saving && active ? <Loader2 size={16} className="animate-spin" /> : <Icon size={16} />}
@@ -203,14 +203,18 @@ export default function AttendanceForm({
             })}
           </div>
 
-          {error && <p className="text-xs text-vermilion-text mt-2 text-center">{error}</p>}
+          {error && <p className="text-xs text-washoku-red mt-2 text-center">{error}</p>}
 
           {isEditing ? (
             <button
               type="button"
               onClick={confirmSelection}
               disabled={!selectedStatus || saving}
-              className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-gold-gradient py-3 text-sm font-semibold text-white shadow-gold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold text-washoku-ink shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--washoku-brass-bright) 0%, var(--washoku-brass) 100%)",
+              }}
             >
               {saving && <Loader2 size={16} className="animate-spin" />}
               {saving ? "保存中..." : "この内容で決定する"}
@@ -221,7 +225,7 @@ export default function AttendanceForm({
                 <Check size={16} />
                 回答を保存しました
               </p>
-              <button type="button" onClick={startEditing} className="mt-2 text-sm text-gold underline">
+              <button type="button" onClick={startEditing} className="mt-2 text-sm text-washoku-brass underline">
                 編集する
               </button>
             </>
@@ -230,7 +234,7 @@ export default function AttendanceForm({
           <button
             type="button"
             onClick={clearSelection}
-            className="mt-4 text-sm text-ink/50 underline"
+            className="mt-4 text-sm text-washoku-ink-muted underline"
           >
             別の人として回答する
           </button>
@@ -238,14 +242,14 @@ export default function AttendanceForm({
       ) : (
         <>
           <IdentitySelectionNotice />
-          <p className="text-sm text-ink/70">あなたのお名前を選んでください</p>
+          <p className="text-sm text-washoku-ink-muted">あなたのお名前を選んでください</p>
           <div className="mt-3 grid gap-2">
             {members.map((m) => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => selectMember(m.id)}
-                className="flex items-center justify-between gap-2 rounded-xl border border-gold/15 px-4 py-2.5 text-sm text-ink text-left hover:border-gold/30 hover:bg-gold/5 transition-colors"
+                className="flex items-center justify-between gap-2 rounded-lg border border-washoku-brass-soft px-4 py-2.5 text-sm text-left hover:border-washoku-brass hover:bg-washoku-brass-soft transition-colors"
               >
                 {m.name}
                 <AttendanceStatusBadge status={m.attendance_status} />

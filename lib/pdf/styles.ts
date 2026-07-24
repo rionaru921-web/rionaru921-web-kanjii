@@ -30,15 +30,19 @@ Font.register({
 // the box; this at least stops it breaking mid-word on latin/number runs.
 Font.registerHyphenationCallback((word) => [word]);
 
+// 「割烹の暖簾」テーマ（PDFは幹事・参加者どちらがダウンロードしても同じ
+// 成果物のため、運用画面/共有画面どちらの「画面」でもなく独立して和デザイン
+// に統一している）。gold=真鍮金（罫線・リンク）、goldDeep=提灯朱寄りの濃色
+// （タイトル・金額など強調用）としてキー名は既存のまま値だけ差し替え。
 export const COLORS = {
-  bg: "#FAF6EF",
-  ink: "#2B2420",
-  inkSecondary: "#6B5D52",
-  inkMuted: "#A89B8E",
-  gold: "#C4633F",
-  goldDeep: "#A85030",
-  vermilion: "#7A2E2E",
-  border: "#E8DDD0",
+  bg: "#F7F3EA",
+  ink: "#2A2624",
+  inkSecondary: "#6B5F55",
+  inkMuted: "#8B8378",
+  gold: "#C4A56B",
+  goldDeep: "#9F4642",
+  vermilion: "#B85450",
+  border: "#E4D9C4",
 };
 
 export const pdfStyles = StyleSheet.create({
