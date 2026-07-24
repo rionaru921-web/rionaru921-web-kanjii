@@ -3,6 +3,7 @@ import { ArrowLeft, SearchX } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import EventPreview from "@/components/share/EventPreview";
 import HistoryDetailActions from "@/components/history/HistoryDetailActions";
+import { CoachTriggerButton } from "@/components/coaching/CoachTriggerButton";
 import type { HistoryRecord } from "@/lib/history/types";
 
 export default async function HistoryDetailPage({
@@ -24,6 +25,21 @@ export default async function HistoryDetailPage({
         .maybeSingle()
     : { data: null };
 
+  const isGuest = !!user?.is_anonymous;
+
+  // history rows only exist post-finalization (see lib/coaching/planContext.ts),
+  // so every record here is already coaching-eligible — no date check needed.
+  const { data: coachSession } =
+    record && !isGuest
+      ? await supabase
+          .from("coaching_sessions")
+          .select("id")
+          .eq("user_id", user!.id)
+          .eq("plan_type", (record as HistoryRecord).type)
+          .eq("plan_id", record.id)
+          .maybeSingle()
+      : { data: null };
+
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto">
       <Link
@@ -43,6 +59,13 @@ export default async function HistoryDetailPage({
             payload={(record as HistoryRecord).payload}
           />
           <HistoryDetailActions record={record as HistoryRecord} />
+          {!isGuest && (
+            <CoachTriggerButton
+              planType={(record as HistoryRecord).type}
+              planId={record.id}
+              hasSession={!!coachSession}
+            />
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center py-20 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">

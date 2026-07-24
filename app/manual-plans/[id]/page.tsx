@@ -17,6 +17,7 @@ import TimelineBadge from "@/components/manual-plans/TimelineBadge";
 import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import MemberList from "@/components/manual-plans/MemberList";
 import ReceiptsSection from "@/components/manual-plans/ReceiptsSection";
+import { CoachTriggerButton } from "@/components/coaching/CoachTriggerButton";
 import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee, getPayingMembers } from "@/lib/manual-plans/format";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { calculateAttendanceRate } from "@/lib/manual-plans/attendance-stats";
@@ -50,6 +51,8 @@ export default async function ManualPlanDetailPage({
     redirect(`/login?redirectTo=/manual-plans/${params.id}`);
   }
 
+  const isGuest = !!user.is_anonymous;
+
   // members only depends on params.id, not on the plan row, so it's fetched
   // alongside plan instead of waiting for it.
   const [{ data: plan }, { data: members }] = await Promise.all([
@@ -60,6 +63,20 @@ export default async function ManualPlanDetailPage({
   if (!plan) notFound();
 
   const typedPlan = plan as ManualPlan;
+  const isCompleted = isCompletedPlan(typedPlan);
+
+  // Guests can't use coaching (API rejects is_anonymous outright), so skip
+  // the lookup entirely for them rather than querying just to hide the result.
+  const { data: coachSession } =
+    isCompleted && !isGuest
+      ? await supabase
+          .from("coaching_sessions")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("plan_type", "manual")
+          .eq("plan_id", typedPlan.id)
+          .maybeSingle()
+      : { data: null };
   // This page renders member fields directly (never passes the raw row
   // objects into a Client Component), so select("*") — and therefore
   // guest_secret — never reaches the browser. We only ever read it here to
@@ -77,7 +94,6 @@ export default async function ManualPlanDetailPage({
   );
 
   const attendanceRate = calculateAttendanceRate(attendanceCounts.attending, typedMembers.length);
-  const isCompleted = isCompletedPlan(typedPlan);
   const payingMembers = getPayingMembers(typedMembers);
   const payingMemberCount = payingMembers.length;
   const perPerson = perPersonFee(typedPlan.fee_amount, payingMemberCount);
@@ -151,6 +167,10 @@ export default async function ManualPlanDetailPage({
       </div>
 
       <PlanDetailActions plan={typedPlan} members={typedMembers} isCompleted={isCompleted} />
+
+      {isCompleted && !isGuest && (
+        <CoachTriggerButton planType="manual" planId={typedPlan.id} hasSession={!!coachSession} />
+      )}
 
       <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
         <CalendarDays className="text-gold shrink-0" size={18} />
