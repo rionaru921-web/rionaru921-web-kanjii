@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { User } from "lucide-react";
+import Link from "next/link";
+import { User, GraduationCap, ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/dashboard/ProfileCard";
 
@@ -34,6 +35,24 @@ export default async function ProfileSettingsPage() {
         表示名やメールアドレスなど、アカウント情報を確認・編集できます。
       </p>
       {user && <ProfileCard userId={user.id} email={user.email ?? ""} displayName={displayName} />}
+
+      {!user?.is_anonymous && (
+        <Link
+          href="/settings/growth"
+          className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-surface-tertiary border border-gold/20 p-4 hover:border-gold/40 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold">
+              <GraduationCap size={18} />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-ink">幹事としての成長</p>
+              <p className="text-xs text-ink-muted mt-0.5">レベルと振り返り履歴を確認</p>
+            </div>
+          </div>
+          <ChevronRight className="text-ink-muted shrink-0" size={18} />
+        </Link>
+      )}
     </main>
   );
 }

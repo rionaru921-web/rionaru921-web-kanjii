@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   MessageSquare,
+  GraduationCap,
 } from "lucide-react";
 import Logo from "./Logo";
 import { LogoutButton } from "@/components/auth/LogoutButton";
@@ -34,6 +35,7 @@ const MAIN_NAV = [
 
 const BOTTOM_NAV = [
   { href: "/history", label: "履歴", icon: History },
+  { href: "/settings/growth", label: "成長記録", icon: GraduationCap },
   { href: "/settings/payment", label: "集金設定", icon: Settings },
   { href: "/settings/profile", label: "プロフィール", icon: User },
 ];
