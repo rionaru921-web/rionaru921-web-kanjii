@@ -84,16 +84,16 @@ export default function CreatePlanModal({ open, onClose }: CreatePlanModalProps)
               <OptionCard
                 href={NOMIKAI_AI_PATH}
                 icon={Wine}
-                title="飲み会をAIに提案"
-                description="条件を伝えるだけで、AIがぴったりのお店を提案します"
+                title="飲み会のお店を提案してもらう"
+                description="条件を伝えるだけで、ぴったりのお店を提案します(AI補助)"
                 iconStyle="gold"
                 onClose={onClose}
               />
               <OptionCard
                 href={TRAVEL_AI_PATH}
                 icon={Plane}
-                title="旅行をAIに提案"
-                description="目的地・日程・予算から、AIが最適なプランを提案します"
+                title="旅行のプランを提案してもらう"
+                description="目的地・日程・予算から、プランの候補を提案します(AI補助)"
                 iconStyle="gold"
                 onClose={onClose}
               />

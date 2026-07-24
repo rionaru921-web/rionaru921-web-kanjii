@@ -39,7 +39,7 @@ export default function AiUsageBadge() {
     return (
       <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-gold/10 text-gold text-xs font-semibold px-3 py-1.5">
         <Sparkles size={12} />
-        Premium: AI提案無制限
+        Premium: お店提案(AI補助)無制限
       </span>
     );
   }
@@ -50,10 +50,10 @@ export default function AiUsageBadge() {
   return (
     <span
       className={`inline-flex items-center gap-1.5 self-start rounded-full text-xs font-semibold px-3 py-1.5 ${
-        isLow ? "bg-vermilion/10 text-vermilion-text-text" : "bg-gold/10 text-gold"
+        isLow ? "bg-vermilion/10 text-vermilion-text" : "bg-gold/10 text-gold"
       }`}
     >
-      今月のAI提案: 残り {remaining} / {maxCount} 回
+      今月のお店提案(AI補助): 残り {remaining} / {maxCount} 回
     </span>
   );
 }

@@ -14,7 +14,7 @@ const jsonLd = {
   "@type": "WebApplication",
   name: "幹事ラボ",
   description:
-    "AIが飲み会・旅行・イベントの幹事を代行。参加者の好み・予算・エリアから最適なお店を提案し、日程調整・割り勘・集金までサポートします。",
+    "幹事ラボは、飲み会・旅行・イベントの幹事業務をサポート。日程調整・お店選び・割り勘・集金まで、あなたの「幹事する」をシンプルにします。",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://kanji-lab.com",
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Web",

@@ -43,7 +43,7 @@ export default function Footer() {
           <div className="max-w-xs">
             <Logo />
             <p className="mt-4 text-sm text-ink-secondary leading-relaxed">
-              あらゆる集まりを、AIが幹事します
+              あらゆる集まりを、あなたが幹事する。
             </p>
             <div className="flex items-center gap-4 mt-6">
               <Link href="/" aria-label="X" className="text-ink-muted hover:text-gold transition-colors">

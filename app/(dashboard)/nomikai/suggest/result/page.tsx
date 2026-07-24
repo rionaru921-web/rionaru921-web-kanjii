@@ -175,7 +175,7 @@ function SuggestResult() {
       {!loading && !error && result && (
         <div className="flex flex-col gap-6">
           <div>
-            <h1 className="font-serif font-bold text-xl text-ink mb-3">AI幹事コメント</h1>
+            <h1 className="font-serif font-bold text-xl text-ink mb-3">AIからのコメント</h1>
             <div className="rounded-3xl bg-surface-tertiary shadow-warm p-5">
               <MizuhikiDivider className="mb-4" />
               <p className="font-serif text-base text-ink leading-relaxed text-center">
@@ -201,7 +201,7 @@ function SuggestResult() {
               className="flex items-center justify-center gap-2 rounded-xl border border-gold/30 text-gold font-semibold py-3 text-sm px-6 hover:bg-gold/5 transition-colors"
             >
               <RefreshCw size={15} />
-              もう一度AI提案する
+              もう一度提案してもらう
             </Link>
             <Link
               href={backHref}

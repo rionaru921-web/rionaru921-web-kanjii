@@ -20,7 +20,7 @@ export default async function PlanOGImage({ params }: { params: { token: string 
   ]);
 
   const title = plan?.title ?? "幹事ラボ";
-  const subtitle = plan?.venue_name ?? "あらゆる集まりを、AIが幹事します";
+  const subtitle = plan?.venue_name ?? "あらゆる集まりを、あなたが幹事する。";
 
   return new ImageResponse(
     (

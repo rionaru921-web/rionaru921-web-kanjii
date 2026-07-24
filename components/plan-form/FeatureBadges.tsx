@@ -5,7 +5,7 @@ import { Clock, Sparkles, Calculator, Share2 } from "lucide-react";
 
 const FEATURES = [
   { icon: Clock, label: "30秒で完了" },
-  { icon: Sparkles, label: "AI提案対応" },
+  { icon: Sparkles, label: "かんたん入力" },
   { icon: Calculator, label: "傾斜割り対応" },
   { icon: Share2, label: "URL・QR・PDF共有" },
 ];

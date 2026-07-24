@@ -10,7 +10,7 @@ const SERVICES = [
   {
     icon: Wine,
     title: "飲み会幹事",
-    description: "AIがベストなお店を選定。割り勘まで自動化。",
+    description: "お店選びから割り勘まで、ワンストップで。",
     status: "available" as const,
     href: "/nomikai",
     image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1200&q=80",
@@ -18,7 +18,7 @@ const SERVICES = [
   {
     icon: Plane,
     title: "旅行幹事",
-    description: "目的地・日程から最適プランを提案。費用分担も。",
+    description: "目的地・日程から、プランをスムーズに作成。費用分担も。",
     status: "available" as const,
     href: "/travel",
     image: "https://images.unsplash.com/photo-1528127269322-539801943592?w=1200&q=80",

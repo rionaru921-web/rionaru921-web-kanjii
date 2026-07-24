@@ -27,7 +27,7 @@ import { useToasts, ToastStack } from "@/components/ui/RealtimeToast";
 const MAIN_NAV = [
   { href: "/dashboard", label: "ホーム", icon: Home },
   { href: "/nomikai", label: "飲み会", icon: Wine },
-  { href: "/nomikai/suggest", label: "AI幹事", icon: Sparkles },
+  { href: "/nomikai/suggest", label: "AI提案（補助）", icon: Sparkles },
   { href: "/travel", label: "旅行", icon: Plane },
   { href: "/event", label: "イベント", icon: PartyPopper, disabled: true },
   { href: "/company", label: "会社", icon: Briefcase, disabled: true },

@@ -3,7 +3,7 @@ import LoginForm from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
   title: "ログイン",
-  description: "幹事ラボにログインして、AIによる幹事代行サービスをご利用ください。",
+  description: "幹事ラボにログインして、幹事の仕事をもっとシンプルに。",
 };
 
 export default function LoginPage() {

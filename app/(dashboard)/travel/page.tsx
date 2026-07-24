@@ -8,7 +8,7 @@ export default function TravelPage() {
           旅行プランを作成
         </h1>
         <p className="text-sm text-ink-secondary">
-          目的地・日程・予算を入力すると、AIが最適なプランを提案します
+          目的地・日程・予算を入力すると、プラン候補がすぐに揃います(AI補助)
         </p>
       </div>
       <TravelPlanForm />

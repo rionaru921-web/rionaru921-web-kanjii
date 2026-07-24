@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "幹事ラボ - あらゆる集まりを、AIが幹事します";
+export const alt = "幹事ラボ - あらゆる集まりを、あなたが幹事する。";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -47,7 +47,7 @@ export default async function OGImage() {
             marginTop: 20,
           }}
         >
-          あらゆる集まりを、AIが幹事します
+          あらゆる集まりを、あなたが幹事する。
         </div>
         <div
           style={{

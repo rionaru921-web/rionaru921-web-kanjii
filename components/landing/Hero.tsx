@@ -23,13 +23,13 @@ export default function Hero({ isLoggedIn }: HeroProps) {
           className="flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1"
         >
           <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-surface-tertiary/70 px-4 py-1.5 text-xs text-gold tracking-wide">
-            幹事 × AI プラットフォーム
+            あらゆる集まりのための、幹事プラットフォーム
           </span>
 
           <h1 className="font-serif font-black text-4xl sm:text-6xl lg:text-6xl leading-[1.2] text-ink text-balance">
             あらゆる集まりを、
             <br />
-            <span className="text-gold-gradient">AIが幹事</span>します
+            あなたが<span className="text-gold-gradient">幹事する</span>。
           </h1>
 
           <p className="mt-6 text-base sm:text-lg text-ink-secondary text-balance max-w-xl">

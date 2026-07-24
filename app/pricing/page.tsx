@@ -7,19 +7,19 @@ import { PLAN_LIMITS } from "@/lib/plans/limits";
 
 export const metadata: Metadata = {
   title: "料金プラン",
-  description: "幹事ラボの料金プランについてのご案内です。現在はベータ版で、AI提案は月10回まで無料でご利用いただけます。",
+  description: "幹事ラボの料金プランについてのご案内です。現在はベータ版で、お店提案（AI補助）は月10回まで無料でご利用いただけます。",
 };
 
 const FREE_AI_LIMIT = PLAN_LIMITS.free.maxAiSuggestionsPerMonth;
 
 const BETA_FEATURES = [
-  `AI提案 月${FREE_AI_LIMIT}回まで`,
+  `お店提案（AI補助）月${FREE_AI_LIMIT}回まで`,
   "手動プラン作成・共有",
   "割り勘計算(傾斜配分含む)",
   "PDF/QR/ICS出力",
 ];
 
-const PREMIUM_FEATURES = ["AI提案 無制限", "手動プラン作成・共有", "割り勘計算(傾斜配分含む)", "PDF/QR/ICS出力"];
+const PREMIUM_FEATURES = ["お店提案（AI補助）無制限", "手動プラン作成・共有", "割り勘計算(傾斜配分含む)", "PDF/QR/ICS出力"];
 
 export default function PricingPage() {
   return (
@@ -40,7 +40,7 @@ export default function PricingPage() {
           料金プラン
         </h1>
         <p className="text-ink-secondary leading-relaxed mb-8">
-          現在はベータ版です。AI提案は月{FREE_AI_LIMIT}回まで、その他の機能は無料でご利用いただけます。
+          現在はベータ版です。お店提案（AI補助）は月{FREE_AI_LIMIT}回まで、その他の機能は無料でご利用いただけます。
         </p>
 
         <div className="grid sm:grid-cols-2 gap-6">

@@ -18,7 +18,7 @@ const CREATE_PLAN_ACTION: ActionItem = {
   href: "__create_plan__",
   icon: Sparkles,
   title: "新しいプランを作る",
-  description: "AIにおまかせ、または自分で入力",
+  description: "AIに相談、または自分で入力",
 };
 
 const ACTIONS: ActionItem[] = [

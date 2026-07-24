@@ -85,7 +85,7 @@ export default async function ResultsPage({
                 className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-gold-gradient text-white text-xs font-bold px-3.5 py-2 hover:brightness-110 transition-all shadow-gold"
               >
                 <Sparkles size={14} />
-                AIに提案してもらう
+                AIに相談する
               </Link>
             ) : (
               <span
@@ -93,7 +93,7 @@ export default async function ResultsPage({
                 className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-surface-tertiary text-ink-muted text-xs font-bold px-3.5 py-2 cursor-not-allowed opacity-60"
               >
                 <Sparkles size={14} />
-                AIに提案してもらう
+                AIに相談する
               </span>
             )}
           </div>

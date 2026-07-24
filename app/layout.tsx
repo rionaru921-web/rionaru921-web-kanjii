@@ -28,11 +28,11 @@ const playfairDisplay = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kanji-lab.com"),
   title: {
-    default: "幹事ラボ - あらゆる集まりを、AIが幹事します",
+    default: "幹事ラボ - あらゆる集まりを、あなたが幹事する。",
     template: "%s | 幹事ラボ",
   },
   description:
-    "飲み会・旅行・イベントの幹事業務をAIが自動化。お店選び、割り勘計算、参加者への共有まで、幹事ラボがすべてサポートします。",
+    "飲み会・旅行・イベントの幹事業務を、幹事ラボがシンプルに。お店選び、割り勘計算、参加者への共有まで、あなたの「幹事する」を支えます。",
   applicationName: "幹事ラボ",
   keywords: [
     "幹事",
@@ -61,8 +61,8 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   openGraph: {
-    title: "幹事ラボ - あらゆる集まりを、AIが幹事します",
-    description: "飲み会・旅行・イベントの幹事業務をAIが自動化",
+    title: "幹事ラボ - あらゆる集まりを、あなたが幹事する。",
+    description: "飲み会・旅行・イベントの幹事業務を、幹事ラボがシンプルに",
     url: "/",
     siteName: "幹事ラボ",
     locale: "ja_JP",
@@ -70,8 +70,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "幹事ラボ - あらゆる集まりを、AIが幹事します",
-    description: "飲み会・旅行・イベントの幹事業務をAIが自動化",
+    title: "幹事ラボ - あらゆる集まりを、あなたが幹事する。",
+    description: "飲み会・旅行・イベントの幹事業務を、幹事ラボがシンプルに",
     creator: "@kanjii_app",
   },
   robots: {
@@ -102,7 +102,7 @@ const websiteJsonLd = {
   "@type": "WebSite",
   name: "幹事ラボ",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://kanji-lab.com",
-  description: "あらゆる集まりを、AIが幹事します。URLを送るだけ。",
+  description: "あらゆる集まりを、あなたが幹事する。URLを送るだけ。",
   inLanguage: "ja",
 };
 

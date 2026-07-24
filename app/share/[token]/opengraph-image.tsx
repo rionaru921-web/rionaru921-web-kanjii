@@ -30,7 +30,7 @@ export default async function ShareOGImage({ params }: { params: { token: string
     : { data: null };
 
   const title = history?.title ?? "幹事ラボ";
-  const subtitle = history ? TYPE_LABEL[history.type] ?? "集まりのご招待" : "あらゆる集まりを、AIが幹事します";
+  const subtitle = history ? TYPE_LABEL[history.type] ?? "集まりのご招待" : "あらゆる集まりを、あなたが幹事する。";
 
   return new ImageResponse(
     (

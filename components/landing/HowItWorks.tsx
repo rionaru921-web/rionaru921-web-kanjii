@@ -15,8 +15,8 @@ const STEPS = [
   {
     number: "02",
     icon: Sparkles,
-    title: "AIが最適プランを提案",
-    description: "何百もの選択肢から、あなたに合う組み合わせを厳選",
+    title: "プランを組み立てる",
+    description: "日程・お店・費用を、シンプルに整理",
     bg: "bg-surface-secondary",
   },
   {
