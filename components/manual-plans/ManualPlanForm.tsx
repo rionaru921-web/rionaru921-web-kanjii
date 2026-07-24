@@ -382,7 +382,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                   type="button"
                   onClick={() => removeMember(i)}
                   disabled={saving || members.length === 1}
-                  className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion transition-colors disabled:opacity-30"
+                  className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
                   aria-label="メンバーを削除"
                 >
                   <Trash2 size={16} />
@@ -534,7 +534,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       </SectionCard>
 
       {error && (
-        <div className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion">
+        <div className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion-text">
           {error}
         </div>
       )}

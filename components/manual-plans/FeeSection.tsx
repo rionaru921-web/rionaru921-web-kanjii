@@ -113,7 +113,7 @@ export default function FeeSection({
                 type="button"
                 onClick={() => removeItem(i)}
                 disabled={disabled}
-                className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion transition-colors disabled:opacity-30"
+                className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
                 aria-label="内訳を削除"
               >
                 <Trash2 size={16} />

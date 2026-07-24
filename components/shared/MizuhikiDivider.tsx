@@ -5,7 +5,7 @@ export default function MizuhikiDivider({ className = "" }: { className?: string
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path
           d="M7 0.5L13.5 7L7 13.5L0.5 7L7 0.5Z"
-          stroke="#C4633F"
+          stroke="#B8935A"
           strokeWidth="1"
           fill="none"
         />

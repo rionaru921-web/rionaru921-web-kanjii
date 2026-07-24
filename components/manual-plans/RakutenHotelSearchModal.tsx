@@ -219,7 +219,7 @@ export default function RakutenHotelSearchModal({ onClose, onSelect }: RakutenHo
           )}
 
           {error && (
-            <div className="mt-3 rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion">
+            <div className="mt-3 rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion-text">
               {error}
             </div>
           )}

@@ -127,7 +127,7 @@ function BottomLinks({
         フィードバック
       </button>
       <LogoutButton
-        className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-vermilion/5 hover:text-vermilion transition-colors w-full text-left"
+        className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-ink-secondary hover:bg-vermilion/5 hover:text-vermilion-text transition-colors w-full text-left"
       />
     </div>
   );

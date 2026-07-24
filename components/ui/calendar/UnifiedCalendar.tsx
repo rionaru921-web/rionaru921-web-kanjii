@@ -226,7 +226,7 @@ export default function UnifiedCalendar({
             >
               <span>{date.getDate()}</span>
               {holidayName && !selected && (
-                <span className="text-[9px] leading-none text-vermilion truncate max-w-full px-0.5">
+                <span className="text-[9px] leading-none text-vermilion-text truncate max-w-full px-0.5">
                   {holidayName}
                 </span>
               )}

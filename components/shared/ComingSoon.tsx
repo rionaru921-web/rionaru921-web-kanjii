@@ -16,7 +16,7 @@ export default function ComingSoon({
       <span className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gold/10 text-gold mb-6">
         <Icon size={30} />
       </span>
-      <span className="text-xs rounded-full bg-vermilion/15 text-vermilion px-3 py-1 mb-4">
+      <span className="text-xs rounded-full bg-vermilion/15 text-vermilion-text px-3 py-1 mb-4">
         Coming Soon
       </span>
       <h1 className="font-serif font-bold text-2xl text-ink mb-3">{title}</h1>

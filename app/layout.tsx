@@ -94,7 +94,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#F5F0E8",
+  themeColor: "#FDFCF9",
 };
 
 const websiteJsonLd = {
@@ -114,7 +114,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${notoSansJP.variable} ${notoSerifJP.variable} ${playfairDisplay.variable} antialiased bg-[#F5F0E8] text-[#2B2420] min-h-screen font-sans`}
+        className={`${notoSansJP.variable} ${notoSerifJP.variable} ${playfairDisplay.variable} antialiased bg-background text-foreground min-h-screen font-sans`}
       >
         <script
           type="application/ld+json"

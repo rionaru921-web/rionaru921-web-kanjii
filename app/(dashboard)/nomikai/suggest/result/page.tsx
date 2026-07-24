@@ -148,7 +148,7 @@ function SuggestResult() {
 
       {!loading && error && (
         <div className="flex flex-col items-center justify-center text-center py-20 gap-3 rounded-2xl border border-vermilion/20 bg-vermilion/5">
-          <AlertTriangle className="text-vermilion" size={40} />
+          <AlertTriangle className="text-vermilion-text" size={40} />
           <p className="text-ink-secondary">{error}</p>
           {errorCode === "GUEST_AI_LIMIT_REACHED" ? (
             <Link

@@ -134,7 +134,7 @@ export default function ResultsList({
       ))}
 
       {error && (
-        <p className="text-xs text-vermilion text-center">{error}</p>
+        <p className="text-xs text-vermilion-text text-center">{error}</p>
       )}
 
       {canLoadMore && (

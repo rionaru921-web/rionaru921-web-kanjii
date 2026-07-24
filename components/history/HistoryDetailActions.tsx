@@ -67,14 +67,14 @@ export default function HistoryDetailActions({ record }: { record: HistoryRecord
         disabled={deleting}
         className={`flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold py-2.5 transition-colors disabled:opacity-60 ${
           confirmDelete
-            ? "border-vermilion/40 bg-vermilion/10 text-vermilion"
-            : "border-gold/20 text-ink-secondary hover:border-vermilion/40 hover:text-vermilion"
+            ? "border-vermilion/40 bg-vermilion/10 text-vermilion-text"
+            : "border-gold/20 text-ink-secondary hover:border-vermilion/40 hover:text-vermilion-text"
         }`}
       >
         {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
         {deleting ? "削除中..." : confirmDelete ? "本当に削除しますか？もう一度押してください" : "この履歴を削除"}
       </button>
-      {error && <p className="text-[11px] text-vermilion text-center">{error}</p>}
+      {error && <p className="text-[11px] text-vermilion-text text-center">{error}</p>}
 
       <ShareModal
         open={shareOpen}

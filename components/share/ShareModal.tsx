@@ -115,7 +115,7 @@ export default function ShareModal({
         )}
 
         {error && (
-          <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 mb-4">
+          <div className="flex items-center gap-2 text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 mb-4">
             <AlertTriangle size={14} className="shrink-0" />
             {error}
           </div>

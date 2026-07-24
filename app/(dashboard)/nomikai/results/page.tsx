@@ -63,7 +63,7 @@ export default async function ResultsPage({
 
       {!result ? (
         <div className="flex flex-col items-center justify-center text-center py-20 gap-3 rounded-2xl border border-vermilion/20 bg-vermilion/5">
-          <AlertTriangle className="text-vermilion" size={40} />
+          <AlertTriangle className="text-vermilion-text" size={40} />
           <p className="text-ink-secondary">{errorMessage}</p>
           <Link
             href="/nomikai"
@@ -101,7 +101,7 @@ export default async function ResultsPage({
             {result.totalAvailable.toLocaleString()}件見つかりました（{people}人・予算¥
             {budget.toLocaleString()}/人）
             {result.source === "mock" && (
-              <span className="ml-2 whitespace-nowrap text-[11px] rounded-full bg-vermilion/15 text-vermilion px-2 py-0.5 align-middle">
+              <span className="ml-2 whitespace-nowrap text-[11px] rounded-full bg-vermilion/15 text-vermilion-text px-2 py-0.5 align-middle">
                 モックデータ
               </span>
             )}

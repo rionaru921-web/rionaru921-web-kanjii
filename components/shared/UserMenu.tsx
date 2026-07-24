@@ -79,7 +79,7 @@ export default function UserMenu({ displayName }: UserMenuProps) {
               フィードバックを送る
             </button>
             <div className="border-t border-gold/10" />
-            <LogoutButton className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-vermilion transition-colors hover:bg-gold/5" />
+            <LogoutButton className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-vermilion-text transition-colors hover:bg-gold/5" />
           </motion.div>
         )}
       </AnimatePresence>

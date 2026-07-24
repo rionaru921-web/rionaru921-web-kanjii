@@ -59,7 +59,7 @@ export default function PDFPreviewButton(props: PDFPreviewButtonProps) {
       )}
 
       {error && (
-        <div className="flex items-start gap-1.5 mt-1.5 text-[11px] text-vermilion">
+        <div className="flex items-start gap-1.5 mt-1.5 text-[11px] text-vermilion-text">
           <AlertTriangle size={12} className="shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>

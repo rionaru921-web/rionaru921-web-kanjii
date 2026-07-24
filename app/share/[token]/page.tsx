@@ -46,7 +46,7 @@ export default async function SharePage({ params }: { params: { token: string } 
         </div>
       ) : expired ? (
         <div className="mt-10 w-full max-w-sm text-center rounded-2xl border border-vermilion/20 bg-vermilion/5 p-8 flex flex-col items-center gap-3">
-          <Clock className="text-vermilion" size={32} />
+          <Clock className="text-vermilion-text" size={32} />
           <p className="text-ink-secondary">このリンクは期限切れです。</p>
           <p className="text-xs text-ink-muted">幹事の方に新しいリンクを依頼してください。</p>
         </div>

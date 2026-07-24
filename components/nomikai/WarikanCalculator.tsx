@@ -252,7 +252,7 @@ export default function WarikanCalculator({
                 type="button"
                 onClick={() => removeParticipant(p.id)}
                 disabled={participants.length <= 1}
-                className="shrink-0 p-2 rounded-lg text-ink-muted hover:text-vermilion hover:bg-vermilion/10 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                className="shrink-0 p-2 rounded-lg text-ink-muted hover:text-vermilion-text hover:bg-vermilion/10 disabled:opacity-20 disabled:pointer-events-none transition-colors"
                 aria-label="削除"
               >
                 <Trash2 size={16} />
@@ -289,7 +289,7 @@ export default function WarikanCalculator({
                 ? "text-ink-muted"
                 : result.diff > 0
                   ? "text-gold"
-                  : "text-vermilion"
+                  : "text-vermilion-text"
             }
           >
             {result.diff > 0 ? "+" : ""}¥{result.diff.toLocaleString()}
@@ -350,7 +350,7 @@ export default function WarikanCalculator({
               もう一度計算
             </button>
           </div>
-          {saveError && <p className="text-[11px] text-vermilion">{saveError}</p>}
+          {saveError && <p className="text-[11px] text-vermilion-text">{saveError}</p>}
         </div>
       )}
 

@@ -104,7 +104,7 @@ export default function AIRecommendation({
 
         {recommendation.warnings && (
           <div className="flex items-start gap-2 rounded-xl bg-vermilion/10 border border-vermilion/20 px-3 py-2.5">
-            <AlertTriangle size={14} className="text-vermilion shrink-0 mt-0.5" />
+            <AlertTriangle size={14} className="text-vermilion-text shrink-0 mt-0.5" />
             <p className="text-xs text-ink-secondary">{recommendation.warnings}</p>
           </div>
         )}

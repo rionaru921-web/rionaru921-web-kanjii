@@ -105,33 +105,35 @@ export function GrowthContent() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="rounded-3xl bg-gold-gradient p-6 shadow-warm text-white"
+        className="rounded-3xl bg-surface-tertiary shadow-warm border border-gold/20 p-6"
       >
         <div className="flex items-center gap-4">
-          <div className="text-5xl leading-none shrink-0">{data.level.emoji}</div>
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gold/10 text-4xl leading-none">
+            {data.level.emoji}
+          </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-white/80">現在のレベル</p>
-            <p className="font-serif font-bold text-xl sm:text-2xl">
+            <p className="text-xs text-ink-muted">現在のレベル</p>
+            <p className="font-serif font-bold text-xl sm:text-2xl text-ink">
               Lv.{data.level.level} {data.level.name}
             </p>
-            <p className="text-sm text-white/90 mt-1">{data.level.description}</p>
+            <p className="text-sm text-ink-secondary mt-1">{data.level.description}</p>
           </div>
         </div>
 
         {data.progress.threshold !== null && (
           <div className="mt-4 space-y-1.5">
-            <div className="flex justify-between text-xs text-white/80">
+            <div className="flex justify-between text-xs text-ink-muted">
               <span>
                 {data.progress.current} / {data.progress.threshold}
               </span>
               <span>次のレベルまであと {data.progress.threshold - data.progress.current}回</span>
             </div>
-            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+            <div className="h-2 bg-gold/10 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${data.progress.percentage}%` }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="h-full bg-white/80"
+                className="h-full bg-gold-gradient"
               />
             </div>
           </div>

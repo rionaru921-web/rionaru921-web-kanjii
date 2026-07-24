@@ -50,7 +50,7 @@ export default function AiUsageBadge() {
   return (
     <span
       className={`inline-flex items-center gap-1.5 self-start rounded-full text-xs font-semibold px-3 py-1.5 ${
-        isLow ? "bg-vermilion/10 text-vermilion" : "bg-gold/10 text-gold"
+        isLow ? "bg-vermilion/10 text-vermilion-text-text" : "bg-gold/10 text-gold"
       }`}
     >
       今月のAI提案: 残り {remaining} / {maxCount} 回

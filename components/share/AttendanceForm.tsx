@@ -203,7 +203,7 @@ export default function AttendanceForm({
             })}
           </div>
 
-          {error && <p className="text-xs text-vermilion mt-2 text-center">{error}</p>}
+          {error && <p className="text-xs text-vermilion-text mt-2 text-center">{error}</p>}
 
           {isEditing ? (
             <button

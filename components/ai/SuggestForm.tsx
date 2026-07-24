@@ -206,7 +206,7 @@ export default function SuggestForm({
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
         <label className="block text-sm text-ink-secondary mb-2">
-          参加者について <span className="text-vermilion">*</span>
+          参加者について <span className="text-vermilion-text">*</span>
         </label>
         <CategorizedSelect
           categories={PARTICIPANT_CATEGORIES}
@@ -227,7 +227,7 @@ export default function SuggestForm({
 
       <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4">
         <label className="block text-sm text-ink-secondary mb-2">
-          シチュエーション <span className="text-vermilion">*</span>
+          シチュエーション <span className="text-vermilion-text">*</span>
         </label>
         <CategorizedSelect
           categories={SITUATION_CATEGORIES}
@@ -258,7 +258,7 @@ export default function SuggestForm({
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
+        <div className="flex items-center gap-2 text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
           <AlertCircle size={14} className="shrink-0" />
           {error}
         </div>

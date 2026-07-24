@@ -41,7 +41,7 @@ export default function GuestLoginButton({ className = "" }: { className?: strin
         {loading ? <Loader2 size={14} className="animate-spin" /> : <UserRound size={14} />}
         {loading ? "準備中..." : "ログインせずゲストで試す"}
       </button>
-      {error && <p className="text-xs text-vermilion text-center">{error}</p>}
+      {error && <p className="text-xs text-vermilion-text text-center">{error}</p>}
     </div>
   );
 }

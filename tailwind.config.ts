@@ -30,9 +30,15 @@ const config: Config = {
           warm: "var(--accent-warm)",
         },
         // Same idea: "vermilion" now resolves to the new wine tone used for
-        // warnings/errors, so existing text-vermilion / bg-vermilion usage
-        // is unaffected.
-        vermilion: "var(--wine)",
+        // warnings/errors, so existing bg-vermilion / border-vermilion usage
+        // is unaffected. --wine itself is the lighter accent tone (fine at
+        // low opacity or on icons); text-vermilion-text is a darker shade
+        // reserved for readable text, since the lighter tone alone doesn't
+        // clear WCAG AA contrast on a white background.
+        vermilion: {
+          DEFAULT: "var(--wine)",
+          text: "var(--wine-text)",
+        },
         ink: {
           DEFAULT: "var(--ink-primary)",
           secondary: "var(--ink-secondary)",
@@ -47,10 +53,13 @@ const config: Config = {
         display: ["var(--font-playfair)", "var(--font-noto-serif-jp)", "serif"],
       },
       boxShadow: {
-        gold: "0 8px 30px -8px rgba(139, 90, 60, 0.25)",
-        "gold-lg": "0 20px 60px -12px rgba(139, 90, 60, 0.3)",
-        warm: "0 4px 24px rgba(139, 90, 60, 0.08)",
-        "warm-hover": "0 12px 40px rgba(139, 90, 60, 0.15)",
+        // Neutral ink-toned shadows (no warm/terracotta tint) for the
+        // "refined white base" look — Notion/Linear/Apple use colorless,
+        // very low-opacity shadows rather than colored ones.
+        gold: "0 8px 24px -8px rgba(31, 27, 24, 0.18)",
+        "gold-lg": "0 20px 50px -12px rgba(31, 27, 24, 0.22)",
+        warm: "0 4px 24px rgba(31, 27, 24, 0.06)",
+        "warm-hover": "0 12px 40px rgba(31, 27, 24, 0.1)",
       },
       backgroundImage: {
         "gold-gradient":

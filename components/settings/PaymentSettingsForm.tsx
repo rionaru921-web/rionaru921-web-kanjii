@@ -221,7 +221,7 @@ export default function PaymentSettingsForm() {
       </p>
 
       {error && (
-        <p className="text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
+        <p className="text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
           {error}
         </p>
       )}

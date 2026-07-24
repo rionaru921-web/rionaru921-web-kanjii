@@ -29,7 +29,7 @@ export default function GlobalError({
       </p>
 
       {process.env.NODE_ENV === "development" && (
-        <pre className="max-w-lg w-full mb-8 rounded-xl border border-vermilion/20 bg-vermilion/5 px-4 py-3 text-left text-xs text-vermilion overflow-x-auto">
+        <pre className="max-w-lg w-full mb-8 rounded-xl border border-vermilion/20 bg-vermilion/5 px-4 py-3 text-left text-xs text-vermilion-text overflow-x-auto">
           {error.message}
         </pre>
       )}

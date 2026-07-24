@@ -48,7 +48,7 @@ export default function PremiumWaitlistForm() {
         disabled={submitting}
         className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-gold disabled:opacity-50 resize-none"
       />
-      {error && <p className="text-xs text-vermilion">{error}</p>}
+      {error && <p className="text-xs text-vermilion-text">{error}</p>}
       <button
         type="button"
         onClick={handleSubmit}

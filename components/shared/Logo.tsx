@@ -25,9 +25,9 @@ export default function Logo({
       >
         <defs>
           <linearGradient id="kanjii-logo-gold" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#E89272" />
-            <stop offset="55%" stopColor="#C4633F" />
-            <stop offset="100%" stopColor="#A85030" />
+            <stop offset="0%" stopColor="#C4A56B" />
+            <stop offset="55%" stopColor="#B8935A" />
+            <stop offset="100%" stopColor="#A67F48" />
           </linearGradient>
         </defs>
         <line x1="20" y1="2" x2="20" y2="7" stroke="url(#kanjii-logo-gold)" strokeWidth="1.5" />

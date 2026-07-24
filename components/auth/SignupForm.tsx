@@ -113,7 +113,7 @@ export default function SignupForm() {
             メールが届かない場合は、迷惑メールフォルダをご確認ください。
           </p>
           {error && (
-            <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 w-full">
+            <div className="flex items-center gap-2 text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 w-full">
               <AlertCircle size={14} className="shrink-0" />
               {error}
             </div>
@@ -229,7 +229,7 @@ export default function SignupForm() {
         </label>
 
         {error && (
-          <div className="flex items-center gap-2 text-xs text-vermilion bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
+          <div className="flex items-center gap-2 text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
             <AlertCircle size={14} className="shrink-0" />
             {error}
           </div>

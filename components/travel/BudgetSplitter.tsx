@@ -245,7 +245,7 @@ export default function BudgetSplitter({
                 type="button"
                 onClick={() => removeParticipant(p.id)}
                 disabled={participants.length <= 1}
-                className="shrink-0 p-2 rounded-lg text-ink-muted hover:text-vermilion hover:bg-vermilion/10 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                className="shrink-0 p-2 rounded-lg text-ink-muted hover:text-vermilion-text hover:bg-vermilion/10 disabled:opacity-20 disabled:pointer-events-none transition-colors"
                 aria-label="削除"
               >
                 <Trash2 size={16} />
@@ -371,7 +371,7 @@ export default function BudgetSplitter({
             <BookmarkPlus size={14} />
             {savedHistoryId ? "履歴に保存済み" : saving ? "保存中..." : "履歴に保存"}
           </button>
-          {saveError && <p className="text-[11px] text-vermilion">{saveError}</p>}
+          {saveError && <p className="text-[11px] text-vermilion-text">{saveError}</p>}
         </div>
       )}
 

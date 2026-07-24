@@ -25,8 +25,8 @@ export default function GlobalError({
           justifyContent: "center",
           padding: "24px",
           textAlign: "center",
-          backgroundColor: "#F5F0E8",
-          color: "#2B2420",
+          backgroundColor: "#FDFCF9",
+          color: "#1F1B18",
           fontFamily: "sans-serif",
         }}
       >
@@ -34,7 +34,7 @@ export default function GlobalError({
         <p style={{ fontSize: "22px", fontWeight: 700, margin: "0 0 8px" }}>
           一時的な不具合が発生しました
         </p>
-        <p style={{ fontSize: "14px", color: "#6B5D52", maxWidth: "360px", margin: "0 0 32px" }}>
+        <p style={{ fontSize: "14px", color: "#6B615A", maxWidth: "360px", margin: "0 0 32px" }}>
           お手数ですが、再読み込みをお試しください。問題が続く場合はお問い合わせください: steplife.contact@gmail.com
         </p>
         <button
@@ -47,7 +47,7 @@ export default function GlobalError({
             fontSize: "15px",
             fontWeight: 700,
             color: "#fff",
-            background: "linear-gradient(135deg, #E89272, #C4633F, #A85030)",
+            background: "linear-gradient(135deg, #C4A56B, #B8935A, #A67F48)",
             cursor: "pointer",
           }}
         >

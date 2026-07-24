@@ -28,7 +28,7 @@ export default function HeaderNav({ isLoggedIn, displayName }: HeaderNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-gold/10 bg-[#F5F0E8]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-gold/10 bg-surface-primary/90 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
         <Logo />
 
@@ -79,7 +79,7 @@ export default function HeaderNav({ isLoggedIn, displayName }: HeaderNavProps) {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-gold/10 bg-[#F5F0E8] px-4 py-4 flex flex-col gap-4">
+        <div className="md:hidden border-t border-gold/10 bg-surface-primary px-4 py-4 flex flex-col gap-4">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
@@ -104,7 +104,7 @@ export default function HeaderNav({ isLoggedIn, displayName }: HeaderNavProps) {
               >
                 ダッシュボード
               </Link>
-              <LogoutButton className="text-sm text-left text-vermilion hover:text-gold transition-colors" />
+              <LogoutButton className="text-sm text-left text-vermilion-text hover:text-gold transition-colors" />
             </>
           ) : (
             <>

@@ -91,7 +91,7 @@ export default function SplitSettingsSection({
             </div>
 
             {allWeightsZero && (
-              <p className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-xs text-vermilion">
+              <p className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-xs text-vermilion-text">
                 全員の重みが0のため、支払額が0円になります。
               </p>
             )}
