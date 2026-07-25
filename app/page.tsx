@@ -5,8 +5,9 @@ import UseCases from "@/components/landing/UseCases";
 import FeatureShowcase from "@/components/landing/FeatureShowcase";
 import Story from "@/components/landing/Story";
 import HowItWorks from "@/components/landing/HowItWorks";
+import HowToGuide from "@/components/landing/HowToGuide";
 import Pricing from "@/components/landing/Pricing";
-import FAQ from "@/components/landing/FAQ";
+import FaqSection from "@/components/landing/FaqSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
 import { createClient } from "@/lib/supabase/server";
@@ -49,8 +50,9 @@ export default async function Home() {
         <FeatureShowcase />
         <Story />
         <HowItWorks />
+        <HowToGuide />
         <Pricing />
-        <FAQ />
+        <FaqSection />
         <CTASection isLoggedIn={isLoggedIn} />
       </main>
       <Footer />
