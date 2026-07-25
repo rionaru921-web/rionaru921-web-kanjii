@@ -23,12 +23,14 @@ export default async function NewManualPlanPage() {
   }
 
   return (
-    <main className="px-4 sm:px-8 pt-8 sm:pt-10 pb-28 max-w-2xl lg:max-w-6xl mx-auto">
-      <h1 className="font-serif font-bold text-2xl text-ink mb-1">新しいプランを作成</h1>
-      <p className="text-sm text-ink-secondary mb-6">
-        自分で決めた予定を登録して、みんなに共有しましょう。保存すると、その場でURL・PDF・QRで共有できます。
-      </p>
-      <FeatureBadges />
+    <main className="px-4 sm:px-8 pt-8 sm:pt-10 pb-28">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="font-serif font-bold text-2xl text-ink mb-1 text-center">新しいプランを作成</h1>
+        <p className="text-sm text-ink-secondary mb-6 text-center">
+          自分で決めた予定を登録して、みんなに共有しましょう。保存すると、その場でURL・PDF・QRで共有できます。
+        </p>
+        <FeatureBadges />
+      </div>
       <ManualPlanForm mode="create" />
     </main>
   );

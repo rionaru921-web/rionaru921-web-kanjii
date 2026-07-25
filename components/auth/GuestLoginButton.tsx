@@ -1,37 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, UserRound } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { translateSupabaseError } from "@/lib/auth/error-translator";
+import { useGuestSignIn } from "@/lib/auth/useGuestSignIn";
 
-export default function GuestLoginButton({ className = "" }: { className?: string }) {
-  const router = useRouter();
-  const supabase = createClient();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleGuestLogin() {
-    setLoading(true);
-    setError(null);
-
-    const { error: signInError } = await supabase.auth.signInAnonymously();
-    if (signInError) {
-      setError(translateSupabaseError(signInError.message));
-      setLoading(false);
-      return;
-    }
-
-    router.push("/dashboard");
-    router.refresh();
-  }
+export default function GuestLoginButton({
+  className = "",
+  redirectTo = "/dashboard",
+}: {
+  className?: string;
+  redirectTo?: string;
+}) {
+  const { start, loading, error } = useGuestSignIn(redirectTo);
 
   return (
     <div className="flex flex-col items-center gap-1.5">
       <button
         type="button"
-        onClick={handleGuestLogin}
+        onClick={start}
         disabled={loading}
         className={
           className ||

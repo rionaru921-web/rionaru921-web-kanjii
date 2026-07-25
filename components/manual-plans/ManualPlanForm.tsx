@@ -1,24 +1,21 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  CalendarDays,
-  MapPin,
-  Wallet,
-  Users as UsersIcon,
-  FileText,
-  Plus,
-  Trash2,
-  Loader2,
-  type LucideIcon,
-} from "lucide-react";
-import type { FeeBreakdownItem, ManualPlan, ManualPlanMember, MemberRole } from "@/lib/manual-plans/types";
+import { Plus, Trash2, Loader2, ChevronDown } from "lucide-react";
+import type {
+  EventType,
+  FeeBreakdownItem,
+  ManualPlan,
+  ManualPlanMember,
+  MemberRole,
+} from "@/lib/manual-plans/types";
 import { ROLE_LABELS } from "@/lib/manual-plans/format";
 import { toDateTimeLocalValue, fromDateTimeLocalValue } from "@/lib/date/kanjii-time";
 import { PLAN_TEMPLATES, formatLocalDateTimeInput, type PlanTemplate } from "@/lib/plan-templates";
 import { resolveMemberWeight } from "@/lib/manual-plans/calculate-split";
+import type { VenueFacility } from "@/lib/manual-plans/facility-types";
 import {
   TIER_LEVELS,
   TIER_LABELS,
@@ -33,11 +30,14 @@ import {
 } from "@/lib/manual-plans/split-types";
 import VenueInput, { type VenueValue } from "./VenueInput";
 import FeeSection from "./FeeSection";
-import TemplateChips from "@/components/plan-form/TemplateChips";
 import SegmentedControl from "@/components/ui/SegmentedControl";
-import PlanPreviewCard from "@/components/plan-form/PlanPreviewCard";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
+import ChapterHeading from "./sections/ChapterHeading";
+import ChapterProgress from "./sections/ChapterProgress";
+import EventTypeTiles from "./sections/EventTypeTiles";
+import FacilityChips from "./sections/FacilityChips";
+import NijikaiSection, { type NijikaiValue } from "./sections/NijikaiSection";
 
 interface MemberInput {
   name: string;
@@ -59,26 +59,11 @@ const inputClass =
   "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
 const labelClass = "block text-sm font-medium text-ink";
 
-function SectionCard({
-  title,
-  subtitle,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  icon: LucideIcon;
-  children: ReactNode;
-}) {
+const CHAPTER_COUNT = 6;
+
+function Chapter({ chapterRef, children }: { chapterRef: React.RefObject<HTMLDivElement>; children: ReactNode }) {
   return (
-    <div className="rounded-3xl bg-surface-tertiary shadow-warm p-4 sm:p-6 flex flex-col gap-4">
-      <div>
-        <label className="flex items-center gap-1.5 text-sm text-ink-secondary">
-          <Icon size={16} />
-          {title}
-        </label>
-        {subtitle && <p className="mt-0.5 text-xs text-ink-muted">{subtitle}</p>}
-      </div>
+    <div ref={chapterRef} className="scroll-mt-20">
       {children}
     </div>
   );
@@ -88,6 +73,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const router = useRouter();
 
   const [title, setTitle] = useState(initialData?.title ?? "");
+  const [eventType, setEventType] = useState<EventType | null>(initialData?.event_type ?? null);
   const [eventDate, setEventDate] = useState(toDateTimeLocalValue(initialData?.event_date));
   const [endDate, setEndDate] = useState(toDateTimeLocalValue(initialData?.end_date));
 
@@ -99,6 +85,10 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     venueLat: initialData?.venue_lat ?? null,
     venueLng: initialData?.venue_lng ?? null,
   });
+  const [venuePhone, setVenuePhone] = useState(initialData?.venue_phone ?? "");
+  const [venueFacilities, setVenueFacilities] = useState<VenueFacility[]>(
+    (initialData?.venue_facilities as VenueFacility[] | undefined) ?? []
+  );
 
   const [feeAmount, setFeeAmount] = useState(
     initialData?.fee_amount != null ? String(initialData.fee_amount) : ""
@@ -108,9 +98,6 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   );
   const [paymentMethods, setPaymentMethods] = useState<string[]>(initialData?.payment_methods ?? []);
   const [paymentDeadline, setPaymentDeadline] = useState(toDateTimeLocalValue(initialData?.payment_deadline));
-
-  const [memo, setMemo] = useState(initialData?.memo ?? "");
-  const [dietaryNotes, setDietaryNotes] = useState(initialData?.dietary_notes ?? "");
 
   const [splitMode, setSplitMode] = useState<SplitMode>(initialData?.split_mode ?? "equal");
   const [roundingUnit, setRoundingUnit] = useState<RoundingUnit>(
@@ -139,14 +126,36 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
         ]
   );
 
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [eventNote, setEventNote] = useState(initialData?.event_note ?? "");
+  const [dietaryNotes, setDietaryNotes] = useState(initialData?.dietary_notes ?? "");
+  const [memo, setMemo] = useState(initialData?.memo ?? "");
+  const [nijikai, setNijikai] = useState<NijikaiValue>({
+    enabled: initialData?.nijikai_enabled ?? false,
+    venue: initialData?.nijikai_venue ?? "",
+    budget: initialData?.nijikai_budget != null ? String(initialData.nijikai_budget) : "",
+    url: initialData?.nijikai_url ?? "",
+    startTime: initialData?.nijikai_start_time ?? "",
+  });
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [venueHint, setVenueHint] = useState<string | null>(null);
 
+  const chapterRefs = [
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+  ];
+
   function handleTemplateSelect(template: PlanTemplate) {
     setSelectedTemplateId(template.id);
+    setEventType(template.eventType);
     setTitle(template.title);
 
     const start = template.getEventDate();
@@ -206,20 +215,29 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     try {
       const payload = {
         title: title.trim(),
+        eventType,
         eventDate: fromDateTimeLocalValue(eventDate),
         endDate: fromDateTimeLocalValue(endDate),
         venueName: venue.venueName.trim() || null,
         venueAddress: venue.venueAddress.trim() || null,
         venueUrl: venue.venueUrl.trim() || null,
+        venuePhone: venuePhone.trim() || null,
         venueHotpepperId: venue.venueHotpepperId.trim() || null,
         venueLat: venue.venueLat,
         venueLng: venue.venueLng,
+        venueFacilities,
         feeAmount: feeAmount.trim() ? Number(feeAmount) : null,
         feeBreakdown: feeBreakdown.filter((item) => item.label.trim()),
         paymentMethods,
         paymentDeadline: fromDateTimeLocalValue(paymentDeadline),
         memo: memo.trim() || null,
         dietaryNotes: dietaryNotes.trim() || null,
+        eventNote: eventNote.trim() || null,
+        nijikaiEnabled: nijikai.enabled,
+        nijikaiVenue: nijikai.venue.trim() || null,
+        nijikaiBudget: nijikai.budget.trim() ? Number(nijikai.budget) : null,
+        nijikaiUrl: nijikai.url.trim() || null,
+        nijikaiStartTime: nijikai.startTime.trim() || null,
         splitMode,
         roundingUnit,
         members: members
@@ -260,16 +278,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   }
 
   return (
-    <>
-      {mode === "create" && (
-        <TemplateChips
-          templates={PLAN_TEMPLATES}
-          selectedId={selectedTemplateId}
-          onSelect={handleTemplateSelect}
-        />
-      )}
+    <div className="max-w-2xl mx-auto">
+      <ChapterProgress chapterRefs={chapterRefs} total={CHAPTER_COUNT} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <form
         onSubmit={handleSubmit}
         onKeyDown={(e) => {
@@ -281,305 +292,365 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             e.preventDefault();
           }
         }}
-        className="lg:col-span-7 flex flex-col gap-4 pb-44 sm:pb-0"
+        className="flex flex-col gap-24 md:gap-32 pb-28 pt-8"
       >
-      <SectionCard title="基本情報" subtitle="イベント名や日時など" icon={CalendarDays}>
-        <div>
-          <label className={labelClass}>タイトル</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            disabled={saving}
-            className={inputClass}
-            placeholder="例: 部署の歓迎会"
-          />
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>開始日時</label>
-            <div className="mt-1.5">
-              <CalendarPopover
-                value={dateTimeLocalToDate(eventDate)}
-                onChange={(d) => setEventDate(dateToDateTimeLocal(d))}
+        {/* 第一章 はじまり */}
+        <Chapter chapterRef={chapterRefs[0]}>
+          <ChapterHeading number="第一章" title="はじまり" subtitle="どんな集まりですか？" />
+          <div className="flex flex-col gap-6">
+            <EventTypeTiles
+              templates={PLAN_TEMPLATES}
+              selectedId={selectedTemplateId}
+              onSelect={handleTemplateSelect}
+            />
+            <div>
+              <label className={labelClass}>タイトル</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
                 disabled={saving}
+                className={inputClass}
+                placeholder="例: 部署の歓迎会"
               />
             </div>
           </div>
-          <div>
-            <label className={labelClass}>終了日時</label>
-            <div className="mt-1.5">
-              <CalendarPopover
-                value={dateTimeLocalToDate(endDate)}
-                onChange={(d) => setEndDate(dateToDateTimeLocal(d))}
-                disabled={saving}
-              />
-            </div>
-          </div>
-        </div>
-      </SectionCard>
+        </Chapter>
 
-      <SectionCard title="場所" subtitle="会場やお店の情報" icon={MapPin}>
-        <VenueInput value={venue} onChange={handleVenueChange} disabled={saving} />
-        {venueHint && (
-          <p className="rounded-xl bg-gold/5 border border-gold/15 px-4 py-2.5 text-xs text-ink-secondary">
-            💡 {venueHint}
-          </p>
-        )}
-      </SectionCard>
-
-      <SectionCard title="予算・集金" subtitle="金額・割り勘・支払い方法" icon={Wallet}>
-        <FeeSection
-          feeAmount={feeAmount}
-          onFeeAmountChange={setFeeAmount}
-          breakdown={feeBreakdown}
-          onBreakdownChange={setFeeBreakdown}
-          paymentMethods={paymentMethods}
-          onTogglePaymentMethod={togglePaymentMethod}
-          paymentDeadline={paymentDeadline}
-          onPaymentDeadlineChange={setPaymentDeadline}
-          splitMode={splitMode}
-          onSplitModeChange={setSplitMode}
-          roundingUnit={roundingUnit}
-          onRoundingUnitChange={setRoundingUnit}
-          members={members
-            .filter((m) => m.name.trim())
-            .map((m) => ({
-              name: m.name,
-              tierLevel: m.tierLevel,
-              weightOverride: m.weightOverride,
-              organizerDiscount: m.organizerDiscount,
-            }))}
-          disabled={saving}
-        />
-      </SectionCard>
-
-      <SectionCard title="メンバー" subtitle="参加者の登録と傾斜設定" icon={UsersIcon}>
-        <div className="flex flex-col gap-3">
-          {members.map((member, i) => (
-            <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
-              <div className="flex items-start gap-2">
-                <div className="flex-1 grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    value={member.name}
-                    onChange={(e) => updateMember(i, { name: e.target.value })}
-                    disabled={saving}
-                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
-                    placeholder="名前"
-                  />
-                  <input
-                    type="email"
-                    value={member.email}
-                    onChange={(e) => updateMember(i, { email: e.target.value })}
-                    disabled={saving}
-                    className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
-                    placeholder="メール(任意)"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeMember(i)}
-                  disabled={saving || members.length === 1}
-                  className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
-                  aria-label="メンバーを削除"
-                >
-                  <Trash2 size={16} />
-                </button>
+        {/* 第二章 いつ */}
+        <Chapter chapterRef={chapterRefs[1]}>
+          <ChapterHeading number="第二章" title="いつ" subtitle="開催の日時を決めましょう" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>開始日時</label>
+              <div className="mt-1.5">
+                <CalendarPopover
+                  value={dateTimeLocalToDate(eventDate)}
+                  onChange={(d) => setEventDate(dateToDateTimeLocal(d))}
+                  disabled={saving}
+                />
               </div>
-              <div className="flex gap-2">
-                {(["organizer", "participant"] as MemberRole[]).map((role) => (
+            </div>
+            <div>
+              <label className={labelClass}>終了日時</label>
+              <div className="mt-1.5">
+                <CalendarPopover
+                  value={dateTimeLocalToDate(endDate)}
+                  onChange={(d) => setEndDate(dateToDateTimeLocal(d))}
+                  disabled={saving}
+                />
+              </div>
+            </div>
+          </div>
+        </Chapter>
+
+        {/* 第三章 どこで */}
+        <Chapter chapterRef={chapterRefs[2]}>
+          <ChapterHeading number="第三章" title="どこで" subtitle="会場やお店の情報" />
+          <div className="flex flex-col gap-4">
+            <VenueInput value={venue} onChange={handleVenueChange} disabled={saving} />
+            {venueHint && (
+              <p className="rounded-xl bg-gold/5 border border-gold/15 px-4 py-2.5 text-xs text-ink-secondary">
+                💡 {venueHint}
+              </p>
+            )}
+            <div>
+              <label className={labelClass}>電話番号(任意)</label>
+              <input
+                type="tel"
+                value={venuePhone}
+                onChange={(e) => setVenuePhone(e.target.value)}
+                disabled={saving}
+                className={inputClass}
+                placeholder="03-1234-5678"
+              />
+            </div>
+            <FacilityChips value={venueFacilities} onChange={setVenueFacilities} disabled={saving} />
+          </div>
+        </Chapter>
+
+        {/* 第四章 いくら */}
+        <Chapter chapterRef={chapterRefs[3]}>
+          <ChapterHeading number="第四章" title="いくら" subtitle="金額・割り勘・支払い方法" />
+          <div className="flex flex-col gap-4">
+            <FeeSection
+              feeAmount={feeAmount}
+              onFeeAmountChange={setFeeAmount}
+              breakdown={feeBreakdown}
+              onBreakdownChange={setFeeBreakdown}
+              paymentMethods={paymentMethods}
+              onTogglePaymentMethod={togglePaymentMethod}
+              paymentDeadline={paymentDeadline}
+              onPaymentDeadlineChange={setPaymentDeadline}
+              splitMode={splitMode}
+              onSplitModeChange={setSplitMode}
+              roundingUnit={roundingUnit}
+              onRoundingUnitChange={setRoundingUnit}
+              members={members
+                .filter((m) => m.name.trim())
+                .map((m) => ({
+                  name: m.name,
+                  tierLevel: m.tierLevel,
+                  weightOverride: m.weightOverride,
+                  organizerDiscount: m.organizerDiscount,
+                }))}
+              disabled={saving}
+            />
+          </div>
+        </Chapter>
+
+        {/* 第五章 だれと */}
+        <Chapter chapterRef={chapterRefs[4]}>
+          <ChapterHeading number="第五章" title="だれと" subtitle="参加者の登録と傾斜設定" />
+          <div className="flex flex-col gap-3">
+            {members.map((member, i) => (
+              <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
+                <div className="flex items-start gap-2">
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={member.name}
+                      onChange={(e) => updateMember(i, { name: e.target.value })}
+                      disabled={saving}
+                      className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                      placeholder="名前"
+                    />
+                    <input
+                      type="email"
+                      value={member.email}
+                      onChange={(e) => updateMember(i, { email: e.target.value })}
+                      disabled={saving}
+                      className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                      placeholder="メール(任意)"
+                    />
+                  </div>
                   <button
-                    key={role}
                     type="button"
-                    onClick={() => updateMember(i, { role })}
-                    disabled={saving}
-                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50 ${
-                      member.role === role
-                        ? "bg-gold-gradient border-transparent text-white"
-                        : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                    }`}
+                    onClick={() => removeMember(i)}
+                    disabled={saving || members.length === 1}
+                    className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
+                    aria-label="メンバーを削除"
                   >
-                    {ROLE_LABELS[role]}
+                    <Trash2 size={16} />
                   </button>
-                ))}
-              </div>
+                </div>
+                <div className="flex gap-2">
+                  {(["organizer", "participant"] as MemberRole[]).map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => updateMember(i, { role })}
+                      disabled={saving}
+                      className={`rounded-xl px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50 ${
+                        member.role === role
+                          ? "bg-gold-gradient border-transparent text-white"
+                          : "border-gold/15 text-ink-secondary hover:border-gold/30"
+                      }`}
+                    >
+                      {ROLE_LABELS[role]}
+                    </button>
+                  ))}
+                </div>
 
-              <AnimatePresence initial={false}>
-                {splitMode === "tiered" && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden flex flex-col gap-2"
-                  >
-                    <div className="flex flex-wrap gap-1.5">
-                      {TIER_LEVELS.map((tier) => (
-                        <button
-                          key={tier}
-                          type="button"
-                          onClick={() =>
-                            updateMember(i, {
-                              tierLevel: tier,
-                              ...(tier !== "organizer" ? { organizerDiscount: null } : {}),
+                <AnimatePresence initial={false}>
+                  {splitMode === "tiered" && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden flex flex-col gap-2"
+                    >
+                      <div className="flex flex-wrap gap-1.5">
+                        {TIER_LEVELS.map((tier) => (
+                          <button
+                            key={tier}
+                            type="button"
+                            onClick={() =>
+                              updateMember(i, {
+                                tierLevel: tier,
+                                ...(tier !== "organizer" ? { organizerDiscount: null } : {}),
+                              })
+                            }
+                            disabled={saving}
+                            className={`rounded-lg px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
+                              member.tierLevel === tier
+                                ? "bg-gold-gradient border-transparent text-white"
+                                : "border-gold/15 text-ink-secondary hover:border-gold/30"
+                            }`}
+                          >
+                            {TIER_LABELS[tier]}
+                          </button>
+                        ))}
+                      </div>
+
+                      {member.tierLevel === "organizer" && (
+                        <SegmentedControl
+                          aria-label="幹事枠割引"
+                          size="sm"
+                          options={ORGANIZER_DISCOUNTS.map((discount) => ({
+                            value: discount,
+                            label: ORGANIZER_DISCOUNT_LABELS[discount],
+                          }))}
+                          value={member.organizerDiscount ?? "none"}
+                          onChange={(discount) => updateMember(i, { organizerDiscount: discount })}
+                          disabled={saving}
+                        />
+                      )}
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-ink-muted shrink-0">重み調整</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={3}
+                          step={0.1}
+                          value={
+                            member.weightOverride ??
+                            resolveMemberWeight({
+                              tierLevel: member.tierLevel,
+                              weightOverride: null,
+                              organizerDiscount: member.organizerDiscount,
                             })
                           }
+                          onChange={(e) => updateMember(i, { weightOverride: Number(e.target.value) })}
                           disabled={saving}
-                          className={`rounded-lg px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
-                            member.tierLevel === tier
-                              ? "bg-gold-gradient border-transparent text-white"
-                              : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                          }`}
-                        >
-                          {TIER_LABELS[tier]}
-                        </button>
-                      ))}
-                    </div>
+                          className="flex-1 accent-gold h-1.5"
+                        />
+                        <span className="text-[11px] font-display-num text-gold w-8 text-right shrink-0">
+                          {(
+                            member.weightOverride ??
+                            resolveMemberWeight({
+                              tierLevel: member.tierLevel,
+                              weightOverride: null,
+                              organizerDiscount: member.organizerDiscount,
+                            })
+                          ).toFixed(1)}
+                        </span>
+                        {member.weightOverride != null && (
+                          <button
+                            type="button"
+                            onClick={() => updateMember(i, { weightOverride: null })}
+                            disabled={saving}
+                            className="text-[11px] text-ink-muted underline shrink-0"
+                          >
+                            リセット
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addMember}
+              disabled={saving}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-sm font-medium text-gold py-2.5 hover:bg-gold/5 transition-colors disabled:opacity-50"
+            >
+              <Plus size={16} />
+              メンバーを追加
+            </button>
+          </div>
+        </Chapter>
 
-                    {member.tierLevel === "organizer" && (
-                      <SegmentedControl
-                        aria-label="幹事枠割引"
-                        size="sm"
-                        options={ORGANIZER_DISCOUNTS.map((discount) => ({
-                          value: discount,
-                          label: ORGANIZER_DISCOUNT_LABELS[discount],
-                        }))}
-                        value={member.organizerDiscount ?? "none"}
-                        onChange={(discount) => updateMember(i, { organizerDiscount: discount })}
-                        disabled={saving}
-                      />
-                    )}
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-ink-muted shrink-0">重み調整</span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={3}
-                        step={0.1}
-                        value={
-                          member.weightOverride ??
-                          resolveMemberWeight({
-                            tierLevel: member.tierLevel,
-                            weightOverride: null,
-                            organizerDiscount: member.organizerDiscount,
-                          })
-                        }
-                        onChange={(e) => updateMember(i, { weightOverride: Number(e.target.value) })}
-                        disabled={saving}
-                        className="flex-1 accent-gold h-1.5"
-                      />
-                      <span className="text-[11px] font-display-num text-gold w-8 text-right shrink-0">
-                        {(
-                          member.weightOverride ??
-                          resolveMemberWeight({
-                            tierLevel: member.tierLevel,
-                            weightOverride: null,
-                            organizerDiscount: member.organizerDiscount,
-                          })
-                        ).toFixed(1)}
-                      </span>
-                      {member.weightOverride != null && (
-                        <button
-                          type="button"
-                          onClick={() => updateMember(i, { weightOverride: null })}
-                          disabled={saving}
-                          className="text-[11px] text-ink-muted underline shrink-0"
-                        >
-                          リセット
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={addMember}
-          disabled={saving}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-sm font-medium text-gold py-2.5 hover:bg-gold/5 transition-colors disabled:opacity-50"
-        >
-          <Plus size={16} />
-          メンバーを追加
-        </button>
-      </SectionCard>
-
-      <SectionCard title="メモ" subtitle="自由記入欄(任意)" icon={FileText}>
-        <div>
-          <label className={labelClass}>自由メモ</label>
-          <textarea
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-            disabled={saving}
-            rows={3}
-            className={inputClass}
-            placeholder="集合場所や持ち物など"
+        {/* 第六章 もっと(オプション) */}
+        <Chapter chapterRef={chapterRefs[5]}>
+          <ChapterHeading
+            number="第六章"
+            title="もっと"
+            subtitle="幹事だけのメモや、二次会の予定があれば"
+            action={
+              <button
+                type="button"
+                onClick={() => setMoreOpen((v) => !v)}
+                className="flex items-center gap-1.5 text-sm font-medium text-gold hover:text-gold-hover transition-colors"
+              >
+                {moreOpen ? "閉じる" : "詳しく入力する(任意)"}
+                <ChevronDown size={16} className={`transition-transform ${moreOpen ? "rotate-180" : ""}`} />
+              </button>
+            }
           />
-        </div>
-        <div>
-          <label className={labelClass}>アレルギー・苦手な食材</label>
-          <textarea
-            value={dietaryNotes}
-            onChange={(e) => setDietaryNotes(e.target.value)}
+
+          <AnimatePresence initial={false}>
+            {moreOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-col gap-5">
+                  <div>
+                    <label className={labelClass}>幹事のメモ</label>
+                    <p className="mb-1.5 text-xs text-ink-muted">
+                      サプライズや連絡事項など。参加者には表示されません。
+                    </p>
+                    <textarea
+                      value={eventNote}
+                      onChange={(e) => setEventNote(e.target.value)}
+                      disabled={saving}
+                      rows={3}
+                      className={inputClass}
+                      placeholder="例: 主役には内緒でケーキを用意"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>参加者向けメモ</label>
+                    <textarea
+                      value={memo}
+                      onChange={(e) => setMemo(e.target.value)}
+                      disabled={saving}
+                      rows={3}
+                      className={inputClass}
+                      placeholder="集合場所や持ち物など"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>アレルギー・苦手な食材</label>
+                    <textarea
+                      value={dietaryNotes}
+                      onChange={(e) => setDietaryNotes(e.target.value)}
+                      disabled={saving}
+                      rows={2}
+                      className={inputClass}
+                    />
+                  </div>
+                  <NijikaiSection value={nijikai} onChange={setNijikai} disabled={saving} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Chapter>
+
+        {error && (
+          <div className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion-text">
+            {error}
+          </div>
+        )}
+
+        <div className="fixed sm:static inset-x-0 bottom-24 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+          <button
+            type="button"
+            onClick={() => router.back()}
             disabled={saving}
-            rows={2}
-            className={inputClass}
-          />
+            className="flex-1 sm:flex-none sm:px-6 rounded-xl border border-gold/15 bg-surface-tertiary py-3 text-sm font-medium text-ink transition-colors hover:bg-gold/5 disabled:opacity-50"
+          >
+            キャンセル
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gold-gradient py-3 font-serif font-semibold text-base text-white shadow-gold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {mode === "create" ? "プランを完成させる" : "保存する"}
+          </button>
         </div>
-      </SectionCard>
-
-      {error && (
-        <div className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion-text">
-          {error}
-        </div>
-      )}
-
-      <div className="fixed sm:static inset-x-0 bottom-24 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          disabled={saving}
-          className="flex-1 rounded-xl border border-gold/15 bg-surface-tertiary py-2.5 text-sm font-medium text-ink transition-colors hover:bg-gold/5 disabled:opacity-50"
-        >
-          キャンセル
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gold-gradient py-2.5 text-sm font-semibold text-white shadow-gold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          {mode === "create" ? "作成する" : "保存する"}
-        </button>
-      </div>
       </form>
-
-      <aside className="hidden lg:block lg:col-span-5">
-        <div className="sticky top-6">
-          <PlanPreviewCard
-            title={title}
-            eventDate={eventDate}
-            venueName={venue.venueName}
-            feeAmount={feeAmount}
-            splitMode={splitMode}
-            roundingUnit={roundingUnit}
-            members={members
-              .filter((m) => m.name.trim())
-              .map((m) => ({
-                name: m.name,
-                tierLevel: m.tierLevel,
-                weightOverride: m.weightOverride,
-                organizerDiscount: m.organizerDiscount,
-              }))}
-          />
-        </div>
-      </aside>
-      </div>
-    </>
+    </div>
   );
 }

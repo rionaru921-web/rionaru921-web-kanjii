@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import type { FeeBreakdownItem, MemberRole } from "@/lib/manual-plans/types";
+import type { EventType, FeeBreakdownItem, MemberRole } from "@/lib/manual-plans/types";
 import type { SplitMode, RoundingUnit, TierLevel, OrganizerDiscount } from "@/lib/manual-plans/split-types";
 
 interface MemberInput {
@@ -14,20 +14,29 @@ interface MemberInput {
 
 interface UpdateManualPlanBody {
   title: string;
+  eventType?: EventType | null;
   eventDate?: string | null;
   endDate?: string | null;
   venueName?: string | null;
   venueAddress?: string | null;
   venueUrl?: string | null;
+  venuePhone?: string | null;
   venueHotpepperId?: string | null;
   venueLat?: number | null;
   venueLng?: number | null;
+  venueFacilities?: string[];
   feeAmount?: number | null;
   feeBreakdown?: FeeBreakdownItem[];
   paymentMethods?: string[];
   paymentDeadline?: string | null;
   memo?: string | null;
   dietaryNotes?: string | null;
+  eventNote?: string | null;
+  nijikaiEnabled?: boolean;
+  nijikaiVenue?: string | null;
+  nijikaiBudget?: number | null;
+  nijikaiUrl?: string | null;
+  nijikaiStartTime?: string | null;
   splitMode?: SplitMode;
   roundingUnit?: RoundingUnit;
   members?: MemberInput[];
@@ -52,20 +61,29 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     .from("manual_plans")
     .update({
       title: body.title.trim(),
+      event_type: body.eventType ?? null,
       event_date: body.eventDate ?? null,
       end_date: body.endDate ?? null,
       venue_name: body.venueName ?? null,
       venue_address: body.venueAddress ?? null,
       venue_url: body.venueUrl ?? null,
+      venue_phone: body.venuePhone ?? null,
       venue_hotpepper_id: body.venueHotpepperId ?? null,
       venue_lat: body.venueLat ?? null,
       venue_lng: body.venueLng ?? null,
+      venue_facilities: body.venueFacilities ?? [],
       fee_amount: body.feeAmount ?? null,
       fee_breakdown: body.feeBreakdown ?? [],
       payment_methods: body.paymentMethods ?? [],
       payment_deadline: body.paymentDeadline ?? null,
       memo: body.memo ?? null,
       dietary_notes: body.dietaryNotes ?? null,
+      event_note: body.eventNote ?? null,
+      nijikai_enabled: body.nijikaiEnabled ?? false,
+      nijikai_venue: body.nijikaiEnabled ? (body.nijikaiVenue ?? null) : null,
+      nijikai_budget: body.nijikaiEnabled ? (body.nijikaiBudget ?? null) : null,
+      nijikai_url: body.nijikaiEnabled ? (body.nijikaiUrl ?? null) : null,
+      nijikai_start_time: body.nijikaiEnabled ? (body.nijikaiStartTime ?? null) : null,
       split_mode: body.splitMode === "tiered" ? "tiered" : "equal",
       rounding_unit: body.roundingUnit ?? 100,
     })

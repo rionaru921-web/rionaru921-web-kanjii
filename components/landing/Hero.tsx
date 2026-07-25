@@ -1,20 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { ChevronDown, PlayCircle } from "lucide-react";
+import { ChevronDown, Loader2, PlayCircle, Sparkles } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ChochinIcon from "@/components/shared/ChochinIcon";
 import UseCaseTags from "@/components/landing/UseCaseTags";
-import GuestLoginButton from "@/components/auth/GuestLoginButton";
+import { useGuestSignIn } from "@/lib/auth/useGuestSignIn";
 
 interface HeroProps {
   isLoggedIn: boolean;
 }
 
 export default function Hero({ isLoggedIn }: HeroProps) {
+  const { start, loading, error } = useGuestSignIn("/manual-plans/new");
+
   return (
-    <section className="relative overflow-hidden ink-wash px-4 sm:px-6 pt-14 pb-16">
+    <section className="relative overflow-hidden ink-wash px-4 sm:px-6 pt-20 pb-20">
       <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-8 items-center min-h-[80vh]">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -22,8 +25,8 @@ export default function Hero({ isLoggedIn }: HeroProps) {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1"
         >
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-surface-tertiary/70 px-4 py-1.5 text-xs text-gold tracking-wide">
-            あらゆる集まりのための、幹事プラットフォーム
+          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold bg-gradient-to-r from-gold/15 via-gold/10 to-gold/5 px-4 py-1.5 text-xs font-semibold text-gold tracking-wide">
+            ログイン不要 · 30秒でプラン完成
           </span>
 
           <h1 className="font-serif font-black text-4xl sm:text-6xl lg:text-6xl leading-[1.2] text-ink text-balance">
@@ -40,18 +43,42 @@ export default function Hero({ isLoggedIn }: HeroProps) {
 
           <UseCaseTags />
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
-            <GoldButton href={isLoggedIn ? "/dashboard" : "/signup"} size="lg">
-              {isLoggedIn ? "マイページへ" : "無料ではじめる"}
-            </GoldButton>
-            <GoldButton href="#how-it-works" variant="outline" size="lg" icon={PlayCircle}>
-              デモを見る
-            </GoldButton>
-          </div>
-
-          {!isLoggedIn && (
-            <div className="mt-4">
-              <GuestLoginButton />
+          {isLoggedIn ? (
+            <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
+              <GoldButton href="/dashboard" size="lg">
+                マイページへ
+              </GoldButton>
+              <GoldButton href="#how-it-works" variant="outline" size="lg" icon={PlayCircle}>
+                デモを見る
+              </GoldButton>
+            </div>
+          ) : (
+            <div className="mt-10 flex flex-col items-center lg:items-start gap-3">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <button
+                  type="button"
+                  onClick={start}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2.5 rounded-full bg-gold-gradient text-white font-bold shadow-gold hover:brightness-110 hover:shadow-gold-lg transition-all duration-200 text-lg py-5 px-10 disabled:opacity-60"
+                >
+                  {loading ? <Loader2 size={22} className="animate-spin" /> : <Sparkles size={22} />}
+                  {loading ? "準備中..." : "今すぐ幹事する"}
+                </button>
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center justify-center rounded-full border border-gold/40 text-ink hover:border-gold hover:bg-gold/5 transition-all duration-200 text-sm py-3 px-6"
+                >
+                  アカウントを作って保存する
+                </Link>
+              </div>
+              <p className="font-serif text-xs text-ink-muted">ログイン不要 · すぐにはじめられます</p>
+              {error && <p className="text-xs text-vermilion-text">{error}</p>}
+              <a
+                href="#how-it-works"
+                className="mt-1 text-sm text-ink-secondary hover:text-gold transition-colors underline underline-offset-4"
+              >
+                デモを見る
+              </a>
             </div>
           )}
 

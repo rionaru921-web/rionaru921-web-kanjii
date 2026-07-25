@@ -23,25 +23,43 @@ export interface FeeBreakdownItem {
   amount: string;
 }
 
+export type EventType =
+  | "welcome"
+  | "farewell"
+  | "bonenkai"
+  | "shinnenkai"
+  | "birthday"
+  | "anniversary"
+  | "trip"
+  | "other";
+
 export interface ManualPlan {
   id: string;
   user_id: string;
   title: string;
+  event_type: EventType | null;
   event_date: string | null;
   end_date: string | null;
   venue_name: string | null;
   venue_address: string | null;
   venue_url: string | null;
-  venue_map_url: string | null;
+  venue_phone: string | null;
   venue_lat: number | null;
   venue_lng: number | null;
   venue_hotpepper_id: string | null;
+  venue_facilities: string[];
   fee_amount: number | null;
   fee_breakdown: FeeBreakdownItem[];
   payment_methods: string[];
   payment_deadline: string | null;
   memo: string | null;
   dietary_notes: string | null;
+  event_note: string | null;
+  nijikai_enabled: boolean;
+  nijikai_venue: string | null;
+  nijikai_budget: number | null;
+  nijikai_url: string | null;
+  nijikai_start_time: string | null;
   share_token: string;
   split_mode: SplitMode;
   rounding_unit: RoundingUnit;

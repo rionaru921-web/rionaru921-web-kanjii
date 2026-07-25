@@ -54,8 +54,12 @@ export function formatLocalDateTimeInput(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+import type { EventType } from "@/lib/manual-plans/types";
+
 export interface PlanTemplate {
   id: string;
+  // フォーム保存時の event_type。'blank'(自由入力)は null のまま保存する。
+  eventType: EventType | null;
   label: string;
   icon: string;
   title: string;
@@ -68,6 +72,7 @@ export interface PlanTemplate {
 export const PLAN_TEMPLATES: PlanTemplate[] = [
   {
     id: "welcome",
+    eventType: "welcome",
     label: "歓迎会",
     icon: "🎉",
     title: "〇〇さんの歓迎会",
@@ -77,6 +82,7 @@ export const PLAN_TEMPLATES: PlanTemplate[] = [
   },
   {
     id: "farewell",
+    eventType: "farewell",
     label: "送別会",
     icon: "🌸",
     title: "〇〇さんの送別会",
@@ -86,6 +92,7 @@ export const PLAN_TEMPLATES: PlanTemplate[] = [
   },
   {
     id: "bonenkai",
+    eventType: "bonenkai",
     label: "忘年会",
     icon: "🍶",
     title: "忘年会",
@@ -95,6 +102,7 @@ export const PLAN_TEMPLATES: PlanTemplate[] = [
   },
   {
     id: "shinnenkai",
+    eventType: "shinnenkai",
     label: "新年会",
     icon: "🎍",
     title: "新年会",
@@ -103,8 +111,29 @@ export const PLAN_TEMPLATES: PlanTemplate[] = [
     feeAmount: "4500",
   },
   {
-    id: "family-trip",
-    label: "家族旅行",
+    id: "birthday",
+    eventType: "birthday",
+    label: "誕生日",
+    icon: "🎂",
+    title: "〇〇さんの誕生日会",
+    getEventDate: () => nextWeekdayAtLeast(6, 1, 18, 0),
+    durationHours: 2,
+    feeAmount: "4000",
+  },
+  {
+    id: "anniversary",
+    eventType: "anniversary",
+    label: "記念日",
+    icon: "💐",
+    title: "記念日のお祝い",
+    getEventDate: () => nextWeekdayAtLeast(6, 1, 18, 0),
+    durationHours: 2,
+    feeAmount: "6000",
+  },
+  {
+    id: "trip",
+    eventType: "trip",
+    label: "旅行",
     icon: "🚗",
     title: "家族旅行",
     getEventDate: () => nextWeekdayAtLeast(6, 1, 10, 0),
@@ -114,6 +143,7 @@ export const PLAN_TEMPLATES: PlanTemplate[] = [
   },
   {
     id: "blank",
+    eventType: null,
     label: "自由入力",
     icon: "✏️",
     title: "",
