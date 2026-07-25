@@ -1,6 +1,7 @@
 import Header from "@/components/shared/Header";
 import Hero from "@/components/landing/Hero";
 import ServiceCards from "@/components/landing/ServiceCards";
+import UseCases from "@/components/landing/UseCases";
 import Story from "@/components/landing/Story";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Pricing from "@/components/landing/Pricing";
@@ -43,6 +44,7 @@ export default async function Home() {
       <main>
         <Hero isLoggedIn={isLoggedIn} />
         <ServiceCards />
+        <UseCases />
         <Story />
         <HowItWorks />
         <Pricing />
