@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ChevronDown, PlayCircle } from "lucide-react";
+import { ChevronDown, PlayCircle, Zap } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ChochinIcon from "@/components/shared/ChochinIcon";
 import UseCaseTags from "@/components/landing/UseCaseTags";
@@ -29,27 +29,40 @@ export default function Hero({ isLoggedIn }: HeroProps) {
         >
           <motion.span
             variants={fadeInUp}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold bg-gradient-to-r from-gold/15 via-gold/10 to-gold/5 px-4 py-1.5 text-xs font-semibold text-gold tracking-wide"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold bg-gradient-to-r from-gold/10 to-gold/5 px-4 py-1.5 text-sm font-semibold text-gold tracking-wide"
           >
-            ログイン不要 · 30秒でプラン完成
+            <Zap size={14} aria-hidden />
+            すぐ使える · 登録不要 · ブラウザだけでOK
           </motion.span>
 
-          <motion.h1
-            variants={fadeInUp}
-            className="font-serif font-black text-4xl sm:text-6xl lg:text-6xl leading-[1.2] text-ink text-balance"
-          >
-            あらゆる集まりを、
-            <br />
-            あなたが<span className="text-gold-gradient">幹事する</span>。
-          </motion.h1>
+          <h1 className="font-serif leading-[1.2] text-balance">
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="block font-black text-4xl sm:text-6xl lg:text-6xl text-gold-gradient"
+            >
+              ログイン不要。
+            </motion.span>
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="block font-bold text-2xl sm:text-4xl lg:text-4xl text-ink mt-2"
+            >
+              今すぐ、幹事プランを作る。
+            </motion.span>
+          </h1>
 
           <motion.p
-            variants={fadeInUp}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
             className="mt-6 text-base sm:text-lg text-ink-secondary text-balance max-w-xl"
           >
-            URLを送るだけ。
+            あらゆる集まりを、あなたが幹事する。
             <br className="sm:hidden" />
-            日程調整も、お店選びも、割り勘も。
+            URLを送るだけ。日程調整も、お店選びも、割り勘も。
           </motion.p>
 
           <motion.div variants={fadeInUp}>
@@ -76,7 +89,6 @@ export default function Hero({ isLoggedIn }: HeroProps) {
                   アカウントを作って保存する
                 </Link>
               </div>
-              <p className="font-serif text-xs text-ink-muted">ログイン不要 · すぐにはじめられます</p>
               {error && <p className="text-xs text-vermilion-text">{error}</p>}
               <a
                 href="#how-it-works"

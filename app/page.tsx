@@ -1,5 +1,6 @@
 import Header from "@/components/shared/Header";
 import Hero from "@/components/landing/Hero";
+import NoLoginBanner from "@/components/landing/NoLoginBanner";
 import ServiceCards from "@/components/landing/ServiceCards";
 import UseCases from "@/components/landing/UseCases";
 import FeatureShowcase from "@/components/landing/FeatureShowcase";
@@ -45,6 +46,7 @@ export default async function Home() {
       <Header />
       <main>
         <Hero isLoggedIn={isLoggedIn} />
+        <NoLoginBanner />
         <UseCases />
         <FeatureShowcase />
         <HowToGuide />
