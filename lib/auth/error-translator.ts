@@ -12,7 +12,18 @@ const TRANSLATIONS: Record<string, string> = {
   "Anonymous sign-ins are disabled": "現在ゲストログインはご利用いただけません。通常のサインアップをお試しください。",
 };
 
+const GENERIC_FALLBACK =
+  "登録処理中にエラーが発生しました。時間をおいてから再度お試しください。";
+
 export function translateSupabaseError(message: string): string {
+  // Supabaseのサーバーが想定外の形状のエラーを返した場合、auth-js内部の
+  // _getErrorMessage が JSON.stringify(err) にフォールバックし、"{}" のような
+  // 生のオブジェクト文字列がここに渡ってくることがある。人間が読めない
+  // メッセージはそのまま表示せず、汎用文言に差し替える。
+  if (!message || /^\{[\s\S]*\}$/.test(message.trim())) {
+    return GENERIC_FALLBACK;
+  }
+
   for (const [key, value] of Object.entries(TRANSLATIONS)) {
     if (message.includes(key)) return value;
   }

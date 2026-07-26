@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { UserPlus, Mail, Lock, AlertCircle, MailCheck } from "lucide-react";
+import { UserPlus, Mail, Lock, AlertCircle, MailCheck, Info } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
 import GuestLoginButton from "@/components/auth/GuestLoginButton";
@@ -109,9 +109,14 @@ export default function SignupForm() {
           <p className="text-sm text-ink-secondary leading-relaxed">
             {email} 宛に確認メールを送信しました。メールに記載されたリンクをクリックして登録を完了してください。
           </p>
-          <p className="text-xs text-ink-muted leading-relaxed">
-            メールが届かない場合は、迷惑メールフォルダをご確認ください。
-          </p>
+          <div className="text-xs text-ink-muted leading-relaxed text-left bg-gold/5 rounded-xl p-3 w-full">
+            <p>メールが届かない場合:</p>
+            <ul className="list-disc list-inside mt-1 space-y-0.5">
+              <li>迷惑メールフォルダをご確認ください</li>
+              <li>Softbank・docomo・au等のキャリアメールは届きにくい場合があります</li>
+              <li>Gmail・iCloud等のメールアドレスでの登録もお試しください</li>
+            </ul>
+          </div>
           {error && (
             <div className="flex items-center gap-2 text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5 w-full">
               <AlertCircle size={14} className="shrink-0" />
@@ -227,6 +232,13 @@ export default function SignupForm() {
             に同意します
           </span>
         </label>
+
+        <div className="flex items-start gap-1.5 text-xs text-ink-secondary bg-gold/5 rounded-xl p-3">
+          <Info size={14} className="shrink-0 mt-0.5" />
+          <span>
+            Softbank・docomo・auなどのキャリアメールは確認メールが届かない場合があります。Gmail・iCloud等のご利用を推奨します。
+          </span>
+        </div>
 
         {error && (
           <div className="flex items-center gap-2 text-xs text-vermilion-text bg-vermilion/10 border border-vermilion/20 rounded-xl px-3 py-2.5">
