@@ -114,23 +114,25 @@ export default function RakutenHotelSearchModal({ onClose, onSelect }: RakutenHo
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.18 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 w-full sm:max-w-lg bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl p-6 max-h-[90vh] overflow-y-auto"
+          className="relative z-10 flex w-full sm:max-w-lg max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-4 top-4 rounded-full p-1.5 text-ink-muted transition-colors hover:text-ink"
-            aria-label="閉じる"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/10 px-6 py-4">
+            <h2 className="font-serif font-bold text-lg text-ink flex items-center gap-2">
+              <Hotel className="h-5 w-5 text-gold" />
+              宿泊施設を探す
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink hover:bg-gold/5"
+              aria-label="閉じる"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-          <h2 className="font-serif font-bold text-lg text-ink flex items-center gap-2">
-            <Hotel className="h-5 w-5 text-gold" />
-            宿泊施設を探す
-          </h2>
-
-          <div className="mt-4 flex border-b border-gold/15">
+          <div className="overflow-y-auto px-6 py-4">
+          <div className="flex border-b border-gold/15">
             <button type="button" onClick={() => setTab("keyword")} className={tabButtonClass(tab === "keyword")}>
               <Search className="h-4 w-4" />
               キーワードで検索
@@ -276,6 +278,7 @@ export default function RakutenHotelSearchModal({ onClose, onSelect }: RakutenHo
               )}
             </div>
           )}
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

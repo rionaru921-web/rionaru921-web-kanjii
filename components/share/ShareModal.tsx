@@ -94,19 +94,20 @@ export default function ShareModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative z-10 w-full sm:max-w-sm bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
+      <div className="relative z-10 flex w-full sm:max-w-sm max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/10 px-6 py-4">
           <h2 className="font-serif font-bold text-lg text-ink">共有</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-ink-muted hover:text-ink transition-colors"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted hover:text-ink hover:bg-gold/5 transition-colors"
             aria-label="閉じる"
           >
             <X size={20} />
           </button>
         </div>
 
+        <div className="overflow-y-auto px-6 py-5">
         {loading && !shareUrl && (
           <div className="flex flex-col items-center justify-center py-10 gap-3">
             <Loader2 size={28} className="text-gold animate-spin" />
@@ -163,6 +164,7 @@ export default function ShareModal({
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

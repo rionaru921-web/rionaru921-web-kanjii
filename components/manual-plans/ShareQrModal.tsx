@@ -46,19 +46,21 @@ export default function ShareQrModal({
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.18 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 w-full sm:max-w-sm bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl p-6 max-h-[90vh] overflow-y-auto"
+          className="relative z-10 flex w-full sm:max-w-sm max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-4 top-4 rounded-full p-1.5 text-ink-muted transition-colors hover:text-ink"
-            aria-label="閉じる"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/10 px-6 py-4">
+            <h2 className="font-serif font-bold text-lg text-ink">QRコードで共有</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink hover:bg-gold/5"
+              aria-label="閉じる"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-          <h2 className="font-serif font-bold text-lg text-ink mb-5">QRコードで共有</h2>
-
+          <div className="overflow-y-auto px-6 py-5">
           <div className="flex flex-col items-center gap-4">
             {dataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -91,6 +93,7 @@ export default function ShareQrModal({
                 QRコードをダウンロード
               </a>
             )}
+          </div>
           </div>
         </motion.div>
       </motion.div>

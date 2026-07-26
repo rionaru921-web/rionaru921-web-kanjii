@@ -44,12 +44,12 @@ export default function FloatingBottomNav() {
         transition={{ duration: 0.2, delay: 0.1 }}
         role="navigation"
         aria-label="メインナビゲーション"
-        className="fixed inset-x-0 bottom-6 z-40 mx-auto flex w-fit max-w-[90vw] items-center gap-1 rounded-full bg-surface-tertiary/95 px-2 py-2 shadow-gold-lg backdrop-blur-md"
+        className="fixed inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-fit max-w-[90vw] items-center gap-1 rounded-full bg-surface-tertiary/95 px-2 py-2 shadow-gold-lg backdrop-blur-md"
       >
         <Link
           href="/dashboard"
           aria-label="ホーム"
-          className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-colors ${
+          className={`flex items-center gap-1.5 rounded-full px-4 py-3.5 text-xs font-medium transition-colors ${
             pathname === "/dashboard" ? "bg-gold/10 text-gold" : "text-ink-secondary hover:text-gold"
           }`}
         >
@@ -61,7 +61,7 @@ export default function FloatingBottomNav() {
           href="/manual-plans/new"
           onClick={handleCreateClick}
           aria-label="プランを作成"
-          className={`flex shrink-0 items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-2.5 text-xs font-semibold text-white shadow-gold transition-opacity hover:opacity-90 ${
+          className={`flex shrink-0 items-center gap-1.5 rounded-full bg-gold-gradient px-4 py-3.5 text-xs font-semibold text-white shadow-gold transition-opacity hover:opacity-90 ${
             isCreateActive ? "ring-2 ring-gold/40 ring-offset-2 ring-offset-surface-tertiary" : ""
           }`}
         >
@@ -72,7 +72,7 @@ export default function FloatingBottomNav() {
         <Link
           href="/manual-plans"
           aria-label="履歴"
-          className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-colors ${
+          className={`flex items-center gap-1.5 rounded-full px-4 py-3.5 text-xs font-medium transition-colors ${
             isHistoryActive ? "bg-gold/10 text-gold" : "text-ink-secondary hover:text-gold"
           }`}
         >

@@ -183,23 +183,24 @@ export function CoachDialog({ planType, planId, open, onClose }: Props) {
           exit={{ opacity: 0, y: 40 }}
           transition={{ duration: 0.2 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 w-full sm:max-w-lg bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl p-6 max-h-[90vh] overflow-y-auto"
+          className="relative z-10 flex w-full sm:max-w-lg max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >
-          <button
-            type="button"
-            onClick={handleCloseRequest}
-            aria-label="閉じる"
-            className="absolute right-4 top-4 rounded-full p-1.5 text-ink-muted transition-colors hover:text-ink"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/10 px-6 py-4">
+            <h2 className="flex items-center gap-2 font-serif font-bold text-lg text-ink">
+              <GraduationCap className="text-gold" size={20} />
+              AI幹事コーチ
+            </h2>
+            <button
+              type="button"
+              onClick={handleCloseRequest}
+              aria-label="閉じる"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink hover:bg-gold/5"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-          <h2 className="flex items-center gap-2 font-serif font-bold text-lg text-ink pr-8">
-            <GraduationCap className="text-gold" size={20} />
-            AI幹事コーチ
-          </h2>
-
-          <div className="mt-5">
+          <div className="overflow-y-auto px-6 py-5">
             {confirmClose ? (
               <div className="space-y-4 py-4">
                 <p className="text-sm text-ink text-center leading-relaxed">

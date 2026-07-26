@@ -147,7 +147,7 @@ export default function DashboardSidebar() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="p-2 text-ink"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center text-ink"
           aria-label="メニューを開く"
         >
           <Menu size={22} />

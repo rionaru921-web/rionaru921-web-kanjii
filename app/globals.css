@@ -64,6 +64,15 @@
   border-color: var(--border-soft);
 }
 
+html,
+body {
+  /* Safety net against stray horizontal scroll (decorative blurs, negative-
+     margin carousel bleed, etc.) — inner elements that intentionally scroll
+     horizontally (e.g. the UseCases card row) manage their own overflow-x
+     and are unaffected by this. */
+  overflow-x: hidden;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -149,6 +158,16 @@ h4 {
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* iOS home-indicator / notch clearance for fixed bottom-anchored UI
+     (FloatingBottomNav, the manual-plan form's action bar). No-op on
+     devices without a safe area. */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
   }
 }
 

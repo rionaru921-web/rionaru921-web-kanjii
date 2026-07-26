@@ -67,23 +67,27 @@ export default function FeedbackModal({ onClose, onSuccess }: FeedbackModalProps
           exit={{ opacity: 0, y: 40 }}
           transition={{ duration: 0.2 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 w-full sm:max-w-md bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl p-6 max-h-[90vh] overflow-y-auto"
+          className="relative z-10 flex w-full sm:max-w-md max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            className="absolute right-4 top-4 rounded-full p-1.5 text-ink-muted transition-colors hover:text-ink"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gold/10 px-6 py-4">
+            <div>
+              <h2 className="font-serif font-bold text-lg text-ink">フィードバックを送る</h2>
+              <p className="mt-1 text-sm text-ink-secondary">
+                バグ報告・ご要望など、お気軽にお聞かせください
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="閉じる"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink hover:bg-gold/5"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-          <h2 className="font-serif font-bold text-lg text-ink">フィードバックを送る</h2>
-          <p className="mt-1 text-sm text-ink-secondary">
-            バグ報告・ご要望など、お気軽にお聞かせください
-          </p>
-
-          <div className="mt-6 space-y-4">
+          <div className="overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-ink mb-1.5">カテゴリ</label>
               <div className="flex flex-wrap gap-1.5">
@@ -158,6 +162,7 @@ export default function FeedbackModal({ onClose, onSuccess }: FeedbackModalProps
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? "送信中..." : "送信する"}
             </button>
+          </div>
           </div>
         </motion.div>
       </motion.div>

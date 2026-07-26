@@ -71,7 +71,7 @@ export default function HeaderNav({ isLoggedIn, displayName }: HeaderNavProps) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="md:hidden p-2 text-ink"
+          className="md:hidden flex min-h-[44px] min-w-[44px] items-center justify-center text-ink"
           aria-label="メニュー"
         >
           {open ? <X size={22} /> : <Menu size={22} />}

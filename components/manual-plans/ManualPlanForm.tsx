@@ -292,7 +292,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             e.preventDefault();
           }
         }}
-        className="flex flex-col gap-24 md:gap-32 pb-28 pt-8"
+        className="flex flex-col gap-28 md:gap-32 pb-36 pt-8"
       >
         {/* 第一章 はじまり */}
         <Chapter chapterRef={chapterRefs[0]}>
@@ -429,7 +429,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                     type="button"
                     onClick={() => removeMember(i)}
                     disabled={saving || members.length === 1}
-                    className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
+                    className="flex shrink-0 items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
                     aria-label="メンバーを削除"
                   >
                     <Trash2 size={16} />
@@ -632,7 +632,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           </div>
         )}
 
-        <div className="fixed sm:static inset-x-0 bottom-24 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+        <div className="safe-area-bottom fixed sm:static inset-x-0 bottom-24 z-30 flex gap-3 border-t border-gold/10 bg-surface-tertiary/95 backdrop-blur-md px-4 py-3 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none sm:pb-0">
           <button
             type="button"
             onClick={() => router.back()}
