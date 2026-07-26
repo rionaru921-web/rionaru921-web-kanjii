@@ -94,7 +94,7 @@ export default function ShareModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative z-10 flex w-full sm:max-w-sm max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl">
+      <div className="relative z-10 flex w-full sm:max-w-sm max-h-[90dvh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl">
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/10 px-6 py-4">
           <h2 className="font-serif font-bold text-lg text-ink">共有</h2>
           <button

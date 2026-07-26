@@ -84,7 +84,7 @@ export default function ProfileEditModal({
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.18 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 flex w-full sm:max-w-md max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
+          className="relative z-10 flex w-full sm:max-w-md max-h-[90dvh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >
           <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gold/10 px-6 py-4">
             <div>

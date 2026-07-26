@@ -68,7 +68,7 @@ export default function HotpepperSearchModal({ onClose, onSelect }: HotpepperSea
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.18 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 flex w-full sm:max-w-lg max-h-[90vh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
+          className="relative z-10 flex w-full sm:max-w-lg max-h-[90dvh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >
           <div className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/10 px-6 py-4">
             <h2 className="font-serif font-bold text-lg text-ink flex items-center gap-2">
