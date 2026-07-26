@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, History, BookOpen, type LucideIcon } from "lucide-react";
+import { Sparkles, History, BookOpen, ClipboardList, type LucideIcon } from "lucide-react";
 import CreatePlanButton from "@/components/shared/CreatePlanButton";
 
 interface ActionItem {
@@ -23,6 +23,7 @@ const CREATE_PLAN_ACTION: ActionItem = {
 
 const ACTIONS: ActionItem[] = [
   CREATE_PLAN_ACTION,
+  { href: "/surveys/new", icon: ClipboardList, title: "アンケートを作る", description: "みんなの都合・希望を集める" },
   { href: "/history", icon: History, title: "履歴を見る", description: "過去のプランを振り返る" },
   { href: "#", icon: BookOpen, title: "使い方を見る", description: "準備中", disabled: true },
 ];

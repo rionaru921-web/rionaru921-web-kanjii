@@ -17,6 +17,7 @@ import {
   X,
   MessageSquare,
   GraduationCap,
+  ClipboardList,
 } from "lucide-react";
 import Logo from "./Logo";
 import { LogoutButton } from "@/components/auth/LogoutButton";
@@ -29,6 +30,7 @@ const MAIN_NAV = [
   { href: "/nomikai", label: "飲み会", icon: Wine },
   { href: "/nomikai/suggest", label: "AI提案（補助）", icon: Sparkles },
   { href: "/travel", label: "旅行", icon: Plane },
+  { href: "/surveys", label: "アンケート", icon: ClipboardList },
   { href: "/event", label: "イベント", icon: PartyPopper, disabled: true },
   { href: "/company", label: "会社", icon: Briefcase, disabled: true },
 ];

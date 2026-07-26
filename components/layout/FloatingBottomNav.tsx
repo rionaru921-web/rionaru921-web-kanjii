@@ -20,7 +20,8 @@ export default function FloatingBottomNav() {
   const router = useRouter();
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
-  const shouldHide = HIDE_PATHS.includes(pathname) || pathname.startsWith("/share/");
+  const shouldHide =
+    HIDE_PATHS.includes(pathname) || pathname.startsWith("/share/") || pathname.startsWith("/s/");
 
   if (shouldHide) return null;
 
