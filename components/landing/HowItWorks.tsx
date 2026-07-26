@@ -30,7 +30,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="px-4 py-24 sm:py-32">
+    <section id="how-it-works" className="px-4 py-20 md:py-28">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="font-serif font-bold text-2xl sm:text-3xl text-ink mb-4">
@@ -54,7 +54,7 @@ export default function HowItWorks() {
                 <span className="font-display-num block font-black text-7xl text-gold-gradient opacity-80 mb-2 leading-none">
                   {step.number}
                 </span>
-                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-tertiary text-gold mb-4 shadow-warm">
+                <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-surface-tertiary text-gold mb-4 shadow-warm">
                   <Icon size={22} />
                 </span>
                 <h3 className="font-serif font-bold text-lg text-ink mb-2">

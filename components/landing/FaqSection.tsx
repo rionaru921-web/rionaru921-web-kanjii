@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FAQ_CATEGORIES } from "@/lib/faq";
-import { fadeInUp } from "@/lib/animations";
 import FaqCategoryTabs from "@/components/landing/FaqCategoryTabs";
 import FaqItem from "@/components/landing/FaqItem";
+import SectionTitle from "@/components/landing/SectionTitle";
 
 export default function FaqSection() {
   const [activeCategoryId, setActiveCategoryId] = useState(FAQ_CATEGORIES[0].id);
@@ -27,26 +27,13 @@ export default function FaqSection() {
   };
 
   return (
-    <section id="faq" className="px-4 py-24 sm:py-32 bg-surface-secondary">
+    <section id="faq" className="px-4 py-20 md:py-28 bg-surface-secondary">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={fadeInUp}
-          className="text-center mb-12"
-        >
-          <p className="text-gold text-2xl mb-3" aria-hidden>
-            ◇
-          </p>
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-ink">
-            よくあるご質問
-          </h2>
-        </motion.div>
+        <SectionTitle title="よくあるご質問" className="mb-12" />
 
         <FaqCategoryTabs
           categories={FAQ_CATEGORIES}

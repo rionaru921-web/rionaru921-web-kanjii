@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export default function Story() {
   return (
-    <section className="px-4 py-24 sm:py-32">
+    <section className="px-4 py-20 md:py-28">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 items-center">
         <motion.div
           initial={{ opacity: 0, x: -16 }}

@@ -9,7 +9,7 @@ interface CTASectionProps {
 
 export default function CTASection({ isLoggedIn }: CTASectionProps) {
   return (
-    <section className="px-4 py-24 sm:py-32 relative overflow-hidden">
+    <section className="px-4 py-16 md:py-24 relative overflow-hidden">
       <div
         className="pointer-events-none absolute inset-0 opacity-50"
         style={{

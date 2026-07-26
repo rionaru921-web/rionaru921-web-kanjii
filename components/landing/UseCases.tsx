@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import UseCaseCard from "@/components/landing/UseCaseCard";
+import SectionTitle from "@/components/landing/SectionTitle";
 import { USE_CASES } from "@/lib/use-cases";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 
@@ -9,23 +10,10 @@ export default function UseCases() {
   return (
     <section className="py-20 md:py-28 px-4 sm:px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={fadeInUp}
-          className="text-center mb-12 md:mb-16"
-        >
-          <p className="text-gold text-2xl mb-3" aria-hidden>
-            ◇
-          </p>
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-ink">
-            こんな場面で、選ばれています
-          </h2>
-          <p className="mt-3 text-ink-secondary text-sm md:text-base">
-            幹事の一大事も、日常の集まりも。
-          </p>
-        </motion.div>
+        <SectionTitle
+          title="こんな場面で、選ばれています"
+          subtitle="幹事の一大事も、日常の集まりも。"
+        />
 
         <motion.div
           initial="initial"

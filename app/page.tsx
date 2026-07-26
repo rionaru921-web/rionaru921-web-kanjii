@@ -45,14 +45,14 @@ export default async function Home() {
       <Header />
       <main>
         <Hero isLoggedIn={isLoggedIn} />
-        <ServiceCards />
         <UseCases />
         <FeatureShowcase />
-        <Story />
-        <HowItWorks />
         <HowToGuide />
+        <HowItWorks />
+        <ServiceCards />
         <Pricing />
         <FaqSection />
+        <Story />
         <CTASection isLoggedIn={isLoggedIn} />
       </main>
       <Footer />
