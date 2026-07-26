@@ -38,6 +38,9 @@ export default async function ResultsPage({
         : "検索中にエラーが発生しました。しばらくしてから再度お試しください。";
   }
 
+  const hotpepperBaseParams =
+    result?.source === "hotpepper" ? await buildHotpepperSearchParams(params) : undefined;
+
   const genreName = genre ? genreNameByCode(genre) : "お店";
   const areaName = station ? `${station}周辺の` : "";
 
@@ -111,9 +114,7 @@ export default async function ResultsPage({
             initialShops={result.shops}
             totalAvailable={result.totalAvailable}
             source={result.source}
-            hotpepperBaseParams={
-              result.source === "hotpepper" ? buildHotpepperSearchParams(params) : undefined
-            }
+            hotpepperBaseParams={hotpepperBaseParams}
             people={people}
           />
 

@@ -18,7 +18,13 @@ interface HeartRailsRawStation {
 // this fills in everything else. Call sites should cache/debounce (see
 // app/api/stations/search/route.ts and components/shared/StationAutocomplete.tsx).
 export async function searchStationsByName(query: string): Promise<Station[]> {
-  const trimmed = query.trim();
+  // HeartRails' `name=` matches against its own bare station names (no "駅"
+  // suffix) and errors out entirely — not just "no matches" — if the query
+  // carries one. Every station value flowing through this app (typed by a
+  // user who wrote "〇〇駅", or selected from StationAutocomplete, which
+  // always appends "駅" — see the mapping below) has that suffix, so
+  // stripping it here is required for real inputs to match at all.
+  const trimmed = query.trim().replace(/駅$/, "");
   if (!trimmed) return [];
 
   const url = `${HEARTRAILS_ENDPOINT}?method=getStations&name=${encodeURIComponent(trimmed)}`;

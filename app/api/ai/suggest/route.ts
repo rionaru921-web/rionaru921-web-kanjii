@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { suggestShops } from "@/lib/ai/suggest";
-import { searchHotpepper, HotpepperApiError } from "@/lib/api/hotpepper";
-import { buildHotpepperSearchParams } from "@/lib/api/restaurants";
-import { getCached, setCached } from "@/lib/api/cache";
+import { HotpepperApiError } from "@/lib/api/hotpepper";
+import { runProgressiveSearch } from "@/lib/ai/relax-search";
+import { getExpansionSuggestions } from "@/lib/ai/area-suggestions";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAiUsageStatus, incrementAiUsage } from "@/lib/plans/checkAiUsage";
@@ -133,19 +133,21 @@ export async function POST(req: NextRequest) {
   };
 
   try {
-    // 1. Find candidate shops via HotPepper (cached, same as /api/hotpepper/search).
-    const hpParams = buildHotpepperSearchParams(searchParams);
-    const cacheKey = `search:${JSON.stringify(hpParams)}`;
-    let searchResult = getCached<Awaited<ReturnType<typeof searchHotpepper>>>(cacheKey);
-    if (!searchResult) {
-      searchResult = await searchHotpepper(hpParams);
-      setCached(cacheKey, searchResult);
-    }
+    // 1. Find candidate shops via HotPepper, loosening budget → genre →
+    // search radius in stages if the conditions as given are too narrow
+    // (see lib/ai/relax-search.ts for why these three, in this order).
+    const searchResult = await runProgressiveSearch(searchParams);
 
     if (searchResult.shops.length === 0) {
+      // Not even the loosest stage found anything — no AI call happens
+      // here (mirrors the previous zero-results behavior), so this doesn't
+      // count against the usage limit. Offer nearby/major stations instead
+      // of a dead end.
+      const areaSuggestions = await getExpansionSuggestions(body.station);
       return NextResponse.json({
         recommendations: [],
-        summary: "該当する店舗が見つかりませんでした。条件を変えてお試しください。",
+        summary: "ご希望の条件では店舗が見つかりませんでした。エリアを変えるか、手動でプランを作成することもできます。",
+        areaSuggestions,
       });
     }
 
@@ -163,6 +165,10 @@ export async function POST(req: NextRequest) {
       },
       searchResult.shops
     );
+
+    if (searchResult.relaxation) {
+      result.relaxation = searchResult.relaxation;
+    }
 
     if (isGuest && admin && user) {
       // ベストエフォート: カウント更新に失敗しても提案結果は返す

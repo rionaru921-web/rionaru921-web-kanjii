@@ -4,6 +4,8 @@ import { buildSuggestPrompt, SUGGEST_SYSTEM_PROMPT, type SuggestContext } from "
 import { parseAiResponse } from "./parseResponse";
 import { parseYenAmount } from "@/lib/api/restaurant-utils";
 import type { HotpepperShop } from "@/lib/api/hotpepper";
+import type { RelaxationInfo } from "./relax-search";
+import type { AreaSuggestion } from "./area-suggestions";
 
 export interface AIRecommendation {
   shopId: string;
@@ -20,6 +22,13 @@ export interface AISuggestResult {
   recommendations: AIRecommendation[];
   summary: string;
   degraded?: boolean; // true when the AI call failed and we fell back to a plain top-N list
+  // Set by the route handler (not suggestShops itself) when the HotPepper
+  // search behind these recommendations had to loosen the user's original
+  // conditions to find enough candidates — see lib/ai/relax-search.ts.
+  relaxation?: RelaxationInfo;
+  // Set instead of relaxation when even the loosest search stage found
+  // nothing at all — nearby/major stations worth trying next.
+  areaSuggestions?: AreaSuggestion[];
 }
 
 export async function suggestShops(

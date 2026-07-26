@@ -6,6 +6,7 @@ import {
 } from "./hotpepper";
 import { budgetPerPersonToCode } from "../constants/budgets";
 import { findStationByName } from "../constants/locations";
+import { searchStationsByName } from "./heartrails";
 import type { Restaurant, RestaurantSearchResult, SearchParams } from "./types";
 
 export { averageBudgetYen } from "./restaurant-utils";
@@ -13,10 +14,24 @@ export { averageBudgetYen } from "./restaurant-utils";
 // Shared by the initial SSR fetch (below) and the results page, which needs
 // the same hotpepper-shaped query to build the "もっと見る" pagination
 // request sent client-side to /api/hotpepper/search.
-export function buildHotpepperSearchParams(
+//
+// The curated STATIONS list (lib/constants/locations.ts) only covers ~25
+// major stations. StationAutocomplete already lets users pick any station
+// nationwide via HeartRails, but until this fix, only the station *name*
+// survived past the form — server-side resolution only checked the curated
+// list, so anything outside it silently fell back to HotPepper's much
+// weaker `keyword` text search instead of a lat/lng radius search. That's a
+// likely major contributor to "0件" for residential-area stations, so this
+// now falls back to the same HeartRails lookup the autocomplete uses before
+// giving up on lat/lng.
+export async function buildHotpepperSearchParams(
   params: SearchParams
-): Omit<HotpepperSearchParams, "start"> {
-  const station = params.station ? findStationByName(params.station) : undefined;
+): Promise<Omit<HotpepperSearchParams, "start">> {
+  let station = params.station ? findStationByName(params.station) : undefined;
+  if (!station && params.station) {
+    const remote = await searchStationsByName(params.station);
+    station = remote[0];
+  }
 
   return {
     keyword: station ? undefined : params.station,
@@ -86,8 +101,9 @@ function searchMockRestaurants(params: SearchParams): RestaurantSearchResult {
 async function searchHotpepperAsRestaurants(
   params: SearchParams
 ): Promise<RestaurantSearchResult> {
+  const hpParams = await buildHotpepperSearchParams(params);
   const result = await searchHotpepper({
-    ...buildHotpepperSearchParams(params),
+    ...hpParams,
     start: params.start ?? 1,
   });
 

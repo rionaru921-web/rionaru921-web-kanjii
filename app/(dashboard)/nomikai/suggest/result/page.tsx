@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, RefreshCw, AlertTriangle, Lightbulb } from "lucide-react";
 import AILoadingAnimation from "@/components/ai/AILoadingAnimation";
 import AIRecommendation from "@/components/ai/AIRecommendation";
 import EmptyResultsFallback from "@/components/ai/EmptyResultsFallback";
@@ -106,19 +106,17 @@ function SuggestResult() {
     return `/nomikai/suggest/result?${p.toString()}`;
   }
 
+  // Genre and budget are no longer offered here — the server already tries
+  // both automatically before ever returning an empty result (see
+  // lib/ai/relax-search.ts), so re-offering them manually would just repeat
+  // something already ruled out. Private room and mood tags aren't part of
+  // that automatic ladder, so they still make sense as manual levers.
   const relaxSuggestions: { label: string; icon: string; href: string }[] = [];
   if (privateRoom) {
     relaxSuggestions.push({
       label: "個室縛りを外して再検索",
       icon: "🚪",
       href: relaxedRetryHref({ privateRoom: null }),
-    });
-  }
-  if (genre) {
-    relaxSuggestions.push({
-      label: "ジャンル指定なしで再検索",
-      icon: "🍽️",
-      href: relaxedRetryHref({ genre: null }),
     });
   }
   if (moodTags.length > 0) {
@@ -128,11 +126,12 @@ function SuggestResult() {
       href: relaxedRetryHref({ moodTags: null }),
     });
   }
-  relaxSuggestions.push({
-    label: "予算を+2,000円で再検索",
-    icon: "💰",
-    href: relaxedRetryHref({ budget: String(budget + 2000) }),
-  });
+
+  const areaSuggestions = (result?.areaSuggestions ?? []).map((s) => ({
+    label: `${s.stationName.replace("駅", "")}で探す`,
+    icon: "🚉",
+    href: relaxedRetryHref({ station: s.stationName }),
+  }));
 
   return (
     <main className="px-4 sm:px-8 py-8 sm:py-10 max-w-2xl mx-auto">
@@ -186,9 +185,32 @@ function SuggestResult() {
           </div>
 
           {result.recommendations.length === 0 ? (
-            <EmptyResultsFallback relaxSuggestions={relaxSuggestions} retryHref={retryHref} />
+            <EmptyResultsFallback
+              relaxSuggestions={relaxSuggestions}
+              areaSuggestions={areaSuggestions}
+              retryHref={retryHref}
+            />
           ) : (
             <div className="flex flex-col gap-4">
+              {result.relaxation && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-gold/20 bg-gold/5 px-4 py-3 text-sm text-ink-secondary">
+                  <Lightbulb size={16} className="text-gold shrink-0 mt-0.5" />
+                  <p>
+                    <span className="font-semibold text-ink">
+                      {result.relaxation.label}検索しました。
+                    </span>
+                    {result.relaxation.appliedBudget !== budget && (
+                      <>
+                        {" "}
+                        予算の目安: ¥{budget.toLocaleString()} → ¥
+                        {result.relaxation.appliedBudget.toLocaleString()}
+                      </>
+                    )}
+                    {result.relaxation.genreDropped && <> ／ ジャンル指定なし</>}
+                    {result.relaxation.rangeWidened && <> ／ 検索範囲を拡大</>}
+                  </p>
+                </div>
+              )}
               {result.recommendations.map((rec) => (
                 <AIRecommendation key={rec.shopId} recommendation={rec} people={people} />
               ))}
