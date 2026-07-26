@@ -95,6 +95,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#FDFCF9",
+  interactiveWidget: "resizes-content",
 };
 
 const websiteJsonLd = {

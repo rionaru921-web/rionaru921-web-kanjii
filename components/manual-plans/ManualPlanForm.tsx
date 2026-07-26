@@ -38,6 +38,7 @@ import ChapterProgress from "./sections/ChapterProgress";
 import EventTypeTiles from "./sections/EventTypeTiles";
 import FacilityChips from "./sections/FacilityChips";
 import NijikaiSection, { type NijikaiValue } from "./sections/NijikaiSection";
+import { useScrollIntoViewOnFocus } from "@/lib/hooks/useScrollIntoViewOnFocus";
 
 interface MemberInput {
   name: string;
@@ -140,6 +141,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const handleFocusScroll = useScrollIntoViewOnFocus();
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [venueHint, setVenueHint] = useState<string | null>(null);
@@ -292,7 +294,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             e.preventDefault();
           }
         }}
-        className="flex flex-col gap-28 md:gap-32 pb-36 pt-8"
+        className="flex flex-col gap-28 md:gap-32 pb-52 sm:pb-36 pt-8"
       >
         {/* 第一章 はじまり */}
         <Chapter chapterRef={chapterRefs[0]}>
@@ -412,6 +414,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                       type="text"
                       value={member.name}
                       onChange={(e) => updateMember(i, { name: e.target.value })}
+                      onFocus={handleFocusScroll}
                       disabled={saving}
                       className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                       placeholder="名前"
@@ -420,6 +423,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                       type="email"
                       value={member.email}
                       onChange={(e) => updateMember(i, { email: e.target.value })}
+                      onFocus={handleFocusScroll}
                       disabled={saving}
                       className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                       placeholder="メール(任意)"

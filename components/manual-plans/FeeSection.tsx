@@ -92,32 +92,35 @@ export default function FeeSection({
         <label className={labelClass}>用途別内訳(オプション)</label>
         <div className="mt-1.5 flex flex-col gap-2">
           {breakdown.map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2">
               <input
                 type="text"
                 value={item.label}
                 onChange={(e) => updateItem(i, "label", e.target.value)}
                 disabled={disabled}
-                className="flex-1 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                className="w-full sm:flex-1 min-w-0 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
                 placeholder="例: 飲食代"
               />
-              <input
-                type="text"
-                value={item.amount}
-                onChange={(e) => updateItem(i, "amount", e.target.value)}
-                disabled={disabled}
-                className="w-28 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
-                placeholder="30000 / 未定"
-              />
-              <button
-                type="button"
-                onClick={() => removeItem(i)}
-                disabled={disabled}
-                className="shrink-0 rounded-xl p-2.5 text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
-                aria-label="内訳を削除"
-              >
-                <Trash2 size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={item.amount}
+                  onChange={(e) => updateItem(i, "amount", e.target.value)}
+                  disabled={disabled}
+                  className="flex-1 sm:w-28 sm:flex-none min-w-0 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                  placeholder="30000 / 未定"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeItem(i)}
+                  disabled={disabled}
+                  className="flex shrink-0 items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 p-2.5 rounded-xl text-ink-muted hover:text-vermilion-text transition-colors disabled:opacity-30"
+                  aria-label="内訳を削除"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
