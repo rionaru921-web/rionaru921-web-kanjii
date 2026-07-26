@@ -2,18 +2,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Send } from "lucide-react";
 import { formatDateOptionLabel } from "@/lib/surveys/format";
-import type { PublicSurvey, WillAttend } from "@/lib/surveys/types";
+import type { AttendanceKind, OptionalAnswers, PublicSurvey, WillAttend } from "@/lib/surveys/types";
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
 const labelClass = "block text-sm font-medium text-ink";
+const choiceButtonClass = (active: boolean) =>
+  `rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium border transition-colors disabled:opacity-50 ${
+    active ? "bg-gold-gradient border-transparent text-white" : "border-gold/15 text-ink-secondary hover:border-gold/30"
+  }`;
 
-const ATTEND_OPTIONS: { value: WillAttend; label: string }[] = [
-  { value: "yes", label: "参加" },
+const ATTEND_CHOICES: { value: AttendanceKind | "no"; label: string }[] = [
+  { value: "full", label: "参加" },
+  { value: "late", label: "遅刻するかも" },
+  { value: "leave_early", label: "途中で抜けるかも" },
   { value: "no", label: "不参加" },
-  { value: "maybe", label: "未定" },
+  { value: "undecided", label: "未定" },
 ];
 
 export default function SurveyResponseForm({ survey }: { survey: PublicSurvey }) {
@@ -24,7 +31,13 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [selectedBudget, setSelectedBudget] = useState<string | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const [willAttend, setWillAttend] = useState<WillAttend | null>(null);
+
+  const [attendChoice, setAttendChoice] = useState<AttendanceKind | "no" | null>(null);
+  const [arrivalTime, setArrivalTime] = useState("");
+  const [leaveTime, setLeaveTime] = useState("");
+  const [willConfirmLater, setWillConfirmLater] = useState(false);
+
+  const [optionalAnswers, setOptionalAnswers] = useState<OptionalAnswers>({});
   const [comment, setComment] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -32,6 +45,16 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
 
   function toggleDate(date: string) {
     setSelectedDates((prev) => (prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]));
+  }
+
+  function setOptionalAnswer(id: string, value: string | string[] | undefined) {
+    setOptionalAnswers((prev) => ({ ...prev, [id]: value }));
+  }
+
+  function toggleMultiSelectAnswer(id: string, option: string) {
+    const current = optionalAnswers[id];
+    const arr = Array.isArray(current) ? current : [];
+    setOptionalAnswer(id, arr.includes(option) ? arr.filter((v) => v !== option) : [...arr, option]);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,6 +65,26 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
     }
     setSubmitting(true);
     setError(null);
+
+    let willAttend: WillAttend | null = null;
+    let attendanceDetail: Record<string, unknown> | null = null;
+    if (attendChoice === "full") {
+      willAttend = "yes";
+      attendanceDetail = { kind: "full" };
+    } else if (attendChoice === "late") {
+      willAttend = "yes";
+      attendanceDetail = { kind: "late", arrival_time: arrivalTime || null };
+    } else if (attendChoice === "leave_early") {
+      willAttend = "yes";
+      attendanceDetail = { kind: "leave_early", leave_time: leaveTime || null };
+    } else if (attendChoice === "no") {
+      willAttend = "no";
+      attendanceDetail = null;
+    } else if (attendChoice === "undecided") {
+      willAttend = "maybe";
+      attendanceDetail = { kind: "undecided", will_confirm_later: willConfirmLater };
+    }
+
     try {
       const res = await fetch(`/api/surveys/${survey.slug}/responses`, {
         method: "POST",
@@ -53,6 +96,8 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
           selected_budget: selectedBudget,
           selected_genre: selectedGenre,
           will_attend: willAttend,
+          attendance_detail: attendanceDetail,
+          optional_answers: optionalAnswers,
           free_comment: comment || null,
         }),
       });
@@ -96,22 +141,17 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
         <div>
           <label className={labelClass}>日程どれが都合いい?(複数選択可)</label>
           <div className="mt-1.5 flex flex-wrap gap-2">
-            {survey.date_options.map((opt, i) => {
-              const active = selectedDates.includes(opt.date);
-              return (
-                <button
-                  key={`${opt.date}-${i}`}
-                  type="button"
-                  onClick={() => toggleDate(opt.date)}
-                  disabled={submitting}
-                  className={`rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium border transition-colors disabled:opacity-50 ${
-                    active ? "bg-gold-gradient border-transparent text-white" : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                  }`}
-                >
-                  {formatDateOptionLabel(opt)}
-                </button>
-              );
-            })}
+            {survey.date_options.map((opt, i) => (
+              <button
+                key={`${opt.date}-${i}`}
+                type="button"
+                onClick={() => toggleDate(opt.date)}
+                disabled={submitting}
+                className={choiceButtonClass(selectedDates.includes(opt.date))}
+              >
+                {formatDateOptionLabel(opt)}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -126,13 +166,9 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
                 type="button"
                 onClick={() => setSelectedBudget(selectedBudget === budget ? null : budget)}
                 disabled={submitting}
-                className={`rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium border transition-colors disabled:opacity-50 ${
-                  selectedBudget === budget
-                    ? "bg-gold-gradient border-transparent text-white"
-                    : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                }`}
+                className={choiceButtonClass(selectedBudget === budget)}
               >
-                {budget}円
+                {budget}
               </button>
             ))}
           </div>
@@ -149,11 +185,7 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
                 type="button"
                 onClick={() => setSelectedGenre(selectedGenre === genre ? null : genre)}
                 disabled={submitting}
-                className={`rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium border transition-colors disabled:opacity-50 ${
-                  selectedGenre === genre
-                    ? "bg-gold-gradient border-transparent text-white"
-                    : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                }`}
+                className={choiceButtonClass(selectedGenre === genre)}
               >
                 {genre}
               </button>
@@ -165,23 +197,151 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
       {survey.ask_attend && (
         <div>
           <label className={labelClass}>参加できる?</label>
-          <div className="mt-1.5 flex gap-2">
-            {ATTEND_OPTIONS.map((opt) => (
+          <div className="mt-1.5 flex flex-wrap gap-2">
+            {ATTEND_CHOICES.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => setWillAttend(willAttend === opt.value ? null : opt.value)}
+                onClick={() => setAttendChoice(attendChoice === opt.value ? null : opt.value)}
                 disabled={submitting}
-                className={`flex-1 rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium border transition-colors disabled:opacity-50 ${
-                  willAttend === opt.value
-                    ? "bg-gold-gradient border-transparent text-white"
-                    : "border-gold/15 text-ink-secondary hover:border-gold/30"
-                }`}
+                className={choiceButtonClass(attendChoice === opt.value)}
               >
                 {opt.label}
               </button>
             ))}
           </div>
+
+          <AnimatePresence initial={false}>
+            {attendChoice === "late" && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <label className="block text-xs text-ink-muted mt-3 mb-1">到着予定時刻</label>
+                <input
+                  type="time"
+                  value={arrivalTime}
+                  onChange={(e) => setArrivalTime(e.target.value)}
+                  disabled={submitting}
+                  className={inputClass.replace("mt-1.5 ", "")}
+                />
+              </motion.div>
+            )}
+            {attendChoice === "leave_early" && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <label className="block text-xs text-ink-muted mt-3 mb-1">退出予定時刻</label>
+                <input
+                  type="time"
+                  value={leaveTime}
+                  onChange={(e) => setLeaveTime(e.target.value)}
+                  disabled={submitting}
+                  className={inputClass.replace("mt-1.5 ", "")}
+                />
+              </motion.div>
+            )}
+            {attendChoice === "undecided" && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <label className="flex items-center gap-2 mt-3 text-sm text-ink-secondary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={willConfirmLater}
+                    onChange={(e) => setWillConfirmLater(e.target.checked)}
+                    disabled={submitting}
+                    className="h-5 w-5 accent-gold"
+                  />
+                  決まったら連絡します
+                </label>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {survey.optional_questions.length > 0 && (
+        <div className="flex flex-col gap-4 border-t border-gold/10 pt-4">
+          {survey.optional_questions.map((q) => (
+            <div key={q.id}>
+              <label className={labelClass}>{q.label}</label>
+              {q.description && <p className="text-xs text-ink-muted mt-0.5">{q.description}</p>}
+
+              {q.type === "text" && (
+                <input
+                  type="text"
+                  value={(optionalAnswers[q.id] as string) ?? ""}
+                  onChange={(e) => setOptionalAnswer(q.id, e.target.value)}
+                  disabled={submitting}
+                  className={inputClass}
+                />
+              )}
+
+              {q.type === "yes_no" && (
+                <div className="mt-1.5 flex gap-2">
+                  {(["yes", "no"] as const).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setOptionalAnswer(q.id, optionalAnswers[q.id] === v ? undefined : v)}
+                      disabled={submitting}
+                      className={`flex-1 ${choiceButtonClass(optionalAnswers[q.id] === v)}`}
+                    >
+                      {v === "yes" ? "はい" : "いいえ"}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {q.type === "select" && (
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {(q.options ?? []).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setOptionalAnswer(q.id, optionalAnswers[q.id] === option ? undefined : option)}
+                      disabled={submitting}
+                      className={choiceButtonClass(optionalAnswers[q.id] === option)}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {q.type === "multi_select" && (
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {(q.options ?? []).map((option) => {
+                    const current = optionalAnswers[q.id];
+                    const active = Array.isArray(current) && current.includes(option);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => toggleMultiSelectAnswer(q.id, option)}
+                        disabled={submitting}
+                        className={choiceButtonClass(active)}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 

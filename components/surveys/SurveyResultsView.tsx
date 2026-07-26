@@ -4,8 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Check, Users, Sparkles } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
-import type { Survey } from "@/lib/surveys/types";
+import type { AttendanceKind, OptionalQuestion, Survey } from "@/lib/surveys/types";
 import type { TallyItem } from "@/lib/surveys/aggregate";
+
+interface OptionalTally {
+  question: OptionalQuestion;
+  tally: TallyItem[];
+  textAnswers: string[];
+}
 
 function Bar({ item, maxCount }: { item: TallyItem; maxCount: number }) {
   const pct = Math.round((item.count / maxCount) * 100);
@@ -27,6 +33,8 @@ export default function SurveyResultsView({
   budgetTally,
   genreTally,
   attendCounts,
+  attendanceDetailCounts,
+  optionalTallies,
   maxCount,
   totalResponses,
 }: {
@@ -36,6 +44,8 @@ export default function SurveyResultsView({
   budgetTally: TallyItem[];
   genreTally: TallyItem[];
   attendCounts: { yes: number; no: number; maybe: number };
+  attendanceDetailCounts: Record<AttendanceKind, number>;
+  optionalTallies: OptionalTally[];
   maxCount: number;
   totalResponses: number;
 }) {
@@ -117,8 +127,40 @@ export default function SurveyResultsView({
                 <span className="font-display-num text-ink font-semibold">{attendCounts.maybe}名</span> / 不参加:{" "}
                 <span className="font-display-num text-ink font-semibold">{attendCounts.no}名</span>
               </p>
+              {(attendanceDetailCounts.late > 0 || attendanceDetailCounts.leave_early > 0) && (
+                <p className="text-xs text-ink-muted mt-2 border-t border-gold/10 pt-2">
+                  うち遅刻するかも: {attendanceDetailCounts.late}名 / 途中で抜けるかも: {attendanceDetailCounts.leave_early}名
+                </p>
+              )}
             </div>
           )}
+
+          {optionalTallies.map(({ question, tally, textAnswers }) => (
+            <div key={question.id} className="rounded-3xl bg-surface-tertiary shadow-warm p-6">
+              <h3 className="font-serif font-semibold text-ink mb-4">💬 {question.label}</h3>
+              {question.type === "text" ? (
+                textAnswers.length > 0 ? (
+                  <ul className="flex flex-col gap-2">
+                    {textAnswers.map((answer, i) => (
+                      <li key={i} className="text-sm text-ink-secondary rounded-xl bg-gold/5 px-3 py-2">
+                        {answer}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-ink-muted">回答がまだありません</p>
+                )
+              ) : tally.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {tally.map((item) => (
+                    <Bar key={item.label} item={item} maxCount={maxCount} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-ink-muted">回答がまだありません</p>
+              )}
+            </div>
+          ))}
 
           <GoldButton onClick={createPlanFromSurvey} icon={Sparkles} size="lg" fullWidth>
             このアンケート結果でプランを作成する

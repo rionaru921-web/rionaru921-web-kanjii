@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { validateAttendanceDetail, validateOptionalAnswers } from "@/lib/surveys/validate";
+import type { AttendanceDetail, OptionalAnswers } from "@/lib/surveys/types";
 
 interface SubmitResponseBody {
   respondent_name: string;
@@ -9,6 +11,8 @@ interface SubmitResponseBody {
   selected_budget?: string | null;
   selected_genre?: string | null;
   will_attend?: "yes" | "no" | "maybe" | null;
+  attendance_detail?: AttendanceDetail | null;
+  optional_answers?: OptionalAnswers;
   free_comment?: string | null;
 }
 
@@ -22,6 +26,15 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   if (!body.respondent_name?.trim()) {
     return NextResponse.json({ error: "お名前は必須です。" }, { status: 400 });
+  }
+
+  const optionalAnswersResult = validateOptionalAnswers(body.optional_answers);
+  if (!optionalAnswersResult.ok) {
+    return NextResponse.json({ error: optionalAnswersResult.error }, { status: 400 });
+  }
+  const attendanceDetailResult = validateAttendanceDetail(body.attendance_detail);
+  if (!attendanceDetailResult.ok) {
+    return NextResponse.json({ error: attendanceDetailResult.error }, { status: 400 });
   }
 
   const sessionClient = createClient();
@@ -55,6 +68,8 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       selected_budget: body.selected_budget || null,
       selected_genre: body.selected_genre || null,
       will_attend: body.will_attend || null,
+      attendance_detail: attendanceDetailResult.value,
+      optional_answers: optionalAnswersResult.value,
       free_comment: body.free_comment?.trim() || null,
     })
     .select()

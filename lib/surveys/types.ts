@@ -15,6 +15,35 @@ export interface DateOption {
   label?: string;
 }
 
+// Wave 11-A2: organizer-defined extra questions beyond the 4 fixed ones.
+// Stored on surveys.optional_questions (jsonb array).
+export type OptionalQuestionType = "text" | "select" | "multi_select" | "yes_no";
+
+export interface OptionalQuestion {
+  id: string; // stable key, used to match against SurveyResponse.optional_answers
+  label: string;
+  description?: string;
+  type: OptionalQuestionType;
+  options?: string[]; // used by 'select' / 'multi_select'
+}
+
+// Keyed by OptionalQuestion.id. Value shape depends on the question's type:
+// 'text' -> string, 'yes_no' -> 'yes'|'no', 'select' -> string,
+// 'multi_select' -> string[].
+export type OptionalAnswers = Record<string, string | string[] | undefined>;
+
+// Wave 11-A2: richer attendance info layered on top of the existing
+// will_attend 3-value column — deliberately additive so existing
+// aggregation (lib/surveys/aggregate.ts) keeps working unchanged.
+export type AttendanceKind = "full" | "late" | "leave_early" | "undecided";
+
+export interface AttendanceDetail {
+  kind: AttendanceKind;
+  arrival_time?: string | null; // 'HH:mm', only meaningful for kind='late'
+  leave_time?: string | null; // 'HH:mm', only meaningful for kind='leave_early'
+  will_confirm_later?: boolean; // only meaningful for kind='undecided'
+}
+
 export interface Survey {
   id: string;
   owner_id: string;
@@ -28,6 +57,7 @@ export interface Survey {
   date_options: DateOption[];
   budget_options: string[];
   genre_options: string[];
+  optional_questions: OptionalQuestion[];
   deadline: string | null;
   status: SurveyStatus;
   slug: string;
@@ -49,6 +79,8 @@ export interface SurveyResponse {
   selected_budget: string | null;
   selected_genre: string | null;
   will_attend: WillAttend | null;
+  attendance_detail: AttendanceDetail | null;
+  optional_answers: OptionalAnswers;
   free_comment: string | null;
   created_at: string;
 }

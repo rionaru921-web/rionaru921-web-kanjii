@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ClipboardList } from "lucide-react";
 import ChapterHeading from "@/components/manual-plans/sections/ChapterHeading";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import OptionListInput from "./OptionListInput";
 import DateOptionInput from "./DateOptionInput";
-import type { DateOption, SurveyEventType } from "@/lib/surveys/types";
+import OptionalQuestionsSection from "./OptionalQuestionsSection";
+import { EVENT_PRESETS, PRESET_LABELS } from "@/lib/surveys/presets";
+import type { DateOption, OptionalQuestion, SurveyEventType } from "@/lib/surveys/types";
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
@@ -36,10 +39,35 @@ export default function SurveyForm() {
   const [dateOptions, setDateOptions] = useState<DateOption[]>([]);
   const [budgetOptions, setBudgetOptions] = useState<string[]>([]);
   const [genreOptions, setGenreOptions] = useState<string[]>([]);
+  const [optionalQuestions, setOptionalQuestions] = useState<OptionalQuestion[]>([]);
   const [deadline, setDeadline] = useState("");
+
+  const [presetDialogFor, setPresetDialogFor] = useState<SurveyEventType | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 「使いたい人だけ」原則: イベント種類を選んだ直後にテンプレ適用の
+  // 確認を出すが、「自分でカスタム」でスキップすれば従来通りの空欄のまま。
+  function handleEventTypeClick(value: SurveyEventType) {
+    if (eventType === value) {
+      setEventType(null);
+      return;
+    }
+    setEventType(value);
+    if (value !== "other") {
+      setPresetDialogFor(value);
+    }
+  }
+
+  function applyPreset(type: SurveyEventType) {
+    const preset = EVENT_PRESETS[type];
+    setBudgetOptions(preset.budgetOptions);
+    setGenreOptions(preset.genreOptions);
+    setAskBudget(true);
+    setAskGenre(true);
+    setPresetDialogFor(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,6 +92,7 @@ export default function SurveyForm() {
           dateOptions,
           budgetOptions,
           genreOptions,
+          optionalQuestions,
           deadline: deadline || null,
         }),
       });
@@ -110,7 +139,7 @@ export default function SurveyForm() {
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setEventType(eventType === opt.value ? null : opt.value)}
+                  onClick={() => handleEventTypeClick(opt.value)}
                   disabled={saving}
                   className={`rounded-xl px-3 py-2 text-xs font-semibold border transition-colors disabled:opacity-50 ${
                     eventType === opt.value
@@ -184,6 +213,16 @@ export default function SurveyForm() {
         />
       </div>
 
+      <div>
+        <ChapterHeading number="第七章" title="もっと聞きたいこと(任意)" subtitle="必要な項目だけ追加できます" />
+        <OptionalQuestionsSection
+          eventType={eventType}
+          value={optionalQuestions}
+          onChange={setOptionalQuestions}
+          disabled={saving}
+        />
+      </div>
+
       {error && (
         <div className="rounded-xl border border-vermilion/20 bg-vermilion/10 px-3 py-2.5 text-sm text-vermilion-text">
           {error}
@@ -198,6 +237,17 @@ export default function SurveyForm() {
         {saving ? <Loader2 size={16} className="animate-spin" /> : <ClipboardList size={16} />}
         {saving ? "作成中..." : "アンケートを作成する"}
       </button>
+
+      {presetDialogFor && (
+        <ConfirmDialog
+          title={`💡 ${PRESET_LABELS[presetDialogFor]}？`}
+          message="予算・ジャンルの候補をテンプレートから自動入力します。あとから自由に編集・削除できます。"
+          confirmLabel="はい、使う"
+          cancelLabel="自分でカスタム"
+          onConfirm={() => applyPreset(presetDialogFor)}
+          onCancel={() => setPresetDialogFor(null)}
+        />
+      )}
     </form>
   );
 }

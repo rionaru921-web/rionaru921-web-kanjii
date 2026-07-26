@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
   const { data: survey, error } = await supabase
     .from("surveys")
     .select(
-      "id, title, description, event_type, ask_dates, ask_budget, ask_genre, ask_attend, date_options, budget_options, genre_options, deadline, status, slug, created_at, updated_at"
+      "id, title, description, event_type, ask_dates, ask_budget, ask_genre, ask_attend, date_options, budget_options, genre_options, optional_questions, deadline, status, slug, created_at, updated_at"
     )
     .eq("slug", params.slug)
     .eq("status", "active")

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateSurveySlug } from "@/lib/surveys/slug";
-import type { DateOption, SurveyEventType } from "@/lib/surveys/types";
+import { validateOptionalQuestions } from "@/lib/surveys/validate";
+import type { DateOption, OptionalQuestion, SurveyEventType } from "@/lib/surveys/types";
 
 interface CreateSurveyBody {
   title: string;
@@ -14,6 +15,7 @@ interface CreateSurveyBody {
   dateOptions?: DateOption[];
   budgetOptions?: string[];
   genreOptions?: string[];
+  optionalQuestions?: OptionalQuestion[];
   deadline?: string | null;
 }
 
@@ -58,6 +60,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "タイトルは必須です。" }, { status: 400 });
   }
 
+  const optionalQuestionsResult = validateOptionalQuestions(body.optionalQuestions);
+  if (!optionalQuestionsResult.ok) {
+    return NextResponse.json({ error: optionalQuestionsResult.error }, { status: 400 });
+  }
+
   const { data: survey, error } = await supabase
     .from("surveys")
     .insert({
@@ -72,6 +79,7 @@ export async function POST(req: NextRequest) {
       date_options: body.dateOptions ?? [],
       budget_options: body.budgetOptions ?? [],
       genre_options: body.genreOptions ?? [],
+      optional_questions: optionalQuestionsResult.value,
       deadline: body.deadline || null,
       slug: generateSurveySlug(),
     })

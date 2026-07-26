@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { aggregateResponses } from "@/lib/surveys/aggregate";
+import { aggregateAttendanceDetail, aggregateOptionalQuestion, aggregateResponses } from "@/lib/surveys/aggregate";
 import SurveyResultsView from "@/components/surveys/SurveyResultsView";
 import type { Survey, SurveyResponse } from "@/lib/surveys/types";
 
@@ -47,6 +47,11 @@ export default async function SurveyResultsPage({ params }: { params: { id: stri
     typedResponses,
     typedSurvey.date_options
   );
+  const attendanceDetailCounts = aggregateAttendanceDetail(typedResponses);
+  const optionalTallies = typedSurvey.optional_questions.map((question) => ({
+    question,
+    ...aggregateOptionalQuestion(question, typedResponses),
+  }));
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
   const shareUrl = `${baseUrl}/s/${typedSurvey.slug}`;
@@ -63,6 +68,8 @@ export default async function SurveyResultsPage({ params }: { params: { id: stri
         budgetTally={budgetTally}
         genreTally={genreTally}
         attendCounts={attendCounts}
+        attendanceDetailCounts={attendanceDetailCounts}
+        optionalTallies={optionalTallies}
         maxCount={maxCount}
         totalResponses={totalResponses}
       />
