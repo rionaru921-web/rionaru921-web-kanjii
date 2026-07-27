@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { ChevronDown, PlayCircle, Zap } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
@@ -11,12 +13,15 @@ import HeroCTA from "@/components/landing/HeroCTA";
 import { useGuestSignIn } from "@/lib/auth/useGuestSignIn";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 
+const DemoModal = dynamic(() => import("@/components/landing/demo/DemoModal"), { ssr: false });
+
 interface HeroProps {
   isLoggedIn: boolean;
 }
 
 export default function Hero({ isLoggedIn }: HeroProps) {
   const { start, loading, error } = useGuestSignIn("/manual-plans/new");
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <section className="relative overflow-hidden ink-wash px-4 sm:px-6 pt-20 pb-20">
@@ -74,7 +79,7 @@ export default function Hero({ isLoggedIn }: HeroProps) {
               <GoldButton href="/dashboard" size="lg">
                 マイページへ
               </GoldButton>
-              <GoldButton href="#how-it-works" variant="outline" size="lg" icon={PlayCircle}>
+              <GoldButton onClick={() => setDemoOpen(true)} variant="outline" size="lg" icon={PlayCircle}>
                 デモを見る
               </GoldButton>
             </motion.div>
@@ -90,12 +95,13 @@ export default function Hero({ isLoggedIn }: HeroProps) {
                 </Link>
               </div>
               {error && <p className="text-xs text-vermilion-text">{error}</p>}
-              <a
-                href="#how-it-works"
+              <button
+                type="button"
+                onClick={() => setDemoOpen(true)}
                 className="mt-1 text-sm text-ink-secondary hover:text-gold transition-colors underline underline-offset-4"
               >
                 デモを見る
-              </a>
+              </button>
             </motion.div>
           )}
 
@@ -118,6 +124,8 @@ export default function Hero({ isLoggedIn }: HeroProps) {
         <span className="text-xs tracking-widest">4つのサービス</span>
         <ChevronDown size={18} />
       </a>
+
+      {demoOpen && <DemoModal onClose={() => setDemoOpen(false)} isLoggedIn={isLoggedIn} />}
     </section>
   );
 }

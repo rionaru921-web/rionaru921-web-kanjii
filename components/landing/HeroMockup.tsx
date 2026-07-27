@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Wine, Flower2, Leaf, PartyPopper } from "lucide-react";
+import type { MockupProps } from "@/components/landing/mockups/mockupTypes";
 
 const EVENT_CHIPS = [
   { label: "飲み会", icon: Wine },
@@ -10,21 +12,36 @@ const EVENT_CHIPS = [
   { label: "誕生日", icon: PartyPopper },
 ];
 
+const CONTAINER_SIZE = {
+  sm: "max-w-xs",
+  md: "max-w-sm sm:max-w-md",
+  lg: "max-w-sm sm:max-w-lg",
+};
+
 // Placeholder for the real product screenshot. The outer motion.div (glow +
 // floating) is the permanent "frame" — once a real screenshot exists, only
 // the inner .screen card below needs to become an <Image src="/hero-mockup.png" />.
-export default function HeroMockup() {
+export default function HeroMockup({ size = "md", autoPlay = true, onInteraction }: MockupProps = {}) {
+  const [selected, setSelected] = useState(0);
+
+  function selectChip(i: number) {
+    setSelected(i);
+    onInteraction?.({ type: "chip-select", label: EVENT_CHIPS[i].label });
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, rotate: -3 }}
-      animate={{ opacity: 1, scale: 1, rotate: -2, y: [0, -10, 0] }}
+      animate={{ opacity: 1, scale: 1, rotate: -2, y: autoPlay ? [0, -10, 0] : 0 }}
       transition={{
         opacity: { duration: 0.8, ease: "easeOut", delay: 0.2 },
         scale: { duration: 0.8, ease: "easeOut", delay: 0.2 },
         rotate: { duration: 0.8, ease: "easeOut", delay: 0.2 },
-        y: { duration: 4, repeat: Infinity, ease: "easeInOut", repeatType: "mirror", delay: 1 },
+        y: autoPlay
+          ? { duration: 4, repeat: Infinity, ease: "easeInOut", repeatType: "mirror", delay: 1 }
+          : { duration: 0.8, ease: "easeOut", delay: 0.2 },
       }}
-      className="relative w-full max-w-sm sm:max-w-md"
+      className={`relative w-full ${CONTAINER_SIZE[size]}`}
     >
       <div className="pointer-events-none absolute inset-0 -z-10 scale-90 rounded-full bg-gold/20 blur-3xl" />
 
@@ -54,22 +71,24 @@ export default function HeroMockup() {
 
         <div className="mb-4 flex flex-wrap gap-2">
           {EVENT_CHIPS.map((chip, i) => {
-            const selected = i === 0;
+            const isSelected = i === selected;
             return (
-              <motion.div
+              <motion.button
                 key={chip.label}
+                type="button"
+                onClick={() => selectChip(i)}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs ${
-                  selected
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                  isSelected
                     ? "border-gold bg-gold/10 text-ink"
-                    : "border-gold/15 text-ink-secondary"
+                    : "border-gold/15 text-ink-secondary hover:border-gold/30"
                 }`}
               >
                 <chip.icon size={12} />
                 {chip.label}
-              </motion.div>
+              </motion.button>
             );
           })}
         </div>
@@ -82,7 +101,10 @@ export default function HeroMockup() {
           >
             <p className="text-[11px] text-ink-muted mb-1">タイトル</p>
             <div className="rounded-lg border border-gold/20 bg-surface-secondary px-3 py-2 text-sm text-ink">
-              夏の同期歓迎会
+              {EVENT_CHIPS[selected].label === "飲み会" && "夏の同期歓迎会"}
+              {EVENT_CHIPS[selected].label === "歓迎会" && "4月新入社員 歓迎会"}
+              {EVENT_CHIPS[selected].label === "送別会" && "お世話になった先輩の送別会"}
+              {EVENT_CHIPS[selected].label === "誕生日" && "同期の誕生日会"}
             </div>
           </motion.div>
           <motion.div
