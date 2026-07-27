@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState, type RefObject } from "react";
+import { Eye } from "lucide-react";
 
 const ZH_NUM = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
 interface ChapterProgressProps {
   chapterRefs: RefObject<HTMLElement>[];
   total: number;
+  onPreviewClick?: () => void;
 }
 
 // Replaces the old desktop-only PlanPreviewCard sidebar, which had nowhere
 // to live once the form became a single scrolling column. A thin sticky
 // progress bar + "第X章/全Y章" label works identically on mobile and
 // desktop, unlike a fixed sidebar.
-export default function ChapterProgress({ chapterRefs, total }: ChapterProgressProps) {
+export default function ChapterProgress({ chapterRefs, total, onPreviewClick }: ChapterProgressProps) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -41,7 +43,19 @@ export default function ChapterProgress({ chapterRefs, total }: ChapterProgressP
         <span className="font-serif text-ink-secondary">
           第{ZH_NUM[current] ?? current + 1}章 / 全{ZH_NUM[total - 1] ?? total}章
         </span>
-        <span className="text-ink-muted">{percentage}%</span>
+        <div className="flex items-center gap-3">
+          <span className="text-ink-muted">{percentage}%</span>
+          {onPreviewClick && (
+            <button
+              type="button"
+              onClick={onPreviewClick}
+              className="lg:hidden flex items-center gap-1 rounded-full border border-gold/20 px-2.5 py-1 text-[11px] font-medium text-gold hover:bg-gold/5 transition-colors"
+            >
+              <Eye size={12} />
+              プレビュー
+            </button>
+          )}
+        </div>
       </div>
       <div className="h-0.5 w-full bg-gold/10">
         <div

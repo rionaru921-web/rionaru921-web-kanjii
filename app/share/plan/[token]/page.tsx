@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { Clock, MapPin, Wallet, FileText, CalendarPlus, MessageCircle, CheckCircle2 } from "lucide-react";
+import {
+  Clock,
+  MapPin,
+  Wallet,
+  FileText,
+  CalendarPlus,
+  MessageCircle,
+  CheckCircle2,
+  PartyPopper,
+} from "lucide-react";
 import { WashokuShell } from "@/components/share/washoku/WashokuShell";
 import { WashokuPaperCard } from "@/components/share/washoku/WashokuPaperCard";
 import { WashokuCTA } from "@/components/share/washoku/WashokuCTA";
@@ -11,7 +20,9 @@ import {
   perPersonFee,
   getPayingMembers,
   buildLineShareText,
+  getEventTypeLabel,
 } from "@/lib/manual-plans/format";
+import { VENUE_FACILITY_LABELS } from "@/lib/manual-plans/facility-types";
 import { calculateSplit, type SplitMemberInput } from "@/lib/manual-plans/calculate-split";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { formatFeeValue } from "@/lib/manual-plans/fee-parser";
@@ -158,6 +169,9 @@ export default async function SharePlanPage({ params }: { params: { token: strin
           <p className="font-serif text-6xl font-black text-washoku-red leading-none">集</p>
           <div className="mt-4 border-t border-b border-washoku-brass-soft py-3">
             <h1 className="font-serif text-xl sm:text-2xl font-bold">{typedPlan.title}</h1>
+            {getEventTypeLabel(typedPlan) && (
+              <p className="mt-1 text-xs text-washoku-ink-muted">分類: {getEventTypeLabel(typedPlan)}</p>
+            )}
             {organizers.length > 0 && (
               <p className="mt-2 text-xs text-washoku-ink-muted">
                 👑 幹事({organizers.length}人): {organizers.map((m) => m.name).join("、")}
@@ -181,6 +195,18 @@ export default async function SharePlanPage({ params }: { params: { token: strin
                 )}
                 {typedPlan.venue_address && (
                   <p className="text-sm text-washoku-ink-muted">{typedPlan.venue_address}</p>
+                )}
+                {typedPlan.venue_facilities.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {typedPlan.venue_facilities.map((f) => (
+                      <span
+                        key={f}
+                        className="text-xs px-2.5 py-1 rounded-full bg-washoku-brass-soft text-washoku-ink"
+                      >
+                        {VENUE_FACILITY_LABELS[f as keyof typeof VENUE_FACILITY_LABELS] ?? f}
+                      </span>
+                    ))}
+                  </div>
                 )}
                 {mapQuery && (
                   <>
@@ -266,6 +292,32 @@ export default async function SharePlanPage({ params }: { params: { token: strin
             <div className="flex items-start gap-3">
               <FileText className="text-washoku-brass shrink-0" size={18} />
               <p className="text-sm text-washoku-ink-muted whitespace-pre-wrap">{typedPlan.memo}</p>
+            </div>
+          )}
+
+          {typedPlan.nijikai_enabled && (
+            <div className="flex items-start gap-3 border-t border-washoku-brass-soft pt-4">
+              <PartyPopper className="text-washoku-brass shrink-0" size={18} />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-washoku-ink-muted mb-1">二次会</p>
+                {typedPlan.nijikai_venue && (
+                  <p className="text-sm font-serif font-semibold">{typedPlan.nijikai_venue}</p>
+                )}
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-sm text-washoku-ink-muted">
+                  {typedPlan.nijikai_start_time && <span>{typedPlan.nijikai_start_time}〜</span>}
+                  {typedPlan.nijikai_budget != null && <span>{yen(typedPlan.nijikai_budget)}</span>}
+                </div>
+                {typedPlan.nijikai_url && (
+                  <a
+                    href={typedPlan.nijikai_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-washoku-red hover:underline mt-1 inline-block truncate max-w-full"
+                  >
+                    {typedPlan.nijikai_url}
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </div>

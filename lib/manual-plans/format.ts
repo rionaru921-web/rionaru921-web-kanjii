@@ -2,6 +2,7 @@ import type { IcsEvent } from "@/lib/ics";
 import { formatJstDateTime, formatJstDateRange } from "@/lib/date/kanjii-time";
 import type { AttendanceStatus, ManualPlan, ManualPlanMember, MemberRole } from "./types";
 import { calculateSplit, type SplitMemberInput } from "./calculate-split";
+import { PLAN_TEMPLATES } from "@/lib/plan-templates";
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: "現金",
@@ -20,6 +21,19 @@ export const ROLE_LABELS: Record<MemberRole, string> = {
   organizer: "幹事",
   participant: "参加者",
 };
+
+// Reuses PLAN_TEMPLATES' labels instead of a second hardcoded map, so the
+// chapter-1 tile label and any later display of the same event_type can't
+// drift apart. Falls back to the organizer's own custom_label when the
+// "自由入力" tile (event_type=null) was used.
+export function getEventTypeLabel(
+  plan: Pick<ManualPlan, "event_type" | "event_type_custom_label">
+): string | null {
+  if (plan.event_type) {
+    return PLAN_TEMPLATES.find((t) => t.eventType === plan.event_type)?.label ?? null;
+  }
+  return plan.event_type_custom_label || null;
+}
 
 // 表示はブラウザ/サーバーいずれの実行環境でも常に JST 基準になるよう
 // lib/date/kanjii-time.ts に変換ロジックを集約している。

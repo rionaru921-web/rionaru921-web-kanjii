@@ -1,6 +1,11 @@
 import { View, Text } from "@react-pdf/renderer";
 import { COLORS, pdfStyles } from "./styles";
 
+// Re-exported (not defined here) so client components can format currency
+// without pulling @react-pdf/renderer into their bundle — see
+// lib/format/currency.ts. Import from there directly in client code.
+export { yen } from "@/lib/format/currency";
+
 export interface PDFPaymentInfo {
   bankName?: string;
   bankBranch?: string;
@@ -71,6 +76,3 @@ export function MizuhikiRule() {
   );
 }
 
-export function yen(n: number): string {
-  return `¥${n.toLocaleString()}`;
-}

@@ -1,21 +1,28 @@
 "use client";
 
 import { VENUE_FACILITIES, VENUE_FACILITY_LABELS, type VenueFacility } from "@/lib/manual-plans/facility-types";
+import OtherInput from "@/components/manual-plans/OtherInput";
 
 interface FacilityChipsProps {
-  value: VenueFacility[];
-  onChange: (next: VenueFacility[]) => void;
+  value: string[];
+  onChange: (next: string[]) => void;
   disabled?: boolean;
 }
 
+function isPreset(value: string): value is VenueFacility {
+  return (VENUE_FACILITIES as readonly string[]).includes(value);
+}
+
 export default function FacilityChips({ value, onChange, disabled }: FacilityChipsProps) {
+  const customFacilities = value.filter((v) => !isPreset(v));
+
   function toggle(facility: VenueFacility) {
     onChange(value.includes(facility) ? value.filter((f) => f !== facility) : [...value, facility]);
   }
 
   return (
     <div>
-      <label className="block text-sm font-medium text-ink">設備</label>
+      <label className="block text-sm font-medium text-ink">設備・こだわり</label>
       <div className="mt-1.5 flex flex-wrap gap-2">
         {VENUE_FACILITIES.map((facility) => (
           <button
@@ -34,6 +41,13 @@ export default function FacilityChips({ value, onChange, disabled }: FacilityChi
           </button>
         ))}
       </div>
+
+      <OtherInput
+        values={customFacilities}
+        onChange={(next) => onChange([...value.filter(isPreset), ...next])}
+        placeholder="その他の設備・こだわりを追加(例: 駐車場あり)"
+        disabled={disabled}
+      />
     </div>
   );
 }

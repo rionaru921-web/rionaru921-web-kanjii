@@ -18,7 +18,14 @@ import PlanDetailActions from "@/components/manual-plans/PlanDetailActions";
 import MemberList from "@/components/manual-plans/MemberList";
 import ReceiptsSection from "@/components/manual-plans/ReceiptsSection";
 import { CoachTriggerButton } from "@/components/coaching/CoachTriggerButton";
-import { formatDateRange, PAYMENT_METHOD_LABELS, perPersonFee, getPayingMembers } from "@/lib/manual-plans/format";
+import {
+  formatDateRange,
+  PAYMENT_METHOD_LABELS,
+  perPersonFee,
+  getPayingMembers,
+  getEventTypeLabel,
+} from "@/lib/manual-plans/format";
+import { VENUE_FACILITY_LABELS } from "@/lib/manual-plans/facility-types";
 import { buildGoogleMapsUrl, buildAppleMapsUrl, buildEmbedUrl } from "@/lib/manual-plans/maps";
 import { calculateAttendanceRate } from "@/lib/manual-plans/attendance-stats";
 import { calculateSplit, type SplitMemberInput } from "@/lib/manual-plans/calculate-split";
@@ -164,6 +171,9 @@ export default async function ManualPlanDetailPage({
         <h1 className="font-serif font-bold text-2xl sm:text-3xl text-ink leading-tight">
           {typedPlan.title}
         </h1>
+        {getEventTypeLabel(typedPlan) && (
+          <p className="mt-1 text-xs text-ink-muted">分類: {getEventTypeLabel(typedPlan)}</p>
+        )}
       </div>
 
       <PlanDetailActions plan={typedPlan} members={typedMembers} isCompleted={isCompleted} />
@@ -198,6 +208,15 @@ export default async function ManualPlanDetailPage({
               >
                 {typedPlan.venue_url}
               </a>
+            )}
+            {typedPlan.venue_facilities.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {typedPlan.venue_facilities.map((f) => (
+                  <span key={f} className="text-xs px-2.5 py-1 rounded-full bg-gold/10 text-ink">
+                    {VENUE_FACILITY_LABELS[f as keyof typeof VENUE_FACILITY_LABELS] ?? f}
+                  </span>
+                ))}
+              </div>
             )}
             {mapQuery && (
               <>
@@ -284,6 +303,30 @@ export default async function ManualPlanDetailPage({
               <p className="text-xs text-ink-muted mt-1">
                 支払い期限: {formatDateRange(typedPlan.payment_deadline, null)}
               </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {typedPlan.nijikai_enabled && (
+        <section className="rounded-3xl bg-surface-tertiary shadow-warm p-6 flex items-start gap-3">
+          <PartyPopper className="text-gold shrink-0" size={18} />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-ink-muted mb-1">二次会</p>
+            {typedPlan.nijikai_venue && <p className="text-sm text-ink font-semibold">{typedPlan.nijikai_venue}</p>}
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-sm text-ink-secondary">
+              {typedPlan.nijikai_start_time && <span>{typedPlan.nijikai_start_time}〜</span>}
+              {typedPlan.nijikai_budget != null && <span>{yen(typedPlan.nijikai_budget)}</span>}
+            </div>
+            {typedPlan.nijikai_url && (
+              <a
+                href={typedPlan.nijikai_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gold hover:text-gold-deep transition-colors mt-1 inline-block truncate max-w-full"
+              >
+                {typedPlan.nijikai_url}
+              </a>
             )}
           </div>
         </section>

@@ -8,6 +8,7 @@ import type { SplitMode, RoundingUnit } from "@/lib/manual-plans/split-types";
 import SplitSettingsSection, { type SplitPreviewMember } from "./SplitSettingsSection";
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
+import OtherInput from "./OtherInput";
 
 interface FeeSectionProps {
   feeAmount: string;
@@ -15,7 +16,7 @@ interface FeeSectionProps {
   breakdown: FeeBreakdownItem[];
   onBreakdownChange: (items: FeeBreakdownItem[]) => void;
   paymentMethods: string[];
-  onTogglePaymentMethod: (method: string) => void;
+  onPaymentMethodsChange: (next: string[]) => void;
   paymentDeadline: string;
   onPaymentDeadlineChange: (value: string) => void;
   members: SplitPreviewMember[];
@@ -38,7 +39,7 @@ export default function FeeSection({
   breakdown,
   onBreakdownChange,
   paymentMethods,
-  onTogglePaymentMethod,
+  onPaymentMethodsChange,
   paymentDeadline,
   onPaymentDeadlineChange,
   members,
@@ -69,6 +70,16 @@ export default function FeeSection({
   function removeItem(index: number) {
     onBreakdownChange(breakdown.filter((_, i) => i !== index));
   }
+
+  function toggleMethod(method: string) {
+    onPaymentMethodsChange(
+      paymentMethods.includes(method)
+        ? paymentMethods.filter((m) => m !== method)
+        : [...paymentMethods, method]
+    );
+  }
+
+  const customPaymentMethods = paymentMethods.filter((m) => !PAYMENT_METHOD_OPTIONS.includes(m));
 
   return (
     <>
@@ -168,7 +179,7 @@ export default function FeeSection({
             <button
               key={method}
               type="button"
-              onClick={() => onTogglePaymentMethod(method)}
+              onClick={() => toggleMethod(method)}
               disabled={disabled}
               className={`rounded-xl px-3 py-2 text-xs font-semibold border transition-colors disabled:opacity-50 ${
                 paymentMethods.includes(method)
@@ -180,6 +191,12 @@ export default function FeeSection({
             </button>
           ))}
         </div>
+        <OtherInput
+          values={customPaymentMethods}
+          onChange={(next) => onPaymentMethodsChange([...paymentMethods.filter((m) => PAYMENT_METHOD_OPTIONS.includes(m)), ...next])}
+          placeholder="その他の支払い方法を追加(例: 割り勘アプリ)"
+          disabled={disabled}
+        />
       </div>
 
       <div>

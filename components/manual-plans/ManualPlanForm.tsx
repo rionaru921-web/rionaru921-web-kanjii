@@ -15,7 +15,6 @@ import { ROLE_LABELS } from "@/lib/manual-plans/format";
 import { toDateTimeLocalValue, fromDateTimeLocalValue } from "@/lib/date/kanjii-time";
 import { PLAN_TEMPLATES, formatLocalDateTimeInput, type PlanTemplate } from "@/lib/plan-templates";
 import { resolveMemberWeight } from "@/lib/manual-plans/calculate-split";
-import type { VenueFacility } from "@/lib/manual-plans/facility-types";
 import {
   TIER_LEVELS,
   TIER_LABELS,
@@ -39,6 +38,8 @@ import EventTypeTiles from "./sections/EventTypeTiles";
 import FacilityChips from "./sections/FacilityChips";
 import NijikaiSection, { type NijikaiValue } from "./sections/NijikaiSection";
 import { useScrollIntoViewOnFocus } from "@/lib/hooks/useScrollIntoViewOnFocus";
+import PlanPreview from "./PlanPreview";
+import MobilePreviewModal from "./MobilePreviewModal";
 
 interface MemberInput {
   name: string;
@@ -75,6 +76,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [eventType, setEventType] = useState<EventType | null>(initialData?.event_type ?? null);
+  const [eventTypeCustomLabel, setEventTypeCustomLabel] = useState(
+    initialData?.event_type_custom_label ?? ""
+  );
   const [eventDate, setEventDate] = useState(toDateTimeLocalValue(initialData?.event_date));
   const [endDate, setEndDate] = useState(toDateTimeLocalValue(initialData?.end_date));
 
@@ -87,9 +91,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     venueLng: initialData?.venue_lng ?? null,
   });
   const [venuePhone, setVenuePhone] = useState(initialData?.venue_phone ?? "");
-  const [venueFacilities, setVenueFacilities] = useState<VenueFacility[]>(
-    (initialData?.venue_facilities as VenueFacility[] | undefined) ?? []
-  );
+  const [venueFacilities, setVenueFacilities] = useState<string[]>(initialData?.venue_facilities ?? []);
 
   const [feeAmount, setFeeAmount] = useState(
     initialData?.fee_amount != null ? String(initialData.fee_amount) : ""
@@ -145,6 +147,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [venueHint, setVenueHint] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const chapterRefs = [
     useRef<HTMLDivElement>(null),
@@ -158,6 +161,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   function handleTemplateSelect(template: PlanTemplate) {
     setSelectedTemplateId(template.id);
     setEventType(template.eventType);
+    if (template.eventType !== null) setEventTypeCustomLabel("");
     setTitle(template.title);
 
     const start = template.getEventDate();
@@ -174,12 +178,6 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   function handleVenueChange(next: VenueValue) {
     setVenue(next);
     setVenueHint(null);
-  }
-
-  function togglePaymentMethod(method: string) {
-    setPaymentMethods((prev) =>
-      prev.includes(method) ? prev.filter((m) => m !== method) : [...prev, method]
-    );
   }
 
   function updateMember(index: number, patch: Partial<MemberInput>) {
@@ -218,6 +216,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       const payload = {
         title: title.trim(),
         eventType,
+        eventTypeCustomLabel: eventTypeCustomLabel.trim() || null,
         eventDate: fromDateTimeLocalValue(eventDate),
         endDate: fromDateTimeLocalValue(endDate),
         venueName: venue.venueName.trim() || null,
@@ -279,9 +278,33 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
     }
   }
 
+  const previewProps = {
+    title,
+    eventType,
+    eventTypeCustomLabel,
+    eventDate,
+    endDate,
+    venueName: venue.venueName,
+    venueAddress: venue.venueAddress,
+    venueFacilities,
+    feeAmount,
+    feeBreakdown,
+    paymentMethods,
+    splitMode,
+    roundingUnit,
+    members: members.map((m) => ({
+      name: m.name,
+      tierLevel: m.tierLevel,
+      weightOverride: m.weightOverride,
+      organizerDiscount: m.organizerDiscount,
+    })),
+    nijikai,
+  };
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <ChapterProgress chapterRefs={chapterRefs} total={CHAPTER_COUNT} />
+    <div className="max-w-2xl lg:max-w-5xl mx-auto lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10 lg:items-start">
+      <div className="max-w-2xl lg:max-w-none mx-auto lg:mx-0 w-full">
+      <ChapterProgress chapterRefs={chapterRefs} total={CHAPTER_COUNT} onPreviewClick={() => setPreviewOpen(true)} />
 
       <form
         onSubmit={handleSubmit}
@@ -305,6 +328,20 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               selectedId={selectedTemplateId}
               onSelect={handleTemplateSelect}
             />
+            {eventType === null && (
+              <div>
+                <label className={labelClass}>分類(自由入力・任意)</label>
+                <input
+                  type="text"
+                  value={eventTypeCustomLabel}
+                  onChange={(e) => setEventTypeCustomLabel(e.target.value)}
+                  disabled={saving}
+                  maxLength={30}
+                  className={inputClass}
+                  placeholder="例: ダーツ会、勉強会"
+                />
+              </div>
+            )}
             <div>
               <label className={labelClass}>タイトル</label>
               <input
@@ -382,7 +419,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               breakdown={feeBreakdown}
               onBreakdownChange={setFeeBreakdown}
               paymentMethods={paymentMethods}
-              onTogglePaymentMethod={togglePaymentMethod}
+              onPaymentMethodsChange={setPaymentMethods}
               paymentDeadline={paymentDeadline}
               onPaymentDeadlineChange={setPaymentDeadline}
               splitMode={splitMode}
@@ -655,6 +692,18 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           </button>
         </div>
       </form>
+      </div>
+
+      <div className="hidden lg:block">
+        <div className="sticky top-8">
+          <PlanPreview {...previewProps} />
+          <p className="mt-3 text-center text-xs text-ink-muted">参加者に見える完成イメージです</p>
+        </div>
+      </div>
+
+      {previewOpen && (
+        <MobilePreviewModal onClose={() => setPreviewOpen(false)} previewProps={previewProps} />
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ interface MemberInput {
 interface CreateManualPlanBody {
   title: string;
   eventType?: EventType | null;
+  eventTypeCustomLabel?: string | null;
   eventDate?: string | null;
   endDate?: string | null;
   venueName?: string | null;
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest) {
       user_id: user.id,
       title: body.title.trim(),
       event_type: body.eventType ?? null,
+      event_type_custom_label: body.eventType ? null : body.eventTypeCustomLabel?.trim() || null,
       event_date: body.eventDate ?? null,
       end_date: body.endDate ?? null,
       venue_name: body.venueName ?? null,

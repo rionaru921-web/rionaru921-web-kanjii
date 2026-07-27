@@ -38,6 +38,7 @@ export interface ManualPlan {
   user_id: string;
   title: string;
   event_type: EventType | null;
+  event_type_custom_label: string | null;
   event_date: string | null;
   end_date: string | null;
   venue_name: string | null;
