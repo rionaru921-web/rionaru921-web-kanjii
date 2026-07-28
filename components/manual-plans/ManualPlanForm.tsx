@@ -347,7 +347,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   };
 
   return (
-    <div className="max-w-2xl lg:max-w-5xl mx-auto lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10 lg:items-start">
+    <div className="max-w-2xl lg:max-w-5xl mx-auto lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
       <div className="max-w-2xl lg:max-w-none mx-auto lg:mx-0 w-full">
       <ChapterProgress
         chapterRefs={chapterRefs}
@@ -775,7 +775,14 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       </div>
 
       <div className="hidden lg:block">
-        <div className="sticky top-8">
+        {/* top-24 clears ChapterProgress's sticky header (which grew taller
+            in Wave 16 with the chapter-indicator row); max-h + overflow-y
+            keeps a tall preview (many members/facilities) from running off
+            the bottom of the viewport instead of just growing forever. The
+            parent grid cell needs to stretch to the left column's full
+            height (no items-start above) for this sticky to have room to
+            actually stick rather than scrolling away with its own short cell. */}
+        <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
           <PlanPreview {...previewProps} />
           <p className="mt-3 text-center text-xs text-ink-muted">参加者に見える完成イメージです</p>
         </div>
