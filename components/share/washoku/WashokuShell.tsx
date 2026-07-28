@@ -9,17 +9,32 @@ import ChochinIcon from "@/components/shared/ChochinIcon";
 // see the share-screen redesign scope notes for why those aren't reused here.
 export function WashokuShell({
   eyebrow = "幹事さんから招待されました",
+  // Opt-in only — omitted entirely by app/share/[token]/page.tsx (the
+  // history-sharing flow), which must keep animating on every visit exactly
+  // as before. Only app/share/plan/[token]/page.tsx passes this, gating the
+  // lantern intro to a visitor's first view per share link this session.
+  sessionKey,
   children,
 }: {
   eyebrow?: string;
+  sessionKey?: string;
   children: React.ReactNode;
 }) {
+  const alreadySeen =
+    !!sessionKey &&
+    typeof window !== "undefined" &&
+    sessionStorage.getItem(`kanjii_chochin_seen_${sessionKey}`) === "1";
+
+  if (sessionKey && typeof window !== "undefined" && !alreadySeen) {
+    sessionStorage.setItem(`kanjii_chochin_seen_${sessionKey}`, "1");
+  }
+
   return (
     <div className="washoku px-4 py-10 flex flex-col items-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.85 }}
+        initial={alreadySeen ? false : { opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.1, ease: "easeOut" }}
+        transition={{ duration: alreadySeen ? 0 : 1.1, ease: "easeOut" }}
         className="relative flex items-center justify-center"
       >
         <div className="absolute inset-0 washoku-glow blur-xl scale-150 -z-10" />
