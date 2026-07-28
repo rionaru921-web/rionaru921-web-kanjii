@@ -85,10 +85,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  icons: {
-    icon: [{ url: "/icon", type: "image/png" }],
-    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
-  },
+  // Deliberately no `icons` field here — app/favicon.ico, app/icon.tsx, and
+  // app/apple-icon.tsx already generate correctly-sized <link> tags via
+  // Next's file convention. A manual `icons.icon` entry without a `sizes`
+  // attribute was clobbering that (duplicate rel="icon" tags, one missing
+  // sizes), which is what caused browser tabs to fall back to a blank/
+  // generic icon instead of the lantern.
 };
 
 export const viewport: Viewport = {

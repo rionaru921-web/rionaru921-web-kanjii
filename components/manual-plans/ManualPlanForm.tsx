@@ -3,7 +3,19 @@
 import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, Loader2, ChevronDown } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  ChevronDown,
+  Sparkles,
+  Calendar,
+  MapPin,
+  Wallet,
+  Users,
+  MoreHorizontal,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type {
   EventType,
   FeeBreakdownItem,
@@ -40,6 +52,7 @@ import NijikaiSection, { type NijikaiValue } from "./sections/NijikaiSection";
 import { useScrollIntoViewOnFocus } from "@/lib/hooks/useScrollIntoViewOnFocus";
 import PlanPreview from "./PlanPreview";
 import MobilePreviewModal from "./MobilePreviewModal";
+import CompletionCelebration from "./CompletionCelebration";
 
 interface MemberInput {
   name: string;
@@ -62,6 +75,7 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-ink";
 
 const CHAPTER_COUNT = 6;
+const CHAPTER_ICONS: LucideIcon[] = [Sparkles, Calendar, MapPin, Wallet, Users, MoreHorizontal];
 
 function Chapter({ chapterRef, children }: { chapterRef: React.RefObject<HTMLDivElement>; children: ReactNode }) {
   return (
@@ -148,6 +162,26 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [venueHint, setVenueHint] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingDestinationRef = useRef<string | null>(null);
+
+  function goToCreatedPlan() {
+    if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
+    if (pendingDestinationRef.current) {
+      router.push(pendingDestinationRef.current);
+      router.refresh();
+    }
+  }
+
+  const chapterComplete = [
+    title.trim() !== "",
+    eventDate !== "",
+    venue.venueName.trim() !== "",
+    feeAmount.trim() !== "",
+    members.some((m) => m.name.trim() !== ""),
+    false,
+  ];
 
   const chapterRefs = [
     useRef<HTMLDivElement>(null),
@@ -270,8 +304,19 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       // client Router Cache can't serve stale (pre-save) data for a plan
       // detail page the user was just looking at seconds ago.
       const marker = mode === "create" ? "just_created" : "just_updated";
-      router.push(`/manual-plans/${targetId}?${marker}=1`);
-      router.refresh();
+      const destination = `/manual-plans/${targetId}?${marker}=1`;
+
+      if (mode === "create") {
+        // The celebration screen owns the redirect for a new plan (auto or
+        // skip-button triggered) — editing an existing plan isn't a
+        // "completion" moment, so that path keeps the old immediate redirect.
+        pendingDestinationRef.current = destination;
+        setCelebrating(true);
+        redirectTimeoutRef.current = setTimeout(goToCreatedPlan, 2500);
+      } else {
+        router.push(destination);
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存に失敗しました。");
       setSaving(false);
@@ -304,7 +349,11 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   return (
     <div className="max-w-2xl lg:max-w-5xl mx-auto lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10 lg:items-start">
       <div className="max-w-2xl lg:max-w-none mx-auto lg:mx-0 w-full">
-      <ChapterProgress chapterRefs={chapterRefs} total={CHAPTER_COUNT} onPreviewClick={() => setPreviewOpen(true)} />
+      <ChapterProgress
+        chapterRefs={chapterRefs}
+        total={CHAPTER_COUNT}
+        onPreviewClick={() => setPreviewOpen(true)}
+      />
 
       <form
         onSubmit={handleSubmit}
@@ -321,7 +370,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       >
         {/* 第一章 はじまり */}
         <Chapter chapterRef={chapterRefs[0]}>
-          <ChapterHeading number="第一章" title="はじまり" subtitle="どんな集まりですか？" />
+          <ChapterHeading
+            number="第一章"
+            title="はじまり"
+            subtitle="どんな集まりですか？"
+            icon={CHAPTER_ICONS[0]}
+            complete={chapterComplete[0]}
+          />
           <div className="flex flex-col gap-6">
             <EventTypeTiles
               templates={PLAN_TEMPLATES}
@@ -359,7 +414,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
         {/* 第二章 いつ */}
         <Chapter chapterRef={chapterRefs[1]}>
-          <ChapterHeading number="第二章" title="いつ" subtitle="開催の日時を決めましょう" />
+          <ChapterHeading
+            number="第二章"
+            title="いつ"
+            subtitle="開催の日時を決めましょう"
+            icon={CHAPTER_ICONS[1]}
+            complete={chapterComplete[1]}
+          />
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>開始日時</label>
@@ -386,7 +447,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
         {/* 第三章 どこで */}
         <Chapter chapterRef={chapterRefs[2]}>
-          <ChapterHeading number="第三章" title="どこで" subtitle="会場やお店の情報" />
+          <ChapterHeading
+            number="第三章"
+            title="どこで"
+            subtitle="会場やお店の情報"
+            icon={CHAPTER_ICONS[2]}
+            complete={chapterComplete[2]}
+          />
           <div className="flex flex-col gap-4">
             <VenueInput value={venue} onChange={handleVenueChange} disabled={saving} />
             {venueHint && (
@@ -411,7 +478,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
         {/* 第四章 いくら */}
         <Chapter chapterRef={chapterRefs[3]}>
-          <ChapterHeading number="第四章" title="いくら" subtitle="金額・割り勘・支払い方法" />
+          <ChapterHeading
+            number="第四章"
+            title="いくら"
+            subtitle="金額・割り勘・支払い方法"
+            icon={CHAPTER_ICONS[3]}
+            complete={chapterComplete[3]}
+          />
           <div className="flex flex-col gap-4">
             <FeeSection
               feeAmount={feeAmount}
@@ -441,7 +514,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
 
         {/* 第五章 だれと */}
         <Chapter chapterRef={chapterRefs[4]}>
-          <ChapterHeading number="第五章" title="だれと" subtitle="参加者の登録と傾斜設定" />
+          <ChapterHeading
+            number="第五章"
+            title="だれと"
+            subtitle="参加者の登録と傾斜設定"
+            icon={CHAPTER_ICONS[4]}
+            complete={chapterComplete[4]}
+          />
           <div className="flex flex-col gap-3">
             {members.map((member, i) => (
               <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
@@ -603,6 +682,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             number="第六章"
             title="もっと"
             subtitle="幹事だけのメモや、二次会の予定があれば"
+            icon={CHAPTER_ICONS[5]}
             action={
               <button
                 type="button"
@@ -704,6 +784,8 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       {previewOpen && (
         <MobilePreviewModal onClose={() => setPreviewOpen(false)} previewProps={previewProps} />
       )}
+
+      {celebrating && <CompletionCelebration onSkip={goToCreatedPlan} />}
     </div>
   );
 }
