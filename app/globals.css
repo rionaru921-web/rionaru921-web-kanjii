@@ -69,8 +69,15 @@ body {
   /* Safety net against stray horizontal scroll (decorative blurs, negative-
      margin carousel bleed, etc.) — inner elements that intentionally scroll
      horizontally (e.g. the UseCases card row) manage their own overflow-x
-     and are unaffected by this. */
-  overflow-x: hidden;
+     and are unaffected by this.
+     `clip` (not `hidden`) deliberately: per the CSS Overflow spec, setting
+     only overflow-x to a non-visible value forces the omitted overflow-y
+     to compute to `auto`, silently turning html/body into their own
+     scroll container instead of relying on the plain viewport. That broke
+     position: sticky/fixed reliability for descendants (found chasing a
+     plan-form preview panel that wouldn't stay put). `clip` suppresses
+     overflow on this axis without triggering that pairing behavior. */
+  overflow-x: clip;
 }
 
 body {

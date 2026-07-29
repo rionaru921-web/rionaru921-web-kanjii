@@ -347,8 +347,13 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   };
 
   return (
-    <div className="max-w-2xl lg:max-w-5xl mx-auto lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
-      <div className="max-w-2xl lg:max-w-none mx-auto lg:mx-0 w-full">
+    // lg:pr-[380px] reserves room for the fixed preview panel below (340px
+    // panel + right-8 offset + a buffer) directly against main's own right
+    // edge — a plain padding reservation instead of a centered max-width
+    // pairing, so it stays correct at every viewport width without needing
+    // to match a fixed-position element's coordinates to a fluid grid.
+    <div className="max-w-2xl mx-auto lg:max-w-none lg:pr-[380px]">
+      <div className="max-w-2xl lg:mx-auto w-full">
       <ChapterProgress
         chapterRefs={chapterRefs}
         total={CHAPTER_COUNT}
@@ -774,15 +779,19 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
       </form>
       </div>
 
-      <div className="hidden lg:block">
-        {/* top-24 clears ChapterProgress's sticky header (which grew taller
-            in Wave 16 with the chapter-indicator row); max-h + overflow-y
-            keeps a tall preview (many members/facilities) from running off
-            the bottom of the viewport instead of just growing forever. The
-            parent grid cell needs to stretch to the left column's full
-            height (no items-start above) for this sticky to have room to
-            actually stick rather than scrolling away with its own short cell. */}
-        <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <div className="hidden lg:block fixed top-24 right-8 z-30 w-[340px]">
+        {/* position: fixed instead of sticky — a grid-cell-height bug
+            (lg:items-start, fixed in an earlier pass) and html/body's
+            overflow-x:hidden implicitly turning them into their own
+            overflow-y:auto scroll container (fixed in globals.css above)
+            both independently broke sticky here, and real-device testing
+            still showed it drifting after the first fix. Fixed positioning
+            is relative to the viewport regardless of either issue, so it
+            can't regress the same way if some other ancestor changes overflow/
+            transform in the future. top-24 clears ChapterProgress's header
+            height; max-h + overflow-y keeps a tall preview (many members/
+            facilities) from running off the bottom of the viewport. */}
+        <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
           <PlanPreview {...previewProps} />
           <p className="mt-3 text-center text-xs text-ink-muted">参加者に見える完成イメージです</p>
         </div>
