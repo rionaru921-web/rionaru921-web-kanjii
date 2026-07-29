@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Users as UsersIcon } from "lucide-react";
 import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
 import MemberRoleBadge from "@/components/manual-plans/MemberRoleBadge";
@@ -31,7 +32,10 @@ export default function MemberList({
   members: MemberListItem[];
 }) {
   const [members, setMembers] = useState(initialMembers);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toasts, pushToast } = useToasts();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const supabase = createClient();
@@ -54,12 +58,19 @@ export default function MemberList({
             prev.map((m) => (m.id === updated.id ? { ...m, attendance_status: updated.attendance_status } : m))
           );
           pushToast(`${updated.name}さんが${ATTENDANCE_LABELS[updated.attendance_status]}を選択しました`);
+
+          // Brief gold glow on the row that just changed, so the update is
+          // noticeable even for people who don't read every toast.
+          if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+          setHighlightedId(updated.id);
+          highlightTimeoutRef.current = setTimeout(() => setHighlightedId(null), 2000);
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     };
   }, [planId, pushToast]);
 
@@ -94,9 +105,21 @@ export default function MemberList({
       ) : (
         <div className="flex flex-col gap-3">
           {members.map((m) => (
-            <div
+            <motion.div
               key={m.id}
-              className="flex items-center justify-between gap-3 border-b border-gold/10 pb-3 last:border-0 last:pb-0"
+              animate={
+                m.id === highlightedId && !reduceMotion
+                  ? {
+                      boxShadow: [
+                        "0 0 0 rgba(184, 147, 90, 0)",
+                        "0 0 16px rgba(184, 147, 90, 0.35)",
+                        "0 0 0 rgba(184, 147, 90, 0)",
+                      ],
+                    }
+                  : { boxShadow: "0 0 0 rgba(184, 147, 90, 0)" }
+              }
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="flex items-center justify-between gap-3 rounded-xl border-b border-gold/10 pb-3 last:border-0 last:pb-0"
             >
               <div className="flex items-center gap-1.5 min-w-0">
                 <MemberRoleBadge role={m.role} />
@@ -109,7 +132,7 @@ export default function MemberList({
                 )}
                 {m.hasGuestSecret && <MemberGuestSecretReset planId={planId} memberId={m.id} />}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

@@ -388,6 +388,18 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               selectedId={selectedTemplateId}
               onSelect={handleTemplateSelect}
             />
+            <div>
+              <label className={labelClass}>タイトル</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                disabled={saving}
+                className={inputClass}
+                placeholder="例: 部署の歓迎会"
+              />
+            </div>
             {eventType === null && (
               <div>
                 <label className={labelClass}>分類(自由入力・任意)</label>
@@ -402,18 +414,6 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                 />
               </div>
             )}
-            <div>
-              <label className={labelClass}>タイトル</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                disabled={saving}
-                className={inputClass}
-                placeholder="例: 部署の歓迎会"
-              />
-            </div>
           </div>
         </Chapter>
 

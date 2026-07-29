@@ -187,7 +187,9 @@ export default async function SharePlanPage({ params }: { params: { token: strin
     <WashokuShell sessionKey={params.token}>
       <WashokuPaperCard>
         <div className="text-center mb-8">
-          <p className="font-serif text-6xl font-black text-washoku-red leading-none">集</p>
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-washoku-red-soft border border-washoku-red-soft">
+            <Users className="w-10 h-10 text-washoku-red" strokeWidth={1.75} />
+          </div>
           <div className="mt-4 border-t border-b border-washoku-brass-soft py-3">
             <h1 className="font-serif text-xl sm:text-2xl font-bold">{typedPlan.title}</h1>
             {getEventTypeLabel(typedPlan) && (
