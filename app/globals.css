@@ -223,3 +223,19 @@ input[type="number"] {
   background: rgba(184, 147, 90, 0.2);
   color: var(--ink-primary);
 }
+
+/* Global safety net for CSS-keyframe animations (animate-chochin-sway,
+   animate-bounce-slow, animate-pulse-warm, etc.) that aren't individually
+   gated in JS — Framer Motion usages handle prefers-reduced-motion per
+   component via useReducedMotion() instead, since !important here can't
+   reach inline transform/opacity values Framer Motion sets directly. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

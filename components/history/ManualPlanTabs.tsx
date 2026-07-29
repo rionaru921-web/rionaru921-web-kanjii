@@ -59,9 +59,25 @@ export default function ManualPlanTabs({
       </div>
 
       {items.length === 0 ? (
-        <p className="text-sm text-ink-muted text-center py-10">
-          {tab === "inProgress" ? "進行中のプランはありません" : "完了したプランはまだありません"}
-        </p>
+        <div className="flex flex-col items-center text-center py-16 px-6 rounded-3xl bg-surface-tertiary shadow-warm">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gold/10 mb-3">
+            <HistoryIcon className="text-gold" size={20} />
+          </span>
+          <p className="font-serif text-sm font-semibold text-ink mb-1">
+            {tab === "inProgress" ? "進行中のプランはありません" : "完了したプランはまだありません"}
+          </p>
+          {tab === "inProgress" && (
+            <>
+              <p className="text-xs text-ink-muted mb-4">新しいプランを作成してみましょう</p>
+              <Link
+                href="/manual-plans/new"
+                className="rounded-xl border border-gold/20 text-xs font-semibold text-gold py-2.5 px-4 hover:border-gold/40 hover:bg-gold/5 transition-colors"
+              >
+                プランを作成する
+              </Link>
+            </>
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           {items.map((item) => (

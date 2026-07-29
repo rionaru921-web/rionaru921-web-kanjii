@@ -2,7 +2,7 @@
 
 import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Plus,
   Trash2,
@@ -53,6 +53,7 @@ import { useScrollIntoViewOnFocus } from "@/lib/hooks/useScrollIntoViewOnFocus";
 import PlanPreview from "./PlanPreview";
 import MobilePreviewModal from "./MobilePreviewModal";
 import CompletionCelebration from "./CompletionCelebration";
+import { inputClass, labelClass } from "@/lib/manual-plans/form-styles";
 
 interface MemberInput {
   name: string;
@@ -70,10 +71,6 @@ interface ManualPlanFormProps {
   initialMembers?: ManualPlanMember[];
 }
 
-const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
-const labelClass = "block text-sm font-medium text-ink";
-
 const CHAPTER_COUNT = 6;
 const CHAPTER_ICONS: LucideIcon[] = [Sparkles, Calendar, MapPin, Wallet, Users, MoreHorizontal];
 
@@ -87,6 +84,7 @@ function Chapter({ chapterRef, children }: { chapterRef: React.RefObject<HTMLDiv
 
 export default function ManualPlanForm({ mode, planId, initialData, initialMembers }: ManualPlanFormProps) {
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
 
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [eventType, setEventType] = useState<EventType | null>(initialData?.event_type ?? null);
@@ -537,7 +535,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                       onChange={(e) => updateMember(i, { name: e.target.value })}
                       onFocus={handleFocusScroll}
                       disabled={saving}
-                      className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                      className={inputClass.replace("mt-1.5 ", "")}
                       placeholder="名前"
                     />
                     <input
@@ -546,7 +544,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                       onChange={(e) => updateMember(i, { email: e.target.value })}
                       onFocus={handleFocusScroll}
                       disabled={saving}
-                      className="w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                      className={inputClass.replace("mt-1.5 ", "")}
                       placeholder="メール(任意)"
                     />
                   </div>
@@ -584,7 +582,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.2 }}
                       className="overflow-hidden flex flex-col gap-2"
                     >
                       <div className="flex flex-wrap gap-1.5">
@@ -599,7 +597,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                               })
                             }
                             disabled={saving}
-                            className={`rounded-lg px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
+                            className={`rounded-xl px-2 py-1 text-[11px] font-semibold border transition-colors disabled:opacity-50 ${
                               member.tierLevel === tier
                                 ? "bg-gold-gradient border-transparent text-white"
                                 : "border-gold/15 text-ink-secondary hover:border-gold/30"
@@ -628,6 +626,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                         <span className="text-[11px] text-ink-muted shrink-0">重み調整</span>
                         <input
                           type="range"
+                          aria-label={`${member.name || "メンバー"}の重み調整`}
                           min={0}
                           max={3}
                           step={0.1}
@@ -692,7 +691,8 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
               <button
                 type="button"
                 onClick={() => setMoreOpen((v) => !v)}
-                className="flex items-center gap-1.5 text-sm font-medium text-gold hover:text-gold-hover transition-colors"
+                disabled={saving}
+                className="flex items-center gap-1.5 text-sm font-medium text-gold hover:text-gold-hover transition-colors disabled:opacity-50"
               >
                 {moreOpen ? "閉じる" : "詳しく入力する(任意)"}
                 <ChevronDown size={16} className={`transition-transform ${moreOpen ? "rotate-180" : ""}`} />
@@ -706,7 +706,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: reduceMotion ? 0 : 0.25 }}
                 className="overflow-hidden"
               >
                 <div className="flex flex-col gap-5">

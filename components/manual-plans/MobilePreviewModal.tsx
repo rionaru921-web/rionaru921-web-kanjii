@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useScrollLock } from "@/lib/hooks/useScrollLock";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import PlanPreview from "./PlanPreview";
@@ -14,6 +14,7 @@ interface MobilePreviewModalProps {
 export default function MobilePreviewModal({ onClose, previewProps }: MobilePreviewModalProps) {
   useScrollLock(true);
   useEscapeKey(true, onClose);
+  const reduceMotion = useReducedMotion();
 
   return (
     <AnimatePresence>
@@ -21,7 +22,7 @@ export default function MobilePreviewModal({ onClose, previewProps }: MobilePrev
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: reduceMotion ? 0 : 0.2 }}
         className="fixed inset-0 z-50 bg-ink/60 backdrop-blur-sm flex items-end sm:items-center justify-center"
         role="dialog"
         aria-modal="true"
@@ -32,7 +33,7 @@ export default function MobilePreviewModal({ onClose, previewProps }: MobilePrev
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+          transition={{ duration: reduceMotion ? 0 : 0.25, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
           className="relative z-10 w-full sm:max-w-md max-h-[85dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl safe-area-bottom"
         >

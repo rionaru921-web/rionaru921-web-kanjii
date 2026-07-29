@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import ChochinIcon from "@/components/shared/ChochinIcon";
 
 // Page wrapper for the participant-facing share screens ("割烹の暖簾" theme).
@@ -20,10 +20,12 @@ export function WashokuShell({
   sessionKey?: string;
   children: React.ReactNode;
 }) {
+  const reduceMotion = useReducedMotion();
   const alreadySeen =
-    !!sessionKey &&
-    typeof window !== "undefined" &&
-    sessionStorage.getItem(`kanjii_chochin_seen_${sessionKey}`) === "1";
+    (!!sessionKey &&
+      typeof window !== "undefined" &&
+      sessionStorage.getItem(`kanjii_chochin_seen_${sessionKey}`) === "1") ||
+    !!reduceMotion;
 
   if (sessionKey && typeof window !== "undefined" && !alreadySeen) {
     sessionStorage.setItem(`kanjii_chochin_seen_${sessionKey}`, "1");

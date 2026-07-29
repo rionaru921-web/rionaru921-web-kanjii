@@ -43,7 +43,7 @@ export default function MemberGuestSecretReset({
       type="button"
       onClick={handleReset}
       disabled={state === "loading"}
-      className="flex items-center gap-1 text-[11px] text-ink-muted hover:text-gold transition-colors disabled:opacity-60"
+      className="flex items-center gap-1 text-[11px] text-ink-muted hover:text-gold transition-colors disabled:opacity-50"
       title="この人の回答登録をリセットして、別の端末から選び直せるようにします"
     >
       {state === "loading" ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />}

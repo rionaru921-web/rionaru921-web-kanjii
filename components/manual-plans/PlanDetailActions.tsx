@@ -39,6 +39,8 @@ export default function PlanDetailActions({
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [icsLoading, setIcsLoading] = useState(false);
 
   const shareUrl =
     typeof window !== "undefined"
@@ -73,6 +75,20 @@ export default function PlanDetailActions({
     setTimeout(() => setCopied(false), 2000);
   }
 
+  // These are plain <a href> navigations to server-generated files (PDF/ICS),
+  // not fetches we can await — this timer is purely a visual "something is
+  // happening" acknowledgment so the button doesn't look unresponsive while
+  // the browser generates/downloads the file, not a real loading state.
+  function handlePdfClick() {
+    setPdfLoading(true);
+    setTimeout(() => setPdfLoading(false), 1500);
+  }
+
+  function handleIcsClick() {
+    setIcsLoading(true);
+    setTimeout(() => setIcsLoading(false), 1500);
+  }
+
   function handleLineShare() {
     const text = buildLineShareText(plan, members, shareUrl);
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
@@ -101,10 +117,11 @@ export default function PlanDetailActions({
         )}
         <a
           href={`/api/manual-plans/${plan.id}/pdf`}
+          onClick={handlePdfClick}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors"
         >
-          <FileDown size={14} />
-          PDFで共有
+          {pdfLoading ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
+          {pdfLoading ? "生成中..." : "PDFで共有"}
         </a>
         <button
           type="button"
@@ -132,10 +149,11 @@ export default function PlanDetailActions({
         </button>
         <a
           href={`/api/manual-plans/${plan.id}/ics`}
+          onClick={handleIcsClick}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 text-blue-600 text-xs font-semibold py-2.5 hover:border-blue-300 hover:bg-blue-50 transition-colors"
         >
-          <CalendarPlus size={14} />
-          カレンダーに追加
+          {icsLoading ? <Loader2 size={14} className="animate-spin" /> : <CalendarPlus size={14} />}
+          {icsLoading ? "生成中..." : "カレンダーに追加"}
         </a>
       </div>
 
@@ -150,7 +168,7 @@ export default function PlanDetailActions({
         type="button"
         onClick={handleDelete}
         disabled={deleting}
-        className={`flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold py-2.5 transition-colors disabled:opacity-60 ${
+        className={`flex items-center justify-center gap-1.5 rounded-xl border text-xs font-semibold py-2.5 transition-colors disabled:opacity-50 ${
           confirmDelete
             ? "border-vermilion/40 bg-vermilion/10 text-vermilion-text"
             : "border-gold/20 text-ink-secondary hover:border-vermilion/40 hover:text-vermilion-text"

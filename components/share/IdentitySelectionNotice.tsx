@@ -1,14 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 
 export default function IdentitySelectionNotice() {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: -4 }}
+      initial={reduceMotion ? false : { opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: reduceMotion ? 0 : 0.25 }}
       className="mb-4 flex items-start gap-2 rounded-lg border border-washoku-red-soft bg-washoku-red-soft px-3 py-2.5 text-xs text-washoku-red"
     >
       <AlertTriangle size={14} className="shrink-0 mt-0.5" />

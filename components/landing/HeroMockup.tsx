@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { FileText, Wine, Flower2, Leaf, PartyPopper } from "lucide-react";
 import type { MockupProps } from "@/components/landing/mockups/mockupTypes";
 
@@ -23,6 +23,8 @@ const CONTAINER_SIZE = {
 // the inner .screen card below needs to become an <Image src="/hero-mockup.png" />.
 export default function HeroMockup({ size = "md", autoPlay = true, onInteraction }: MockupProps = {}) {
   const [selected, setSelected] = useState(0);
+  const reduceMotion = useReducedMotion();
+  const shouldFloat = autoPlay && !reduceMotion;
 
   function selectChip(i: number) {
     setSelected(i);
@@ -32,12 +34,12 @@ export default function HeroMockup({ size = "md", autoPlay = true, onInteraction
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, rotate: -3 }}
-      animate={{ opacity: 1, scale: 1, rotate: -2, y: autoPlay ? [0, -10, 0] : 0 }}
+      animate={{ opacity: 1, scale: 1, rotate: -2, y: shouldFloat ? [0, -10, 0] : 0 }}
       transition={{
         opacity: { duration: 0.8, ease: "easeOut", delay: 0.2 },
         scale: { duration: 0.8, ease: "easeOut", delay: 0.2 },
         rotate: { duration: 0.8, ease: "easeOut", delay: 0.2 },
-        y: autoPlay
+        y: shouldFloat
           ? { duration: 4, repeat: Infinity, ease: "easeInOut", repeatType: "mirror", delay: 1 }
           : { duration: 0.8, ease: "easeOut", delay: 0.2 },
       }}

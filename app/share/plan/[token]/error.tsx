@@ -42,7 +42,7 @@ export default function SharePlanError({
         </button>
         <a
           href="/"
-          className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-washoku-ink shadow-md"
+          className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-washoku-ink shadow-md transition-opacity hover:opacity-90"
           style={{
             background: "linear-gradient(135deg, var(--washoku-brass-bright) 0%, var(--washoku-brass) 100%)",
           }}

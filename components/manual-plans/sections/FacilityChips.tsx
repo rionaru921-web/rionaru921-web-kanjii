@@ -31,7 +31,7 @@ export default function FacilityChips({ value, onChange, disabled }: FacilityChi
             aria-pressed={value.includes(facility)}
             onClick={() => toggle(facility)}
             disabled={disabled}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50 ${
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50 ${
               value.includes(facility)
                 ? "bg-gold-gradient border-transparent text-white"
                 : "border-gold/15 text-ink-secondary hover:border-gold/30"

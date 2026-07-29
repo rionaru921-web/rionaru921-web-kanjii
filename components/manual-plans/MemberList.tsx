@@ -101,7 +101,13 @@ export default function MemberList({
         </p>
       )}
       {members.length === 0 ? (
-        <p className="text-sm text-ink-secondary">まだメンバーが登録されていません</p>
+        <div className="flex flex-col items-center text-center py-6">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gold/10 mb-3">
+            <UsersIcon className="text-gold" size={20} />
+          </span>
+          <p className="font-serif text-sm font-semibold text-ink mb-1">まだメンバーがいません</p>
+          <p className="text-xs text-ink-muted">プランを編集して参加者を追加しましょう</p>
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           {members.map((m) => (

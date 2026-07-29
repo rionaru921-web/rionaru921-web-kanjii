@@ -9,6 +9,7 @@ import SplitSettingsSection, { type SplitPreviewMember } from "./SplitSettingsSe
 import CalendarPopover from "@/components/ui/calendar/CalendarPopover";
 import { dateTimeLocalToDate, dateToDateTimeLocal } from "@/lib/calendar/local-datetime";
 import OtherInput from "./OtherInput";
+import { inputClass, labelClass } from "@/lib/manual-plans/form-styles";
 
 interface FeeSectionProps {
   feeAmount: string;
@@ -28,10 +29,6 @@ interface FeeSectionProps {
 }
 
 const PAYMENT_METHOD_OPTIONS = ["cash", "paypay", "bank_transfer"];
-
-const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
-const labelClass = "block text-sm font-medium text-ink";
 
 export default function FeeSection({
   feeAmount,
@@ -109,7 +106,7 @@ export default function FeeSection({
                 value={item.label}
                 onChange={(e) => updateItem(i, "label", e.target.value)}
                 disabled={disabled}
-                className="w-full sm:flex-1 min-w-0 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                className={inputClass.replace("mt-1.5 w-full", "w-full sm:flex-1 min-w-0")}
                 placeholder="例: 飲食代"
               />
               <div className="flex items-center gap-2">
@@ -119,7 +116,7 @@ export default function FeeSection({
                   value={item.amount}
                   onChange={(e) => updateItem(i, "amount", e.target.value)}
                   disabled={disabled}
-                  className="flex-1 sm:w-28 sm:flex-none min-w-0 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
+                  className={inputClass.replace("mt-1.5 w-full", "flex-1 sm:w-28 sm:flex-none min-w-0")}
                   placeholder="30000 / 未定"
                 />
                 <button

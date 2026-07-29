@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { inputClass, labelClass } from "@/lib/manual-plans/form-styles";
 
 export interface NijikaiValue {
   enabled: boolean;
@@ -16,11 +17,9 @@ interface NijikaiSectionProps {
   disabled?: boolean;
 }
 
-const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
-const labelClass = "block text-sm font-medium text-ink";
-
 export default function NijikaiSection({ value, onChange, disabled }: NijikaiSectionProps) {
+  const reduceMotion = useReducedMotion();
+
   function patch(fields: Partial<NijikaiValue>) {
     onChange({ ...value, ...fields });
   }
@@ -53,7 +52,7 @@ export default function NijikaiSection({ value, onChange, disabled }: NijikaiSec
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
             className="overflow-hidden"
           >
             <div className="mt-4 grid sm:grid-cols-2 gap-4">

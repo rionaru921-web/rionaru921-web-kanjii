@@ -32,7 +32,7 @@ export default function UseCaseMockup({ mockup, delay = 0 }: UseCaseMockupProps)
       transition={{ duration: 0.5, ease: "easeOut", delay }}
       className="relative w-full"
     >
-      <div className="rounded-xl border border-gold/20 bg-surface-tertiary shadow-warm p-4">
+      <div className="rounded-2xl border border-gold/20 bg-surface-tertiary shadow-warm-hover p-4">
         <div className="mb-3 flex items-center gap-1.5 border-b border-gold/10 pb-2">
           <span className="font-serif text-[11px] text-ink-muted">{mockup.eventName}</span>
         </div>
@@ -67,7 +67,7 @@ export default function UseCaseMockup({ mockup, delay = 0 }: UseCaseMockupProps)
           })}
         </div>
 
-        <div className="rounded-md border border-gold/20 bg-surface-secondary px-2.5 py-1.5 text-[11px] text-ink">
+        <div className="rounded-lg border border-gold/20 bg-surface-secondary px-2.5 py-1.5 text-[11px] text-ink">
           {mockup.date}
         </div>
 

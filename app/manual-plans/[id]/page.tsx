@@ -151,7 +151,7 @@ export default async function ManualPlanDetailPage({
       </nav>
 
       {(justCreated || justUpdated) && (
-        <div className="rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3 flex items-start gap-2.5">
+        <div className="rounded-2xl border border-gold/15 bg-gold/5 px-4 py-3 flex items-start gap-2.5">
           <PartyPopper className="text-gold shrink-0 mt-0.5" size={18} />
           <p className="text-sm font-semibold text-ink">
             {justCreated ? "プランを保存しました。共有可能です。" : "プランを更新しました。"}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface OtherInputProps {
   values: string[];
@@ -23,6 +23,7 @@ export default function OtherInput({
   disabled,
 }: OtherInputProps) {
   const [input, setInput] = useState("");
+  const reduceMotion = useReducedMotion();
 
   function handleAdd() {
     const trimmed = input.trim();
@@ -43,6 +44,7 @@ export default function OtherInput({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
             className="flex flex-wrap gap-2 mb-3 overflow-hidden"
           >
             {values.map((v) => (
@@ -51,6 +53,7 @@ export default function OtherInput({
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.2 }}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-ink text-sm"
               >
                 {v}

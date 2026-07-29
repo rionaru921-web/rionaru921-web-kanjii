@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import type { Feature } from "@/lib/features";
 import KeishaMockup from "@/components/landing/mockups/KeishaMockup";
 import CalendarMockup from "@/components/landing/mockups/CalendarMockup";
@@ -36,6 +36,7 @@ export default function FeatureRow({ feature, reverse }: FeatureRowProps) {
     reverse ? [30, 0, 0, -20] : [-30, 0, 0, 20]
   );
   const mockupOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 1, 1, 0.6]);
+  const reduceMotion = useReducedMotion();
 
   return (
     <div ref={ref} className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
@@ -58,7 +59,7 @@ export default function FeatureRow({ feature, reverse }: FeatureRowProps) {
       </motion.div>
 
       <motion.div
-        style={{ x: mockupX, opacity: mockupOpacity, willChange: "transform" }}
+        style={reduceMotion ? undefined : { x: mockupX, opacity: mockupOpacity, willChange: "transform" }}
         className={reverse ? "md:order-1" : ""}
       >
         <Mockup />

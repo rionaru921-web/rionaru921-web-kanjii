@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Check, X, HelpCircle, Loader2, type LucideIcon } from "lucide-react";
 import AttendanceStatusBadge from "@/components/manual-plans/AttendanceStatusBadge";
 import IdentitySelectionNotice from "@/components/share/IdentitySelectionNotice";
-import { useToasts, ToastStack } from "@/components/ui/RealtimeToast";
 import type { AttendanceStatus, ManualPlanMember } from "@/lib/manual-plans/types";
 
 const OPTIONS: { value: AttendanceStatus; label: string; icon: LucideIcon; activeClass: string }[] = [
@@ -40,7 +39,6 @@ export default function AttendanceForm({
   const [isEditing, setIsEditing] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toasts, pushToast } = useToasts();
 
   useEffect(() => {
     const stored = sessionStorage.getItem(storageKey(shareToken));
@@ -164,7 +162,6 @@ export default function AttendanceForm({
     const ok = await updateAttendance(selectedStatus);
     if (ok) {
       setIsEditing(false);
-      pushToast("回答を保存しました");
     }
   }
 
@@ -192,7 +189,7 @@ export default function AttendanceForm({
                   type="button"
                   onClick={() => isEditing && setSelectedStatus(opt.value)}
                   disabled={saving || !isEditing}
-                  className={`flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-xs font-semibold border transition-colors disabled:opacity-60 ${
+                  className={`flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-xs font-semibold border transition-colors disabled:opacity-50 ${
                     active ? opt.activeClass : "border-washoku-brass-soft text-washoku-ink-muted hover:border-washoku-brass"
                   }`}
                 >
@@ -210,7 +207,7 @@ export default function AttendanceForm({
               type="button"
               onClick={confirmSelection}
               disabled={!selectedStatus || saving}
-              className="mt-4 w-full flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold text-washoku-ink shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold text-washoku-ink shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               style={{
                 background:
                   "linear-gradient(135deg, var(--washoku-brass-bright) 0%, var(--washoku-brass) 100%)",
@@ -258,8 +255,6 @@ export default function AttendanceForm({
           </div>
         </>
       )}
-
-      <ToastStack toasts={toasts} />
     </div>
   );
 }

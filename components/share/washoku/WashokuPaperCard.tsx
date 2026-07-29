@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 // 障子紙カード: paper-toned card with gold corner brackets and a faint
 // washi-paper noise texture. Corner frame size steps up on larger screens
@@ -12,11 +12,12 @@ export function WashokuPaperCard({
   children: React.ReactNode;
   delay?: number;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay, ease: "easeOut" }}
+      transition={{ duration: reduceMotion ? 0 : 0.8, delay: reduceMotion ? 0 : delay, ease: "easeOut" }}
       className="bg-washoku-paper text-washoku-ink rounded-lg shadow-2xl relative overflow-hidden"
     >
       <div className="absolute top-0 left-0 w-8 h-8 sm:w-16 sm:h-16 border-l-2 border-t-2 border-washoku-brass pointer-events-none" />

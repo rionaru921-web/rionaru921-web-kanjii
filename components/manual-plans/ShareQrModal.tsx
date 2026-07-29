@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Download, Loader2 } from "lucide-react";
 import { generateQRDataUrl } from "@/lib/share/qr";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 export default function ShareQrModal({
   open,
@@ -17,6 +19,9 @@ export default function ShareQrModal({
   title: string;
 }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
+  useScrollLock(open);
+  useEscapeKey(open, onClose);
 
   useEffect(() => {
     if (!open) return;
@@ -39,12 +44,15 @@ export default function ShareQrModal({
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70"
         onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label="QRコードで共有"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.18 }}
+          transition={{ duration: reduceMotion ? 0 : 0.18 }}
           onClick={(e) => e.stopPropagation()}
           className="relative z-10 flex w-full sm:max-w-sm max-h-[90dvh] flex-col overflow-hidden bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl"
         >

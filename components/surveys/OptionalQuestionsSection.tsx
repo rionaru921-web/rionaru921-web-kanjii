@@ -156,7 +156,7 @@ export default function OptionalQuestionsSection({
                 type="button"
                 onClick={() => setCustomType(t)}
                 disabled={disabled}
-                className={`rounded-xl px-3 py-2 text-xs font-semibold border transition-colors disabled:opacity-50 ${
+                className={`rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-semibold border transition-colors disabled:opacity-50 ${
                   customType === t ? "bg-gold-gradient border-transparent text-white" : "border-gold/15 text-ink-secondary hover:border-gold/30"
                 }`}
               >

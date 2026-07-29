@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface ConfirmDialogProps {
   title: string;
@@ -19,6 +19,7 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const reduceMotion = useReducedMotion();
   return (
     <AnimatePresence>
       <motion.div
@@ -32,7 +33,7 @@ export default function ConfirmDialog({
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: reduceMotion ? 0 : 0.2 }}
           onClick={(e) => e.stopPropagation()}
           className="relative z-10 w-full sm:max-w-sm bg-surface-tertiary shadow-warm-hover rounded-t-3xl sm:rounded-3xl p-6"
         >

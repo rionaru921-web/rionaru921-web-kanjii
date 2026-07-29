@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { calculateSplit, type SplitMemberInput } from "@/lib/manual-plans/calculate-split";
 import {
   SPLIT_MODE_LABELS,
@@ -38,6 +38,7 @@ export default function SplitSettingsSection({
   members,
   disabled,
 }: SplitSettingsSectionProps) {
+  const reduceMotion = useReducedMotion();
   const splitInputs: SplitMemberInput[] = members.map((m, i) => ({
     id: String(i),
     tierLevel: m.tierLevel,
@@ -71,7 +72,7 @@ export default function SplitSettingsSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
             className="overflow-hidden flex flex-col gap-3"
           >
             <div>

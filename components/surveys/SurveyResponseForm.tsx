@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Loader2, Send } from "lucide-react";
 import { formatDateOptionLabel } from "@/lib/surveys/format";
 import type { AttendanceKind, OptionalAnswers, PublicSurvey, WillAttend } from "@/lib/surveys/types";
@@ -25,6 +25,7 @@ const ATTEND_CHOICES: { value: AttendanceKind | "no"; label: string }[] = [
 
 export default function SurveyResponseForm({ survey }: { survey: PublicSurvey }) {
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -217,7 +218,7 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: reduceMotion ? 0 : 0.2 }}
                 className="overflow-hidden"
               >
                 <label className="block text-xs text-ink-muted mt-3 mb-1">到着予定時刻</label>
@@ -235,7 +236,7 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: reduceMotion ? 0 : 0.2 }}
                 className="overflow-hidden"
               >
                 <label className="block text-xs text-ink-muted mt-3 mb-1">退出予定時刻</label>
@@ -253,7 +254,7 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: reduceMotion ? 0 : 0.2 }}
                 className="overflow-hidden"
               >
                 <label className="flex items-center gap-2 mt-3 text-sm text-ink-secondary cursor-pointer">

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Loader2, Unlock } from "lucide-react";
 
 interface HeroCTAProps {
@@ -9,6 +9,8 @@ interface HeroCTAProps {
 }
 
 export default function HeroCTA({ onClick, loading }: HeroCTAProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.button
       type="button"
@@ -17,7 +19,7 @@ export default function HeroCTA({ onClick, loading }: HeroCTAProps) {
       aria-label="今すぐ試す（ログイン不要）"
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full bg-gold-gradient text-white font-bold shadow-gold hover:shadow-gold-lg transition-shadow duration-200 text-lg py-5 px-10 disabled:opacity-60"
+      className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full bg-gold-gradient text-white font-bold shadow-gold hover:shadow-gold-lg hover:brightness-110 transition-shadow duration-200 text-lg py-5 px-10 disabled:opacity-60"
     >
       {loading ? (
         <>
@@ -31,8 +33,8 @@ export default function HeroCTA({ onClick, loading }: HeroCTAProps) {
             今すぐ試す<span className="whitespace-nowrap">（ログイン不要）</span>
           </span>
           <motion.span
-            animate={{ x: [0, 4, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduceMotion ? {} : { x: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: reduceMotion ? 0 : Infinity, ease: "easeInOut" }}
             className="flex"
           >
             <ArrowRight size={18} aria-hidden />

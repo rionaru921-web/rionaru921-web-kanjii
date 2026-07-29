@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Loader2, Sparkles, BookOpen } from "lucide-react";
 import type { CoachLevel } from "@/lib/coaching/level";
 import type { PlanType } from "@/lib/coaching/planContext";
@@ -33,6 +33,7 @@ function getPlanDetailPath(planType: PlanType, planId: string): string {
 }
 
 export function GrowthContent() {
+  const reduceMotion = useReducedMotion();
   const [data, setData] = useState<GrowthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +78,7 @@ export function GrowthContent() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3">
         <motion.section
-          initial={{ opacity: 0, y: 10 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl bg-surface-tertiary shadow-warm border border-gold/20 p-5 text-center"
         >
@@ -88,9 +89,9 @@ export function GrowthContent() {
           <p className="text-xs text-ink-muted mt-1">回</p>
         </motion.section>
         <motion.section
-          initial={{ opacity: 0, y: 10 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+          transition={{ delay: reduceMotion ? 0 : 0.05 }}
           className="rounded-3xl bg-surface-tertiary shadow-warm border border-gold/20 p-5 text-center"
         >
           <p className="text-xs text-ink-muted">通算の振り返り</p>
@@ -102,9 +103,9 @@ export function GrowthContent() {
       </div>
 
       <motion.section
-        initial={{ opacity: 0, y: 10 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: reduceMotion ? 0 : 0.1 }}
         className="rounded-3xl bg-surface-tertiary shadow-warm border border-gold/20 p-6"
       >
         <div className="flex items-center gap-4">
@@ -132,7 +133,7 @@ export function GrowthContent() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${data.progress.percentage}%` }}
-                transition={{ duration: 0.8, delay: 0.3 }}
+                transition={{ duration: reduceMotion ? 0 : 0.8, delay: reduceMotion ? 0 : 0.3 }}
                 className="h-full bg-gold-gradient"
               />
             </div>
@@ -155,7 +156,7 @@ export function GrowthContent() {
             </p>
             <Link
               href="/history"
-              className="inline-block mt-4 rounded-xl bg-gold-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-gold transition-opacity hover:opacity-90"
+              className="inline-block mt-4 rounded-full bg-gold-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-gold hover:brightness-110 transition-all"
             >
               履歴を見る
             </Link>
@@ -165,9 +166,9 @@ export function GrowthContent() {
             {data.sessions.map((s, i) => (
               <motion.div
                 key={s.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 + i * 0.03 }}
+                transition={{ delay: reduceMotion ? 0 : 0.15 + i * 0.03 }}
               >
                 <Link
                   href={getPlanDetailPath(s.plan_type, s.plan_id)}
