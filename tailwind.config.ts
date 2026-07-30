@@ -10,24 +10,31 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        // Wave 19: every entry uses rgb(var(--x) / <alpha-value>) instead of
+        // a plain var(--x) reference — the CSS variables themselves are now
+        // space-separated RGB triples (see globals.css :root), which is what
+        // lets Tailwind's opacity modifier (border-gold/20, bg-ink/60, etc.)
+        // actually generate a rule. With a plain var(--x) hex string, /N was
+        // silently producing no CSS at all — confirmed by grepping the
+        // compiled bundle for every custom color across 126 files.
+        background: "rgb(var(--background) / <alpha-value>)",
+        foreground: "rgb(var(--foreground) / <alpha-value>)",
         surface: {
-          DEFAULT: "var(--bg-primary)",
-          primary: "var(--bg-primary)",
-          secondary: "var(--bg-secondary)",
-          tertiary: "var(--bg-tertiary)",
-          warm: "var(--bg-warm)",
+          DEFAULT: "rgb(var(--bg-primary) / <alpha-value>)",
+          primary: "rgb(var(--bg-primary) / <alpha-value>)",
+          secondary: "rgb(var(--bg-secondary) / <alpha-value>)",
+          tertiary: "rgb(var(--bg-tertiary) / <alpha-value>)",
+          warm: "rgb(var(--bg-warm) / <alpha-value>)",
         },
         // "gold" is kept as the class-name family for the primary accent
         // (now terracotta) so the ~50 files already using text-gold /
         // bg-gold-gradient / border-gold keep working — only the CSS
         // variables they resolve to changed.
         gold: {
-          DEFAULT: "var(--accent-primary)",
-          bright: "var(--accent-light)",
-          deep: "var(--accent-hover)",
-          warm: "var(--accent-warm)",
+          DEFAULT: "rgb(var(--accent-primary) / <alpha-value>)",
+          bright: "rgb(var(--accent-light) / <alpha-value>)",
+          deep: "rgb(var(--accent-hover) / <alpha-value>)",
+          warm: "rgb(var(--accent-warm) / <alpha-value>)",
         },
         // Same idea: "vermilion" now resolves to the new wine tone used for
         // warnings/errors, so existing bg-vermilion / border-vermilion usage
@@ -36,16 +43,16 @@ const config: Config = {
         // reserved for readable text, since the lighter tone alone doesn't
         // clear WCAG AA contrast on a white background.
         vermilion: {
-          DEFAULT: "var(--wine)",
-          text: "var(--wine-text)",
+          DEFAULT: "rgb(var(--wine) / <alpha-value>)",
+          text: "rgb(var(--wine-text) / <alpha-value>)",
         },
         ink: {
-          DEFAULT: "var(--ink-primary)",
-          secondary: "var(--ink-secondary)",
-          muted: "var(--ink-muted)",
+          DEFAULT: "rgb(var(--ink-primary) / <alpha-value>)",
+          secondary: "rgb(var(--ink-secondary) / <alpha-value>)",
+          muted: "rgb(var(--ink-muted) / <alpha-value>)",
         },
-        sage: "var(--sage)",
-        premium: "var(--gold-accent)",
+        sage: "rgb(var(--sage) / <alpha-value>)",
+        premium: "rgb(var(--gold-accent) / <alpha-value>)",
       },
       fontFamily: {
         serif: ["var(--font-noto-serif-jp)", "serif"],
@@ -63,7 +70,7 @@ const config: Config = {
       },
       backgroundImage: {
         "gold-gradient":
-          "linear-gradient(135deg, var(--accent-light), var(--accent-primary), var(--accent-hover))",
+          "linear-gradient(135deg, rgb(var(--accent-light)), rgb(var(--accent-primary)), rgb(var(--accent-hover)))",
       },
       keyframes: {
         "bounce-slow": {
