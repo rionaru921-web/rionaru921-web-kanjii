@@ -57,16 +57,44 @@ export function useDemoState() {
   }, []);
 
   useEffect(() => {
-    if (mode !== "auto" || !isPlaying) return;
+    // Temporary diagnostic logging (Wave 19-Fix) — left in deliberately so
+    // real-device Safari testing can confirm from the Console tab whether
+    // this effect fires at all, and with what values, instead of guessing
+    // blind. Safe to remove once auto-play is confirmed reliable in the
+    // field; harmless in production otherwise (console.log only).
+    console.log("[Demo] effect fired", { step, mode, isPlaying });
+
+    if (mode !== "auto" || !isPlaying) {
+      console.log("[Demo] skip auto-play (mode or isPlaying)", { mode, isPlaying });
+      return;
+    }
     // Welcome (-1) and Ending (5) never auto-advance — the welcome screen
     // must wait for an explicit mode choice, and auto-advancing it on a
     // timer let a stale localStorage "manual" preference silently win a
     // race against the user's own "自動再生で見る" click (the click would
     // land after the timer had already moved past the welcome screen).
-    if (step < 0 || step >= 5) return;
-    const timer = setTimeout(next, STEP_DURATIONS[step]);
-    return () => clearTimeout(timer);
-  }, [step, mode, isPlaying, next]);
+    if (step < 0 || step >= 5) {
+      console.log("[Demo] no auto-play for step", step);
+      return;
+    }
+
+    const duration = STEP_DURATIONS[step];
+    console.log("[Demo] scheduling next step in", duration, "ms, from step", step);
+
+    const timer = setTimeout(() => {
+      console.log("[Demo] timer fired, advancing from step", step);
+      // Defensive guard: only advance if `step` is still what this timer was
+      // scheduled for. If some other path (footer nav, mode toggle) already
+      // moved `step` on, this stale closure's `next` would otherwise still
+      // fire and double-advance from a step the UI has already left.
+      setStep((current) => (current === step ? ((step + 1) as DemoStep) : current));
+    }, duration);
+
+    return () => {
+      console.log("[Demo] cleanup timer for step", step);
+      clearTimeout(timer);
+    };
+  }, [step, mode, isPlaying]);
 
   return {
     step,

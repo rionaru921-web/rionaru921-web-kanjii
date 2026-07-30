@@ -30,6 +30,8 @@ export default function DemoModal({ onClose, isLoggedIn }: DemoModalProps) {
   useEscapeKey(true, onClose);
 
   function handleSelectMode(nextMode: typeof mode) {
+    // See useDemoState.ts for the matching diagnostic logs on the timer side.
+    console.log("[Demo] mode selected on Welcome screen", nextMode);
     setMode(nextMode);
     next();
   }
