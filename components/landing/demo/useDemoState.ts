@@ -8,8 +8,11 @@ export type DemoStep = -1 | 0 | 1 | 2 | 3 | 4 | 5;
 
 const MODE_STORAGE_KEY = "kanji-lab-demo-mode";
 
+// No entry for -1 (Welcome) or 5 (Ending) — both are excluded from the
+// auto-advance effect below and must only ever be left via an explicit
+// button click, never a timer.
 const STEP_DURATIONS: Record<DemoStep, number> = {
-  [-1]: 3000,
+  [-1]: 0,
   0: 20000,
   1: 20000,
   2: 15000,
@@ -55,7 +58,12 @@ export function useDemoState() {
 
   useEffect(() => {
     if (mode !== "auto" || !isPlaying) return;
-    if (step >= 5) return;
+    // Welcome (-1) and Ending (5) never auto-advance — the welcome screen
+    // must wait for an explicit mode choice, and auto-advancing it on a
+    // timer let a stale localStorage "manual" preference silently win a
+    // race against the user's own "自動再生で見る" click (the click would
+    // land after the timer had already moved past the welcome screen).
+    if (step < 0 || step >= 5) return;
     const timer = setTimeout(next, STEP_DURATIONS[step]);
     return () => clearTimeout(timer);
   }, [step, mode, isPlaying, next]);

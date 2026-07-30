@@ -21,7 +21,7 @@ export default function DemoHeader({ step, mode, onModeChange, onClose }: DemoHe
           type="button"
           onClick={onClose}
           aria-label="デモを閉じる"
-          className="flex h-11 w-11 items-center justify-center rounded-full text-surface-primary/70 transition-colors hover:text-surface-primary hover:bg-surface-primary/10"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-white/70 transition-colors hover:text-surface-primary hover:bg-white/10"
         >
           <X className="h-5 w-5" />
         </button>

@@ -17,7 +17,7 @@ export default function DemoProgressDots({ current, total, onSelect }: DemoProgr
           onClick={() => onSelect?.(i)}
           disabled={!onSelect}
           className={`h-2 rounded-full transition-all duration-300 ${
-            i === current ? "w-6 bg-gold-gradient" : "w-2 bg-surface-primary/30"
+            i === current ? "w-6 bg-gold-gradient" : "w-2 bg-white/30"
           } ${onSelect ? "cursor-pointer" : ""}`}
         />
       ))}

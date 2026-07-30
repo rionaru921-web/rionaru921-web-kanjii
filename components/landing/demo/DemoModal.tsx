@@ -43,7 +43,7 @@ export default function DemoModal({ onClose, isLoggedIn }: DemoModalProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-50 bg-ink/90 backdrop-blur-md"
+        className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md"
         role="dialog"
         aria-modal="true"
         aria-label="幹事ラボ 体験ツアー"

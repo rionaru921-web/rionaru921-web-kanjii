@@ -10,7 +10,7 @@ interface ModeToggleProps {
 
 export default function ModeToggle({ mode, onChange }: ModeToggleProps) {
   return (
-    <div className="inline-flex items-center rounded-full border border-surface-primary/20 bg-surface-primary/10 p-1">
+    <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 p-1">
       <button
         type="button"
         onClick={() => onChange("auto")}
@@ -18,7 +18,7 @@ export default function ModeToggle({ mode, onChange }: ModeToggleProps) {
         className={`flex items-center gap-1.5 rounded-full px-3 py-2 min-h-[36px] text-xs font-medium transition-colors ${
           mode === "auto"
             ? "bg-gold-gradient text-white"
-            : "text-surface-primary/70 hover:text-surface-primary"
+            : "text-white/70 hover:text-surface-primary"
         }`}
       >
         <Play size={12} />
@@ -31,7 +31,7 @@ export default function ModeToggle({ mode, onChange }: ModeToggleProps) {
         className={`flex items-center gap-1.5 rounded-full px-3 py-2 min-h-[36px] text-xs font-medium transition-colors ${
           mode === "manual"
             ? "bg-gold-gradient text-white"
-            : "text-surface-primary/70 hover:text-surface-primary"
+            : "text-white/70 hover:text-surface-primary"
         }`}
       >
         <MousePointerClick size={12} />

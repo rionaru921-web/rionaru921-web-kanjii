@@ -22,7 +22,7 @@ export default function WelcomeScene({ onSelectMode }: WelcomeSceneProps) {
       <h2 className="font-serif text-2xl sm:text-3xl font-bold text-surface-primary mb-4">
         幹事ラボの体験ツアー、開始
       </h2>
-      <p className="text-sm sm:text-base text-surface-primary/75 mb-8 leading-relaxed">
+      <p className="text-sm sm:text-base text-white/75 mb-8 leading-relaxed">
         プラン作成から振り返りまで、5つの章で幹事ラボの使い方をご紹介します。
       </p>
 
@@ -38,7 +38,7 @@ export default function WelcomeScene({ onSelectMode }: WelcomeSceneProps) {
         <button
           type="button"
           onClick={() => onSelectMode("manual")}
-          className="flex items-center justify-center gap-2 rounded-full border border-surface-primary/30 px-6 py-3.5 min-h-[44px] text-sm font-semibold text-surface-primary transition-colors hover:border-surface-primary/60"
+          className="flex items-center justify-center gap-2 rounded-full border border-white/30 px-6 py-3.5 min-h-[44px] text-sm font-semibold text-surface-primary transition-colors hover:border-white/60"
         >
           <MousePointerClick size={16} />
           手動で進める

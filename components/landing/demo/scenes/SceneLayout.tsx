@@ -24,10 +24,10 @@ export default function SceneLayout({ chapterLabel, title, description, hint, ch
         <p className="text-gold text-sm mb-1" aria-hidden>
           ◇
         </p>
-        <p className="font-serif text-xs tracking-[0.25em] text-surface-primary/60 mb-2">{chapterLabel}</p>
+        <p className="font-serif text-xs tracking-[0.25em] text-white/60 mb-2">{chapterLabel}</p>
         <h3 className="font-serif text-2xl sm:text-3xl font-bold text-surface-primary mb-4">{title}</h3>
-        <p className="text-sm sm:text-base text-surface-primary/75 leading-relaxed">{description}</p>
-        {hint && <p className="mt-4 text-xs text-gold/90">↗ {hint}</p>}
+        <p className="text-sm sm:text-base text-white/75 leading-relaxed">{description}</p>
+        {hint && <p className="mt-4 text-xs text-gold">↗ {hint}</p>}
       </motion.div>
 
       <motion.div

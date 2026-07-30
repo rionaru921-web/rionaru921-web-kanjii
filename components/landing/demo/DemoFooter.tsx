@@ -20,17 +20,17 @@ export default function DemoFooter({ step, onPrev, onNext, onSelectStep }: DemoF
           type="button"
           onClick={onPrev}
           disabled={step === 0}
-          className="flex items-center gap-1 min-h-[44px] px-3 text-sm text-surface-primary/80 transition-colors hover:text-surface-primary disabled:opacity-30 disabled:pointer-events-none"
+          className="flex items-center gap-1 min-h-[44px] px-3 text-sm text-white/80 transition-colors hover:text-surface-primary disabled:opacity-30 disabled:pointer-events-none"
         >
           <ChevronLeft size={18} />
           前へ
         </button>
-        <span className="text-xs text-surface-primary/60">Step {step + 1} / 5</span>
+        <span className="text-xs text-white/60">Step {step + 1} / 5</span>
         <button
           type="button"
           onClick={onNext}
           disabled={step === 4}
-          className="flex items-center gap-1 min-h-[44px] px-3 text-sm text-surface-primary/80 transition-colors hover:text-surface-primary disabled:opacity-30 disabled:pointer-events-none"
+          className="flex items-center gap-1 min-h-[44px] px-3 text-sm text-white/80 transition-colors hover:text-surface-primary disabled:opacity-30 disabled:pointer-events-none"
         >
           次へ
           <ChevronRight size={18} />

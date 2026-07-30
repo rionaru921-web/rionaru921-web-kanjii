@@ -38,7 +38,7 @@ export default function EndingScene({ isLoggedIn, onRestart, onClose }: EndingSc
       <h2 className="font-serif text-2xl sm:text-3xl font-bold text-surface-primary mb-4">
         体験ツアー、終了
       </h2>
-      <p className="text-sm sm:text-base text-surface-primary/75 mb-8 leading-relaxed">
+      <p className="text-sm sm:text-base text-white/75 mb-8 leading-relaxed">
         幹事ラボは、あなたが幹事を
         <br />
         「楽しく」やるための道具です。
@@ -51,7 +51,7 @@ export default function EndingScene({ isLoggedIn, onRestart, onClose }: EndingSc
         <button
           type="button"
           onClick={onRestart}
-          className="flex items-center justify-center gap-2 rounded-full border border-surface-primary/30 px-6 py-3 min-h-[44px] text-sm font-medium text-surface-primary transition-colors hover:border-surface-primary/60"
+          className="flex items-center justify-center gap-2 rounded-full border border-white/30 px-6 py-3 min-h-[44px] text-sm font-medium text-surface-primary transition-colors hover:border-white/60"
         >
           <RotateCcw size={14} />
           もう一度見る
@@ -59,7 +59,7 @@ export default function EndingScene({ isLoggedIn, onRestart, onClose }: EndingSc
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center justify-center gap-2 px-6 py-2 min-h-[44px] text-sm text-surface-primary/60 transition-colors hover:text-surface-primary"
+          className="flex items-center justify-center gap-2 px-6 py-2 min-h-[44px] text-sm text-white/60 transition-colors hover:text-surface-primary"
         >
           <X size={14} />
           デモを終了する
