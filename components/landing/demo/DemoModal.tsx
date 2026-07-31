@@ -24,17 +24,10 @@ interface DemoModalProps {
 }
 
 export default function DemoModal({ onClose, isLoggedIn }: DemoModalProps) {
-  const { step, mode, setMode, next, prev, setStep, restart } = useDemoState();
+  const { step, next, prev, setStep, restart } = useDemoState();
 
   useScrollLock(true);
   useEscapeKey(true, onClose);
-
-  function handleSelectMode(nextMode: typeof mode) {
-    // See useDemoState.ts for the matching diagnostic logs on the timer side.
-    console.log("[Demo] mode selected on Welcome screen", nextMode);
-    setMode(nextMode);
-    next();
-  }
 
   const StepScene = step >= 0 && step <= 4 ? STEP_SCENES[step] : null;
 
@@ -50,7 +43,7 @@ export default function DemoModal({ onClose, isLoggedIn }: DemoModalProps) {
         aria-modal="true"
         aria-label="幹事ラボ 体験ツアー"
       >
-        <DemoHeader step={step} mode={mode} onModeChange={setMode} onClose={onClose} />
+        <DemoHeader onClose={onClose} />
 
         <div className="h-full flex items-center justify-center px-4 py-24 md:px-8">
           <AnimatePresence mode="wait">
@@ -63,10 +56,10 @@ export default function DemoModal({ onClose, isLoggedIn }: DemoModalProps) {
               className="w-full"
               aria-live="polite"
             >
-              {step === -1 && <WelcomeScene onSelectMode={handleSelectMode} />}
+              {step === -1 && <WelcomeScene onStart={next} />}
               {StepScene && (
                 <StepScene
-                  autoPlay={mode === "auto"}
+                  autoPlay={true}
                   onInteraction={() => {
                     /* reserved for future analytics; interactions are purely local UI state today */
                   }}

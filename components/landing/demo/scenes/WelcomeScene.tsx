@@ -1,14 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MousePointerClick, Play } from "lucide-react";
-import type { DemoMode } from "../useDemoState";
+import { Play } from "lucide-react";
 
 interface WelcomeSceneProps {
-  onSelectMode: (mode: DemoMode) => void;
+  onStart: () => void;
 }
 
-export default function WelcomeScene({ onSelectMode }: WelcomeSceneProps) {
+export default function WelcomeScene({ onStart }: WelcomeSceneProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -26,22 +25,14 @@ export default function WelcomeScene({ onSelectMode }: WelcomeSceneProps) {
         プラン作成から振り返りまで、5つの章で幹事ラボの使い方をご紹介します。
       </p>
 
-      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <div className="flex w-full justify-center sm:w-auto">
         <button
           type="button"
-          onClick={() => onSelectMode("auto")}
+          onClick={onStart}
           className="flex items-center justify-center gap-2 rounded-full bg-gold-gradient px-6 py-3.5 min-h-[44px] text-sm font-semibold text-white shadow-gold transition-opacity hover:opacity-90"
         >
           <Play size={16} />
-          自動再生で見る
-        </button>
-        <button
-          type="button"
-          onClick={() => onSelectMode("manual")}
-          className="flex items-center justify-center gap-2 rounded-full border border-white/30 px-6 py-3.5 min-h-[44px] text-sm font-semibold text-surface-primary transition-colors hover:border-white/60"
-        >
-          <MousePointerClick size={16} />
-          手動で進める
+          デモを始める
         </button>
       </div>
     </motion.div>
