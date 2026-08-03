@@ -152,6 +152,34 @@ export const OPTIONAL_QUESTION_PRESETS: OptionalQuestionPreset[] = [
     options: ["当日現金", "事前振込", "幹事にお任せ"],
     suggestedFor: ["nomikai", "travel"],
   },
+  // Wave 21: 追加質問プリセット3件。既存の optional_questions/optional_answers
+  // (jsonb) と type: 'select' | 'multi_select' の仕組みだけで表現でき、
+  // 回答UI(SurveyResponseForm.tsx)・集計(lib/surveys/aggregate.ts)・
+  // 結果表示(SurveyResultsView.tsx)はどれも型ベースで汎用実装済みのため
+  // このファイル以外は無変更。
+  {
+    id: "genre_multi",
+    label: "食べたいジャンルは?(複数選択可)",
+    description: "単一選択の「ジャンル候補」とは別に、複数のジャンルを希望として聞けます",
+    type: "multi_select",
+    options: ["居酒屋", "焼肉", "カフェ", "和食", "洋食", "中華", "韓国料理", "寿司", "ラーメン", "その他"],
+    suggestedFor: ["nomikai", "kangeikai", "sobetsukai", "birthday", "travel"],
+  },
+  {
+    id: "allergy_checklist",
+    label: "アレルギー・苦手な食べ物はありますか?(該当するものを選択)",
+    description: "自由記述の「食べ物のアレルギー」と併用できます",
+    type: "multi_select",
+    options: ["エビ", "カニ", "乳製品", "卵", "そば", "ピーナッツ", "なし"],
+    suggestedFor: ["nomikai", "kangeikai", "sobetsukai", "birthday", "travel"],
+  },
+  {
+    id: "time_preference",
+    label: "開始時間の希望は?",
+    type: "select",
+    options: ["ランチ(11:00-14:00)", "夜(17:00-19:00)", "夜(19:00-21:00)", "遅め(21:00-)"],
+    suggestedFor: ["nomikai", "kangeikai", "sobetsukai", "birthday"],
+  },
 ];
 
 // イベント種類ごとに、その場で推奨する追加質問プリセットを返す。

@@ -3,6 +3,7 @@ import Hero from "@/components/landing/Hero";
 import NoLoginBanner from "@/components/landing/NoLoginBanner";
 import ServiceCards from "@/components/landing/ServiceCards";
 import UseCases from "@/components/landing/UseCases";
+import SurveyShowcase from "@/components/landing/SurveyShowcase";
 import FeatureShowcase from "@/components/landing/FeatureShowcase";
 import Story from "@/components/landing/Story";
 import HowItWorks from "@/components/landing/HowItWorks";
@@ -48,6 +49,7 @@ export default async function Home() {
         <Hero isLoggedIn={isLoggedIn} />
         <NoLoginBanner />
         <UseCases />
+        <SurveyShowcase />
         <FeatureShowcase />
         <HowToGuide />
         <HowItWorks />
