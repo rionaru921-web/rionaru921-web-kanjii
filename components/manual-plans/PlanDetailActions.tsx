@@ -23,6 +23,7 @@ import { buildLineShareText } from "@/lib/manual-plans/format";
 // user actually opens the QR modal — code-split it out of the main detail
 // page bundle instead of loading it on every visit.
 const ShareQrModal = dynamic(() => import("./ShareQrModal"), { ssr: false });
+const SaveFavoriteButton = dynamic(() => import("./SaveFavoriteButton"), { ssr: false });
 
 export default function PlanDetailActions({
   plan,
@@ -163,6 +164,8 @@ export default function PlanDetailActions({
           このプランは完了しています。基本情報の編集はできません。
         </p>
       )}
+
+      {!plan.is_favorite && <SaveFavoriteButton planId={plan.id} defaultName={plan.title} />}
 
       <button
         type="button"

@@ -64,6 +64,8 @@ export interface ManualPlan {
   share_token: string;
   split_mode: SplitMode;
   rounding_unit: RoundingUnit;
+  is_favorite: boolean;
+  favorite_name: string | null;
   created_at: string;
   updated_at: string;
 }

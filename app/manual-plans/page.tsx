@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import GoldButton from "@/components/shared/GoldButton";
 import ManualPlansList, { type ManualPlanListItem } from "@/components/manual-plans/ManualPlansList";
@@ -32,10 +33,13 @@ export default async function ManualPlansPage() {
   // manual_plan_members.plan_id lets PostgREST join both in one round trip.
   // Ordered by event_date descending (nulls last) so upcoming/recent plans
   // lead the list regardless of when they were created.
+  // is_favorite=true 行は「よく使うプラン」専用の複製データであり、実際の
+  // 予定ではないため通常の一覧には出さない(/manual-plans/favorites が担当)。
   const { data: plans } = await supabase
     .from("manual_plans")
     .select("*, manual_plan_members(id, attendance_status)")
     .eq("user_id", user.id)
+    .eq("is_favorite", false)
     .order("event_date", { ascending: false, nullsFirst: false });
 
   const items: ManualPlanListItem[] = (plans ?? []).map((row) => {
@@ -61,6 +65,14 @@ export default async function ManualPlansPage() {
           新規作成
         </GoldButton>
       </div>
+
+      <Link
+        href="/manual-plans/favorites"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-secondary hover:text-gold transition-colors mb-6"
+      >
+        <Bookmark size={14} />
+        よく使うプラン
+      </Link>
 
       <ManualPlansList plans={items} />
     </main>

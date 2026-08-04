@@ -3,6 +3,8 @@
 import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   Plus,
   Trash2,
@@ -53,15 +55,30 @@ import { useScrollIntoViewOnFocus } from "@/lib/hooks/useScrollIntoViewOnFocus";
 import PlanPreview from "./PlanPreview";
 import MobilePreviewModal from "./MobilePreviewModal";
 import CompletionCelebration from "./CompletionCelebration";
+import SortableMemberRow from "./SortableMemberRow";
 import { inputClass, labelClass } from "@/lib/manual-plans/form-styles";
 
 interface MemberInput {
+  id: string;
   name: string;
   email: string;
   role: MemberRole;
   tierLevel: TierLevel;
   weightOverride: number | null;
   organizerDiscount: OrganizerDiscount | null;
+}
+
+// id is client-side only (drag-and-drop identity) — never sent to the API.
+function createEmptyMember(): MemberInput {
+  return {
+    id: crypto.randomUUID(),
+    name: "",
+    email: "",
+    role: "participant",
+    tierLevel: DEFAULT_TIER_LEVEL,
+    weightOverride: null,
+    organizerDiscount: null,
+  };
 }
 
 interface ManualPlanFormProps {
@@ -122,6 +139,7 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   const [members, setMembers] = useState<MemberInput[]>(
     initialMembers && initialMembers.length > 0
       ? initialMembers.map((m) => ({
+          id: m.id,
           name: m.name,
           email: m.email ?? "",
           role: m.role,
@@ -129,17 +147,9 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
           weightOverride: m.weight_override,
           organizerDiscount: m.organizer_discount,
         }))
-      : [
-          {
-            name: "",
-            email: "",
-            role: "participant",
-            tierLevel: DEFAULT_TIER_LEVEL,
-            weightOverride: null,
-            organizerDiscount: null,
-          },
-        ]
+      : [createEmptyMember()]
   );
+  const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const [moreOpen, setMoreOpen] = useState(false);
   const [eventNote, setEventNote] = useState(initialData?.event_note ?? "");
@@ -217,21 +227,22 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
   }
 
   function addMember() {
-    setMembers((prev) => [
-      ...prev,
-      {
-        name: "",
-        email: "",
-        role: "participant",
-        tierLevel: DEFAULT_TIER_LEVEL,
-        weightOverride: null,
-        organizerDiscount: null,
-      },
-    ]);
+    setMembers((prev) => [...prev, createEmptyMember()]);
   }
 
   function removeMember(index: number) {
     setMembers((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function handleMemberDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setMembers((prev) => {
+      const oldIndex = prev.findIndex((m) => m.id === active.id);
+      const newIndex = prev.findIndex((m) => m.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+      return arrayMove(prev, oldIndex, newIndex);
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -524,9 +535,11 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
             icon={CHAPTER_ICONS[4]}
             complete={chapterComplete[4]}
           />
-          <div className="flex flex-col gap-3">
-            {members.map((member, i) => (
-              <div key={i} className="flex flex-col gap-2 rounded-xl border border-gold/10 p-3">
+          <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleMemberDragEnd}>
+            <SortableContext items={members.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-3">
+                {members.map((member, i) => (
+                  <SortableMemberRow key={member.id} id={member.id} disabled={saving}>
                 <div className="flex items-start gap-2">
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <input
@@ -666,18 +679,20 @@ export default function ManualPlanForm({ mode, planId, initialData, initialMembe
                     </motion.div>
                   )}
                 </AnimatePresence>
+                  </SortableMemberRow>
+                ))}
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={addMember}
-              disabled={saving}
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-sm font-medium text-gold py-2.5 hover:bg-gold/5 transition-colors disabled:opacity-50"
-            >
-              <Plus size={16} />
-              メンバーを追加
-            </button>
-          </div>
+            </SortableContext>
+          </DndContext>
+          <button
+            type="button"
+            onClick={addMember}
+            disabled={saving}
+            className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-sm font-medium text-gold py-2.5 hover:bg-gold/5 transition-colors disabled:opacity-50"
+          >
+            <Plus size={16} />
+            メンバーを追加
+          </button>
         </Chapter>
 
         {/* 第六章 もっと(オプション) */}

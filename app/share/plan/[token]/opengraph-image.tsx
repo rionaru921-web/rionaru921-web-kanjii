@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { formatJstDateTime } from "@/lib/date/kanjii-time";
 
 export const runtime = "edge";
 export const alt = "幹事ラボ プラン招待";
@@ -15,11 +16,16 @@ const NOTO_SANS_JP_URL =
 export default async function PlanOGImage({ params }: { params: { token: string } }) {
   const supabase = createAdminClient();
   const [{ data: plan }, fontData] = await Promise.all([
-    supabase.from("manual_plans").select("title, venue_name").eq("share_token", params.token).maybeSingle(),
+    supabase
+      .from("manual_plans")
+      .select("title, venue_name, event_date")
+      .eq("share_token", params.token)
+      .maybeSingle(),
     fetch(NOTO_SANS_JP_URL).then((res) => res.arrayBuffer()),
   ]);
 
   const title = plan?.title ?? "幹事ラボ";
+  const dateLabel = plan?.event_date ? formatJstDateTime(plan.event_date) : null;
   const subtitle = plan?.venue_name ?? "あらゆる集まりを、あなたが幹事する。";
 
   return new ImageResponse(
@@ -54,6 +60,7 @@ export default async function PlanOGImage({ params }: { params: { token: string 
         >
           {title}
         </div>
+        {dateLabel && <div style={{ fontSize: 30, color: "#C4A56B", marginTop: 4 }}>{dateLabel}</div>}
         <div style={{ fontSize: 28, color: "#8B8378", marginTop: 20 }}>{subtitle}</div>
       </div>
     ),

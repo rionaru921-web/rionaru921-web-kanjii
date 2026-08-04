@@ -22,6 +22,7 @@ export default async function HistoryPage() {
           .from("manual_plans")
           .select("id, title, event_date, end_date, created_at")
           .eq("user_id", user.id)
+          .eq("is_favorite", false)
           .order("created_at", { ascending: false }),
       ])
     : [{ data: [] }, { data: [] }];
