@@ -1,4 +1,4 @@
-import { View, Text } from "@react-pdf/renderer";
+import { View, Text, Svg, Path, Rect, Ellipse } from "@react-pdf/renderer";
 import { COLORS, pdfStyles } from "./styles";
 
 // Re-exported (not defined here) so client components can format currency
@@ -49,6 +49,29 @@ export function PaymentInfoCard({ payment }: { payment: PDFPaymentInfo }) {
         <Text style={{ fontSize: 9, color: COLORS.inkSecondary }}>{payment.memo}</Text>
       )}
     </View>
+  );
+}
+
+// components/shared/ChochinIcon.tsx (提灯)を react-pdf の Svg プリミティブで
+// 簡略再現したもの。ブラウザSVGコンポーネントはそのまま埋め込めないため。
+export function ChochinPdfIcon({ size = 12 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size * 1.6} viewBox="0 0 24 38">
+      <Path d="M12 0 V4" stroke={COLORS.goldDeep} strokeWidth={1} />
+      <Rect x="8.5" y="3.5" width="7" height="2.5" rx="0.6" fill={COLORS.goldDeep} />
+      <Ellipse cx="12" cy="19" rx="10" ry="12.5" fill={COLORS.vermilion} fillOpacity={0.85} />
+      <Ellipse
+        cx="12"
+        cy="19"
+        rx="10"
+        ry="12.5"
+        stroke={COLORS.goldDeep}
+        strokeWidth={0.6}
+        fillOpacity={0}
+      />
+      <Rect x="8.5" y="31.5" width="7" height="2.5" rx="0.6" fill={COLORS.goldDeep} />
+      <Path d="M12 34 V37.5" stroke={COLORS.goldDeep} strokeWidth={1} />
+    </Svg>
   );
 }
 

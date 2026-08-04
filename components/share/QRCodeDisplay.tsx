@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { generateQRDataUrl } from "@/lib/share/qr";
+import { generateStyledQRDataUrl } from "@/lib/share/qrStyled";
 
 export default function QRCodeDisplay({
   value,
@@ -14,12 +14,13 @@ export default function QRCodeDisplay({
 
   useEffect(() => {
     let cancelled = false;
-    generateQRDataUrl(value).then((url) => {
+    generateStyledQRDataUrl(value, size * 2).then((url) => {
       if (!cancelled) setDataUrl(url);
     });
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   if (!dataUrl) {

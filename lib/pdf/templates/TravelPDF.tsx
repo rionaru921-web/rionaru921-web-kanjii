@@ -1,6 +1,13 @@
 import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { pdfStyles, COLORS } from "../styles";
-import { MizuhikiRule, yen, hasPaymentInfo, PaymentInfoCard, type PDFPaymentInfo } from "../components";
+import {
+  MizuhikiRule,
+  ChochinPdfIcon,
+  yen,
+  hasPaymentInfo,
+  PaymentInfoCard,
+  type PDFPaymentInfo,
+} from "../components";
 
 export interface TravelPDFProps {
   title: string;
@@ -34,7 +41,10 @@ export function TravelPDF({
       {/* Page 1: overview */}
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>幹事ラボ</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <ChochinPdfIcon size={11} />
+            <Text style={[pdfStyles.brand, { marginLeft: 5 }]}>幹事ラボ</Text>
+          </View>
           <Text style={pdfStyles.headerDate}>{dateRange}</Text>
         </View>
 
@@ -86,7 +96,10 @@ export function TravelPDF({
       {/* Page 2+: itinerary (auto-flows to further pages if it overflows) */}
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>幹事ラボ</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <ChochinPdfIcon size={11} />
+            <Text style={[pdfStyles.brand, { marginLeft: 5 }]}>幹事ラボ</Text>
+          </View>
           <Text style={pdfStyles.headerDate}>{title}</Text>
         </View>
         <Text style={pdfStyles.sectionLabel}>【日程表】</Text>
@@ -117,7 +130,10 @@ export function TravelPDF({
       {/* Final page: cost breakdown detail */}
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>幹事ラボ</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <ChochinPdfIcon size={11} />
+            <Text style={[pdfStyles.brand, { marginLeft: 5 }]}>幹事ラボ</Text>
+          </View>
           <Text style={pdfStyles.headerDate}>{title}</Text>
         </View>
         <Text style={pdfStyles.sectionLabel}>【費用分担詳細】</Text>

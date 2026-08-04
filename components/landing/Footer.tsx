@@ -26,6 +26,7 @@ const FOOTER_COLUMNS = [
   {
     heading: "会社情報",
     links: [
+      { label: "幹事ラボについて", href: "/about" },
       { label: "利用規約", href: "/legal/terms" },
       { label: "ベータ利用規約", href: "/legal/beta" },
       { label: "プライバシーポリシー", href: "/legal/privacy" },
@@ -45,6 +46,14 @@ function GithubIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+function XIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M18.24 2h3.29l-7.19 8.21L23 22h-6.62l-5.18-6.77L5.24 22H1.94l7.7-8.8L1 2h6.8l4.69 6.19L18.24 2Zm-1.16 18h1.82L7.02 3.9H5.06l12.02 16.1Z" />
+    </svg>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="border-t border-gold/10 bg-surface-secondary px-4 py-16">
@@ -56,6 +65,15 @@ export default function Footer() {
               あらゆる集まりを、あなたが幹事する。
             </p>
             <div className="flex items-center gap-4 mt-6">
+              <a
+                href="https://x.com/kanji_lab_dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X (旧Twitter)"
+                className="text-ink-muted hover:text-gold transition-colors"
+              >
+                <XIcon size={18} />
+              </a>
               <a
                 href="https://github.com/rionaru921-web"
                 target="_blank"

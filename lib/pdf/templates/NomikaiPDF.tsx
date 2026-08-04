@@ -1,6 +1,13 @@
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer";
 import { pdfStyles, COLORS } from "../styles";
-import { MizuhikiRule, yen, hasPaymentInfo, PaymentInfoCard, type PDFPaymentInfo } from "../components";
+import {
+  MizuhikiRule,
+  ChochinPdfIcon,
+  yen,
+  hasPaymentInfo,
+  PaymentInfoCard,
+  type PDFPaymentInfo,
+} from "../components";
 
 export interface NomikaiPDFProps {
   title: string;
@@ -36,7 +43,10 @@ export function NomikaiPDF({
     <Document title={`KanjiLabo_${title}`}>
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>幹事ラボ</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <ChochinPdfIcon size={11} />
+            <Text style={[pdfStyles.brand, { marginLeft: 5 }]}>幹事ラボ</Text>
+          </View>
           <Text style={pdfStyles.headerDate}>{date}</Text>
         </View>
 

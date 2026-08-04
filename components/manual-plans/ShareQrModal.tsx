@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Download, Loader2 } from "lucide-react";
-import { generateQRDataUrl } from "@/lib/share/qr";
+import { generateStyledQRDataUrl } from "@/lib/share/qrStyled";
 import { useScrollLock } from "@/lib/hooks/useScrollLock";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
@@ -26,7 +26,7 @@ export default function ShareQrModal({
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    generateQRDataUrl(url).then((d) => {
+    generateStyledQRDataUrl(url, 400).then((d) => {
       if (!cancelled) setDataUrl(d);
     });
     return () => {

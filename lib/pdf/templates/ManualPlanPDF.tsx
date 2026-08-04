@@ -1,6 +1,6 @@
 import { Document, Page, View, Text, Image, Link } from "@react-pdf/renderer";
 import { pdfStyles, COLORS } from "../styles";
-import { MizuhikiRule, yen } from "../components";
+import { MizuhikiRule, ChochinPdfIcon, yen } from "../components";
 import {
   PAYMENT_METHOD_LABELS,
   ATTENDANCE_LABELS,
@@ -60,7 +60,10 @@ export function ManualPlanPDF({
     <Document title={`KanjiLabo_${title}`}>
       <Page size="A4" style={pdfStyles.page}>
         <View style={pdfStyles.headerRow}>
-          <Text style={pdfStyles.brand}>幹事ラボ</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <ChochinPdfIcon size={11} />
+            <Text style={[pdfStyles.brand, { marginLeft: 5 }]}>幹事ラボ</Text>
+          </View>
           <Text style={pdfStyles.headerDate}>{timelineLabel}</Text>
         </View>
 
