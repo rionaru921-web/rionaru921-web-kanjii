@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Check, Users, Sparkles } from "lucide-react";
+import { Copy, Check, Users, Sparkles, QrCode, Download, CalendarClock, Coins } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
+import ShareQrModal from "@/components/manual-plans/ShareQrModal";
+import DateRecommendation from "./aggregations/DateRecommendation";
+import BudgetHistogram from "./aggregations/BudgetHistogram";
 import type { AttendanceKind, OptionalQuestion, Survey } from "@/lib/surveys/types";
-import type { TallyItem } from "@/lib/surveys/aggregate";
+import type { BudgetSliderStats, DateRangeExtendedDateScore, TallyItem } from "@/lib/surveys/aggregate";
 
 interface OptionalTally {
   question: OptionalQuestion;
@@ -35,6 +38,9 @@ export default function SurveyResultsView({
   attendCounts,
   attendanceDetailCounts,
   optionalTallies,
+  dateRangeExtendedResults,
+  budgetSliderResults,
+  csv,
   maxCount,
   totalResponses,
 }: {
@@ -46,16 +52,30 @@ export default function SurveyResultsView({
   attendCounts: { yes: number; no: number; maybe: number };
   attendanceDetailCounts: Record<AttendanceKind, number>;
   optionalTallies: OptionalTally[];
+  dateRangeExtendedResults: { question: OptionalQuestion; scores: DateRangeExtendedDateScore[] }[];
+  budgetSliderResults: { question: OptionalQuestion; stats: BudgetSliderStats }[];
+  csv: string;
   maxCount: number;
   totalResponses: number;
 }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
 
   async function copyLink() {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  function downloadCsv() {
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${survey.title}_回答一覧.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function createPlanFromSurvey() {
@@ -69,15 +89,36 @@ export default function SurveyResultsView({
           <Users size={16} className="text-gold" />
           回答数: {totalResponses}名
         </div>
-        <button
-          type="button"
-          onClick={copyLink}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-gold/20 py-2.5 text-sm font-medium text-gold hover:bg-gold/5 transition-colors"
-        >
-          {copied ? <Check size={16} /> : <Copy size={16} />}
-          {copied ? "コピーしました" : "共有URLをコピー"}
-        </button>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={copyLink}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors"
+          >
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+            {copied ? "コピー済み" : "URLコピー"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setQrOpen(true)}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors"
+          >
+            <QrCode size={15} />
+            QR表示
+          </button>
+          <button
+            type="button"
+            onClick={downloadCsv}
+            disabled={totalResponses === 0}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors disabled:opacity-40"
+          >
+            <Download size={15} />
+            CSV
+          </button>
+        </div>
       </div>
+
+      <ShareQrModal open={qrOpen} onClose={() => setQrOpen(false)} url={shareUrl} title={survey.title} />
 
       {totalResponses === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-16 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">
@@ -162,9 +203,34 @@ export default function SurveyResultsView({
             </div>
           ))}
 
-          <GoldButton onClick={createPlanFromSurvey} icon={Sparkles} size="lg" fullWidth>
-            このアンケート結果でプランを作成する
-          </GoldButton>
+          {dateRangeExtendedResults.map(({ question, scores }) => (
+            <div key={question.id} className="rounded-3xl bg-surface-tertiary shadow-warm p-6">
+              <h3 className="flex items-center gap-1.5 font-serif font-semibold text-ink mb-4">
+                <CalendarClock size={16} className="text-gold" />
+                {question.label}(おすすめ日程)
+              </h3>
+              <DateRecommendation scores={scores} />
+            </div>
+          ))}
+
+          {budgetSliderResults.map(({ question, stats }) => (
+            <div key={question.id} className="rounded-3xl bg-surface-tertiary shadow-warm p-6">
+              <h3 className="flex items-center gap-1.5 font-serif font-semibold text-ink mb-4">
+                <Coins size={16} className="text-gold" />
+                {question.label}
+              </h3>
+              <BudgetHistogram stats={stats} />
+            </div>
+          ))}
+
+          <div className="rounded-3xl border border-gold/20 bg-gold/5 p-6 text-center">
+            <p className="text-sm text-ink-secondary mb-4">
+              回答が集まった日程・予算をもとに、そのままプランを作成できます
+            </p>
+            <GoldButton onClick={createPlanFromSurvey} icon={Sparkles} size="lg" fullWidth>
+              このアンケート結果でプランを作成する
+            </GoldButton>
+          </div>
         </>
       )}
     </div>

@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle } from "lucide-react";
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { OPTIONAL_QUESTION_PRESETS, getSuggestedOptionalQuestions } from "@/lib/surveys/presets";
-import type { OptionalQuestion, OptionalQuestionType, SurveyEventType } from "@/lib/surveys/types";
+import type { OptionalQuestion, SurveyEventType } from "@/lib/surveys/types";
+import DateRangeExtendedConfig from "./question-config/DateRangeExtendedConfig";
+import BudgetSliderConfig from "./question-config/BudgetSliderConfig";
+import SortableOptionalQuestion from "./SortableOptionalQuestion";
 
-const CUSTOM_TYPE_LABELS: Record<Exclude<OptionalQuestionType, "multi_select">, string> = {
+// "多い/multi_select" と同じ理由で、専用の設定UIが要る新タイプ
+// ('date_range_extended' / 'budget_slider') もこのシンプルなボタン型
+// ビルダーの対象外(それぞれ Wave 25 で追加する専用セクションから作る)。
+const CUSTOM_TYPE_LABELS: Record<"text" | "select" | "yes_no", string> = {
   text: "自由記述",
   select: "選択式",
   yes_no: "はい/いいえ",
@@ -23,9 +31,20 @@ export default function OptionalQuestionsSection({
   disabled?: boolean;
 }) {
   const [customLabel, setCustomLabel] = useState("");
-  const [customType, setCustomType] = useState<Exclude<OptionalQuestionType, "multi_select">>("text");
+  const [customType, setCustomType] = useState<"text" | "select" | "yes_no">("text");
   const [customOptions, setCustomOptions] = useState("");
   const [showAllPresets, setShowAllPresets] = useState(false);
+
+  const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = value.findIndex((q) => q.id === active.id);
+    const newIndex = value.findIndex((q) => q.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    onChange(arrayMove(value, oldIndex, newIndex));
+  }
 
   const suggested = getSuggestedOptionalQuestions(eventType ?? "other");
   const suggestedIds = new Set(suggested.map((q) => q.id));
@@ -54,8 +73,6 @@ export default function OptionalQuestionsSection({
   function removeQuestion(id: string) {
     onChange(value.filter((q) => q.id !== id));
   }
-
-  const customQuestions = value.filter((q) => !OPTIONAL_QUESTION_PRESETS.some((p) => p.id === q.id));
 
   return (
     <div className="flex flex-col gap-4">
@@ -115,25 +132,23 @@ export default function OptionalQuestionsSection({
         </div>
       )}
 
-      {customQuestions.length > 0 && (
+      {value.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-ink mb-2">追加したカスタム質問</p>
-          <div className="flex flex-col gap-1.5">
-            {customQuestions.map((q) => (
-              <div key={q.id} className="flex items-center justify-between gap-2 rounded-xl border border-gold/10 px-4 py-3 text-sm">
-                <span className="text-ink">{q.label}</span>
-                <button
-                  type="button"
-                  onClick={() => removeQuestion(q.id)}
-                  disabled={disabled}
-                  className="shrink-0 text-ink-muted hover:text-vermilion-text"
-                  aria-label="この質問を削除"
-                >
-                  <X size={16} />
-                </button>
+          <p className="text-sm font-medium text-ink mb-2">追加された質問(ドラッグで順番を変更できます)</p>
+          <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={value.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-1.5">
+                {value.map((q) => (
+                  <SortableOptionalQuestion
+                    key={q.id}
+                    question={q}
+                    onRemove={() => removeQuestion(q.id)}
+                    disabled={disabled}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
@@ -185,6 +200,9 @@ export default function OptionalQuestionsSection({
           </button>
         </div>
       </div>
+
+      <DateRangeExtendedConfig onAdd={(question) => onChange([...value, question])} disabled={disabled} />
+      <BudgetSliderConfig onAdd={(question) => onChange([...value, question])} disabled={disabled} />
 
       {value.length >= 3 && (
         <div className="flex items-start gap-2 text-xs text-ink-muted bg-gold/5 rounded-xl p-3">

@@ -1,11 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Loader2, Send } from "lucide-react";
 import { formatDateOptionLabel } from "@/lib/surveys/format";
-import type { AttendanceKind, OptionalAnswers, PublicSurvey, WillAttend } from "@/lib/surveys/types";
+import type { AttendanceKind, OptionalAnswers, OptionalQuestion, PublicSurvey, WillAttend } from "@/lib/surveys/types";
+import DateRangeExtendedAnswer from "./response-types/DateRangeExtendedAnswer";
+import BudgetSliderAnswer from "./response-types/BudgetSliderAnswer";
+
+// 進捗バー用: 質問タイプごとに「回答済みとみなせるか」を判定する。
+function isOptionalQuestionAnswered(question: OptionalQuestion, value: OptionalAnswers[string]): boolean {
+  if (value == null) return false;
+  switch (question.type) {
+    case "text":
+      return typeof value === "string" && value.trim().length > 0;
+    case "multi_select":
+      return Array.isArray(value) && value.length > 0;
+    case "budget_slider":
+      return typeof value === "number";
+    case "date_range_extended":
+      return typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 0;
+    default: // select / yes_no
+      return typeof value === "string" && value.length > 0;
+  }
+}
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50";
@@ -48,7 +67,7 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
     setSelectedDates((prev) => (prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]));
   }
 
-  function setOptionalAnswer(id: string, value: string | string[] | undefined) {
+  function setOptionalAnswer(id: string, value: OptionalAnswers[string]) {
     setOptionalAnswers((prev) => ({ ...prev, [id]: value }));
   }
 
@@ -57,6 +76,29 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
     const arr = Array.isArray(current) ? current : [];
     setOptionalAnswer(id, arr.includes(option) ? arr.filter((v) => v !== option) : [...arr, option]);
   }
+
+  // 進捗バー用の設問数カウント。名前・メール・コメントは「設問」に含めない
+  // (幹事が実際に設定した質問項目のみを分母にする)。
+  const totalQuestions =
+    (survey.ask_dates && survey.date_options.length > 0 ? 1 : 0) +
+    (survey.ask_budget && survey.budget_options.length > 0 ? 1 : 0) +
+    (survey.ask_genre && survey.genre_options.length > 0 ? 1 : 0) +
+    (survey.ask_attend ? 1 : 0) +
+    survey.optional_questions.length;
+
+  const answeredQuestions = useMemo(() => {
+    let count = 0;
+    if (survey.ask_dates && survey.date_options.length > 0 && selectedDates.length > 0) count++;
+    if (survey.ask_budget && survey.budget_options.length > 0 && selectedBudget !== null) count++;
+    if (survey.ask_genre && survey.genre_options.length > 0 && selectedGenre !== null) count++;
+    if (survey.ask_attend && attendChoice !== null) count++;
+    for (const q of survey.optional_questions) {
+      if (isOptionalQuestionAnswered(q, optionalAnswers[q.id])) count++;
+    }
+    return count;
+  }, [survey, selectedDates, selectedBudget, selectedGenre, attendChoice, optionalAnswers]);
+
+  const progressPercent = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 100;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -113,6 +155,24 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {totalQuestions > 0 && (
+        <div>
+          <div className="flex justify-between text-xs text-ink-secondary mb-1.5">
+            <span>
+              {answeredQuestions}/{totalQuestions}問 回答済み
+            </span>
+            <span>{progressPercent}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-gold/10 overflow-hidden">
+            <motion.div
+              className="h-full bg-gold-gradient rounded-full"
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: reduceMotion ? 0 : 0.3 }}
+            />
+          </div>
+        </div>
+      )}
+
       <div>
         <label className={labelClass}>あなたのお名前 *</label>
         <input
@@ -339,6 +399,35 @@ export default function SurveyResponseForm({ survey }: { survey: PublicSurvey })
                       </button>
                     );
                   })}
+                </div>
+              )}
+
+              {q.type === "date_range_extended" && (
+                <div className="mt-1.5">
+                  <DateRangeExtendedAnswer
+                    dateCandidates={q.dateCandidates ?? []}
+                    useTimeSlots={!!q.useTimeSlots}
+                    value={
+                      optionalAnswers[q.id] && typeof optionalAnswers[q.id] === "object" && !Array.isArray(optionalAnswers[q.id])
+                        ? (optionalAnswers[q.id] as Exclude<OptionalAnswers[string], string | string[] | number | undefined>)
+                        : {}
+                    }
+                    onChange={(v) => setOptionalAnswer(q.id, v)}
+                    disabled={submitting}
+                  />
+                </div>
+              )}
+
+              {q.type === "budget_slider" && (
+                <div className="mt-1.5">
+                  <BudgetSliderAnswer
+                    min={q.sliderMin ?? 1000}
+                    max={q.sliderMax ?? 20000}
+                    step={q.sliderStep ?? 500}
+                    value={typeof optionalAnswers[q.id] === "number" ? (optionalAnswers[q.id] as number) : undefined}
+                    onChange={(v) => setOptionalAnswer(q.id, v)}
+                    disabled={submitting}
+                  />
                 </div>
               )}
             </div>

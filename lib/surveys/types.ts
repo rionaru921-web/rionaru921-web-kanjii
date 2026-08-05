@@ -17,7 +17,18 @@ export interface DateOption {
 
 // Wave 11-A2: organizer-defined extra questions beyond the 4 fixed ones.
 // Stored on surveys.optional_questions (jsonb array).
-export type OptionalQuestionType = "text" | "select" | "multi_select" | "yes_no";
+// Wave 25: added 'date_range_extended' (4-level ◎◯△× per date, optionally
+// split into lunch/dinner) and 'budget_slider' (numeric range input) —
+// deliberately additive on top of the fixed ask_dates/ask_budget flow so
+// existing Wave 21 surveys keep working unchanged; organizers opt into the
+// richer versions as extra questions instead.
+export type OptionalQuestionType =
+  | "text"
+  | "select"
+  | "multi_select"
+  | "yes_no"
+  | "date_range_extended"
+  | "budget_slider";
 
 export interface OptionalQuestion {
   id: string; // stable key, used to match against SurveyResponse.optional_answers
@@ -25,12 +36,47 @@ export interface OptionalQuestion {
   description?: string;
   type: OptionalQuestionType;
   options?: string[]; // used by 'select' / 'multi_select'
+
+  // 'date_range_extended' only
+  dateCandidates?: string[]; // 'YYYY-MM-DD'
+  useTimeSlots?: boolean; // true: ask lunch/dinner separately per date
+
+  // 'budget_slider' only
+  sliderMin?: number;
+  sliderMax?: number;
+  sliderStep?: number;
 }
+
+export type DateChoiceLevel = "certain" | "probably" | "maybe" | "no"; // ◎ ◯ △ ×
+
+export const DATE_CHOICE_LEVELS: {
+  value: DateChoiceLevel;
+  label: string;
+  symbol: string;
+  colorClass: string;
+}[] = [
+  { value: "certain", label: "絶対いける", symbol: "◎", colorClass: "text-sage" },
+  { value: "probably", label: "いける", symbol: "◯", colorClass: "text-gold" },
+  { value: "maybe", label: "微妙", symbol: "△", colorClass: "text-ink-secondary" },
+  { value: "no", label: "NG", symbol: "×", colorClass: "text-vermilion-text" },
+];
+
+// One date's answer for a 'date_range_extended' question: a single level
+// when the question doesn't split by time slot, or per-slot levels when it
+// does (either slot may be left unanswered).
+export type DateRangeExtendedValue = DateChoiceLevel | { lunch?: DateChoiceLevel; dinner?: DateChoiceLevel };
+
+// Keyed by 'YYYY-MM-DD' (matching OptionalQuestion.dateCandidates entries).
+export type DateRangeExtendedAnswer = Record<string, DateRangeExtendedValue>;
 
 // Keyed by OptionalQuestion.id. Value shape depends on the question's type:
 // 'text' -> string, 'yes_no' -> 'yes'|'no', 'select' -> string,
-// 'multi_select' -> string[].
-export type OptionalAnswers = Record<string, string | string[] | undefined>;
+// 'multi_select' -> string[], 'budget_slider' -> number,
+// 'date_range_extended' -> DateRangeExtendedAnswer.
+export type OptionalAnswers = Record<
+  string,
+  string | string[] | number | DateRangeExtendedAnswer | undefined
+>;
 
 // Wave 11-A2: richer attendance info layered on top of the existing
 // will_attend 3-value column — deliberately additive so existing

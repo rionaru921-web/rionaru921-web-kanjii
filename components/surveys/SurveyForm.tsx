@@ -8,6 +8,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import OptionListInput from "./OptionListInput";
 import DateOptionInput from "./DateOptionInput";
 import OptionalQuestionsSection from "./OptionalQuestionsSection";
+import SurveyPreview from "./SurveyPreview";
 import { EVENT_PRESETS, PRESET_LABELS } from "@/lib/surveys/presets";
 import type { DateOption, OptionalQuestion, SurveyEventType } from "@/lib/surveys/types";
 
@@ -106,7 +107,8 @@ export default function SurveyForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-16">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-8 items-start">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-16">
       <div>
         <ChapterHeading number="第一章" title="アンケートの基本" subtitle="何のためのアンケートですか？" />
         <div className="flex flex-col gap-4">
@@ -249,5 +251,24 @@ export default function SurveyForm() {
         />
       )}
     </form>
+
+      <div className="hidden lg:block">
+        <div className="sticky top-24">
+          <p className="text-xs font-semibold text-ink-secondary mb-3">◇ プレビュー</p>
+          <SurveyPreview
+            title={title}
+            description={description}
+            askDates={askDates}
+            askBudget={askBudget}
+            askGenre={askGenre}
+            askAttend={askAttend}
+            dateOptions={dateOptions}
+            budgetOptions={budgetOptions}
+            genreOptions={genreOptions}
+            optionalQuestions={optionalQuestions}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

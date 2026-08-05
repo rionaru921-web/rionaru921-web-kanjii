@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { aggregateAttendanceDetail, aggregateOptionalQuestion, aggregateResponses } from "@/lib/surveys/aggregate";
+import {
+  aggregateAttendanceDetail,
+  aggregateBudgetSlider,
+  aggregateDateRangeExtended,
+  aggregateOptionalQuestion,
+  aggregateResponses,
+} from "@/lib/surveys/aggregate";
+import { buildSurveyResponsesCsv } from "@/lib/surveys/csv-export";
 import SurveyResultsView from "@/components/surveys/SurveyResultsView";
 import type { Survey, SurveyResponse } from "@/lib/surveys/types";
 
@@ -48,10 +55,28 @@ export default async function SurveyResultsPage({ params }: { params: { id: stri
     typedSurvey.date_options
   );
   const attendanceDetailCounts = aggregateAttendanceDetail(typedResponses);
-  const optionalTallies = typedSurvey.optional_questions.map((question) => ({
+
+  // date_range_extended / budget_slider は専用の集計・表示コンポーネントを
+  // 持つため、汎用の aggregateOptionalQuestion(text/select/multi_select/
+  // yes_no 用)の対象からは除く — 混ぜると値の形が合わず「回答なし」と
+  // 誤表示されてしまう。
+  const genericOptionalQuestions = typedSurvey.optional_questions.filter(
+    (q) => q.type !== "date_range_extended" && q.type !== "budget_slider"
+  );
+  const optionalTallies = genericOptionalQuestions.map((question) => ({
     question,
     ...aggregateOptionalQuestion(question, typedResponses),
   }));
+
+  const dateRangeExtendedResults = typedSurvey.optional_questions
+    .filter((q) => q.type === "date_range_extended")
+    .map((question) => ({ question, scores: aggregateDateRangeExtended(question, typedResponses) }));
+
+  const budgetSliderResults = typedSurvey.optional_questions
+    .filter((q) => q.type === "budget_slider")
+    .map((question) => ({ question, stats: aggregateBudgetSlider(question, typedResponses) }));
+
+  const csv = buildSurveyResponsesCsv(typedSurvey, typedResponses);
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
   const shareUrl = `${baseUrl}/s/${typedSurvey.slug}`;
@@ -70,6 +95,9 @@ export default async function SurveyResultsPage({ params }: { params: { id: stri
         attendCounts={attendCounts}
         attendanceDetailCounts={attendanceDetailCounts}
         optionalTallies={optionalTallies}
+        dateRangeExtendedResults={dateRangeExtendedResults}
+        budgetSliderResults={budgetSliderResults}
+        csv={csv}
         maxCount={maxCount}
         totalResponses={totalResponses}
       />

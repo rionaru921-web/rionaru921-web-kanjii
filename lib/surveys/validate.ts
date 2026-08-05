@@ -3,7 +3,14 @@ import type { AttendanceDetail, OptionalAnswers, OptionalQuestion, OptionalQuest
 const MAX_LABEL_LENGTH = 100;
 const MAX_OPTIONAL_QUESTIONS = 20;
 const MAX_OPTIONAL_ANSWERS_JSON_LENGTH = 10_000;
-const QUESTION_TYPES: OptionalQuestionType[] = ["text", "select", "multi_select", "yes_no"];
+const QUESTION_TYPES: OptionalQuestionType[] = [
+  "text",
+  "select",
+  "multi_select",
+  "yes_no",
+  "date_range_extended",
+  "budget_slider",
+];
 const ATTENDANCE_KINDS = ["full", "late", "leave_early", "undecided"];
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
@@ -23,6 +30,21 @@ export function validateOptionalQuestions(input: unknown): Result<OptionalQuesti
     if (!QUESTION_TYPES.includes(q.type)) return { ok: false, error: "追加質問の種類が不正です。" };
     if ((q.type === "select" || q.type === "multi_select") && !Array.isArray(q.options)) {
       return { ok: false, error: "選択式の質問には選択肢が必要です。" };
+    }
+    if (q.type === "date_range_extended" && (!Array.isArray(q.dateCandidates) || q.dateCandidates.length === 0)) {
+      return { ok: false, error: "日程調整の質問には候補日が必要です。" };
+    }
+    if (q.type === "budget_slider") {
+      const { sliderMin, sliderMax, sliderStep } = q;
+      if (
+        typeof sliderMin !== "number" ||
+        typeof sliderMax !== "number" ||
+        typeof sliderStep !== "number" ||
+        sliderStep <= 0 ||
+        sliderMin >= sliderMax
+      ) {
+        return { ok: false, error: "予算スライダーの設定が不正です。" };
+      }
     }
   }
   return { ok: true, value: input as OptionalQuestion[] };
