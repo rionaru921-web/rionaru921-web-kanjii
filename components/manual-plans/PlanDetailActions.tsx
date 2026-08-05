@@ -15,9 +15,11 @@ import {
   MessageCircle,
   CalendarPlus,
   Lock,
+  Mail,
 } from "lucide-react";
 import type { ManualPlan, ManualPlanMember } from "@/lib/manual-plans/types";
 import { buildLineShareText } from "@/lib/manual-plans/format";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 // The qrcode dependency pulled in by ShareQrModal is only needed once the
 // user actually opens the QR modal — code-split it out of the main detail
@@ -42,6 +44,9 @@ export default function PlanDetailActions({
   const [error, setError] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [icsLoading, setIcsLoading] = useState(false);
+  const [notifyConfirmOpen, setNotifyConfirmOpen] = useState(false);
+  const [notifyLoading, setNotifyLoading] = useState(false);
+  const [notifyResult, setNotifyResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const shareUrl =
     typeof window !== "undefined"
@@ -94,6 +99,22 @@ export default function PlanDetailActions({
     const text = buildLineShareText(plan, members, shareUrl);
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
     window.open(lineUrl, "_blank");
+  }
+
+  async function handleNotifyConfirmed() {
+    setNotifyConfirmOpen(false);
+    setNotifyLoading(true);
+    setNotifyResult(null);
+    try {
+      const res = await fetch(`/api/manual-plans/${plan.id}/notify-confirmed`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "送信に失敗しました。");
+      setNotifyResult({ ok: true, message: `${data.sent}名に確定メールを送信しました` });
+    } catch (err) {
+      setNotifyResult({ ok: false, message: err instanceof Error ? err.message : "送信に失敗しました。" });
+    } finally {
+      setNotifyLoading(false);
+    }
   }
 
   return (
@@ -165,6 +186,23 @@ export default function PlanDetailActions({
         </p>
       )}
 
+      {plan.event_date && (
+        <button
+          type="button"
+          onClick={() => setNotifyConfirmOpen(true)}
+          disabled={notifyLoading}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 text-ink-secondary text-xs font-semibold py-2.5 hover:border-gold/40 hover:text-gold transition-colors disabled:opacity-50"
+        >
+          {notifyLoading ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}
+          {notifyLoading ? "送信中..." : "確定メールを参加者に送る"}
+        </button>
+      )}
+      {notifyResult && (
+        <p className={`text-[11px] text-center ${notifyResult.ok ? "text-ink-secondary" : "text-vermilion-text"}`}>
+          {notifyResult.message}
+        </p>
+      )}
+
       {!plan.is_favorite && <SaveFavoriteButton planId={plan.id} defaultName={plan.title} />}
 
       <button
@@ -183,6 +221,17 @@ export default function PlanDetailActions({
       {error && <p className="text-[11px] text-vermilion-text text-center">{error}</p>}
 
       {qrOpen && <ShareQrModal open={qrOpen} onClose={() => setQrOpen(false)} url={shareUrl} title={plan.title} />}
+
+      {notifyConfirmOpen && (
+        <ConfirmDialog
+          title="確定メールを送信しますか？"
+          message="メールアドレスが登録されている参加者に、日程・会場が確定した旨のお知らせメールを送信します。"
+          confirmLabel="送信する"
+          cancelLabel="キャンセル"
+          onConfirm={handleNotifyConfirmed}
+          onCancel={() => setNotifyConfirmOpen(false)}
+        />
+      )}
     </div>
   );
 }

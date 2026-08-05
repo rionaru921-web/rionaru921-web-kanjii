@@ -107,6 +107,7 @@ export interface Survey {
   deadline: string | null;
   status: SurveyStatus;
   slug: string;
+  results_public: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles, BarChart3 } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import ChochinIcon from "@/components/shared/ChochinIcon";
 import ShareButtons from "@/components/surveys/ShareButtons";
@@ -15,7 +15,7 @@ export default async function SurveyThanksPage({ params }: { params: { slug: str
   const supabase = createAdminClient();
   const { data: survey } = await supabase
     .from("surveys")
-    .select("title")
+    .select("title, results_public")
     .eq("slug", params.slug)
     .maybeSingle();
 
@@ -33,6 +33,16 @@ export default async function SurveyThanksPage({ params }: { params: { slug: str
             <p className="font-serif font-bold text-lg text-ink">回答ありがとうございました</p>
             {survey?.title && <p className="text-sm text-ink-secondary mt-1">「{survey.title}」への回答を送信しました</p>}
           </div>
+
+          {survey?.title && survey.results_public && (
+            <Link
+              href={`/s/${params.slug}/results`}
+              className="flex items-center justify-center gap-2 w-full rounded-full border border-gold/30 text-gold font-serif font-semibold py-3 text-sm hover:bg-gold/5 transition-colors"
+            >
+              <BarChart3 size={16} />
+              みんなの回答を見る
+            </Link>
+          )}
 
           {survey?.title && (
             <div className="w-full border-t border-gold/10 pt-4">

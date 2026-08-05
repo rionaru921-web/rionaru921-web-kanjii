@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Check, Users, Sparkles, QrCode, Download, CalendarClock, Coins } from "lucide-react";
+import Link from "next/link";
+import { Copy, Check, Users, Sparkles, QrCode, Download, CalendarClock, Coins, ArrowRight } from "lucide-react";
 import GoldButton from "@/components/shared/GoldButton";
 import ShareQrModal from "@/components/manual-plans/ShareQrModal";
+import ShareButtons from "./ShareButtons";
 import DateRecommendation from "./aggregations/DateRecommendation";
 import BudgetHistogram from "./aggregations/BudgetHistogram";
-import type { AttendanceKind, OptionalQuestion, Survey } from "@/lib/surveys/types";
+import type { AttendanceKind, OptionalQuestion, PublicSurvey } from "@/lib/surveys/types";
 import type { BudgetSliderStats, DateRangeExtendedDateScore, TallyItem } from "@/lib/surveys/aggregate";
 
 interface OptionalTally {
@@ -43,8 +45,9 @@ export default function SurveyResultsView({
   csv,
   maxCount,
   totalResponses,
+  mode = "owner",
 }: {
-  survey: Survey;
+  survey: PublicSurvey;
   shareUrl: string;
   dateTally: TallyItem[];
   budgetTally: TallyItem[];
@@ -54,9 +57,12 @@ export default function SurveyResultsView({
   optionalTallies: OptionalTally[];
   dateRangeExtendedResults: { question: OptionalQuestion; scores: DateRangeExtendedDateScore[] }[];
   budgetSliderResults: { question: OptionalQuestion; stats: BudgetSliderStats }[];
-  csv: string;
+  csv?: string;
   maxCount: number;
   totalResponses: number;
+  // "owner": 幹事のダッシュボード(URL/QR/CSV/プラン作成)。
+  // "public": 回答者にも見せる /s/[slug]/results(共有ボタンと回答導線のみ)。
+  mode?: "owner" | "public";
 }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -69,6 +75,7 @@ export default function SurveyResultsView({
   }
 
   function downloadCsv() {
+    if (!csv) return;
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -89,41 +96,52 @@ export default function SurveyResultsView({
           <Users size={16} className="text-gold" />
           回答数: {totalResponses}名
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            onClick={copyLink}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors"
-          >
-            {copied ? <Check size={15} /> : <Copy size={15} />}
-            {copied ? "コピー済み" : "URLコピー"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setQrOpen(true)}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors"
-          >
-            <QrCode size={15} />
-            QR表示
-          </button>
-          <button
-            type="button"
-            onClick={downloadCsv}
-            disabled={totalResponses === 0}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors disabled:opacity-40"
-          >
-            <Download size={15} />
-            CSV
-          </button>
-        </div>
+
+        {mode === "owner" ? (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={copyLink}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors"
+            >
+              {copied ? <Check size={15} /> : <Copy size={15} />}
+              {copied ? "コピー済み" : "URLコピー"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors"
+            >
+              <QrCode size={15} />
+              QR表示
+            </button>
+            <button
+              type="button"
+              onClick={downloadCsv}
+              disabled={totalResponses === 0}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/20 py-2.5 text-xs font-medium text-gold hover:bg-gold/5 transition-colors disabled:opacity-40"
+            >
+              <Download size={15} />
+              CSV
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3">
+            <ShareButtons url={shareUrl} title={survey.title} />
+          </div>
+        )}
       </div>
 
-      <ShareQrModal open={qrOpen} onClose={() => setQrOpen(false)} url={shareUrl} title={survey.title} />
+      {mode === "owner" && (
+        <ShareQrModal open={qrOpen} onClose={() => setQrOpen(false)} url={shareUrl} title={survey.title} />
+      )}
 
       {totalResponses === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-16 gap-3 rounded-3xl bg-surface-tertiary shadow-warm">
           <p className="text-ink-secondary">まだ回答がありません</p>
-          <p className="text-xs text-ink-muted">共有URLを参加者に送ってみましょう</p>
+          <p className="text-xs text-ink-muted">
+            {mode === "owner" ? "共有URLを参加者に送ってみましょう" : "最初の回答者になってみませんか?"}
+          </p>
         </div>
       ) : (
         <>
@@ -223,14 +241,27 @@ export default function SurveyResultsView({
             </div>
           ))}
 
-          <div className="rounded-3xl border border-gold/20 bg-gold/5 p-6 text-center">
-            <p className="text-sm text-ink-secondary mb-4">
-              回答が集まった日程・予算をもとに、そのままプランを作成できます
-            </p>
-            <GoldButton onClick={createPlanFromSurvey} icon={Sparkles} size="lg" fullWidth>
-              このアンケート結果でプランを作成する
-            </GoldButton>
-          </div>
+          {mode === "owner" ? (
+            <div className="rounded-3xl border border-gold/20 bg-gold/5 p-6 text-center">
+              <p className="text-sm text-ink-secondary mb-4">
+                回答が集まった日程・予算をもとに、そのままプランを作成できます
+              </p>
+              <GoldButton onClick={createPlanFromSurvey} icon={Sparkles} size="lg" fullWidth>
+                このアンケート結果でプランを作成する
+              </GoldButton>
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-gold/20 bg-gold/5 p-6 text-center">
+              <p className="text-sm text-ink-secondary mb-4">まだ回答していませんか?あなたの一票も反映されます</p>
+              <Link
+                href={`/s/${survey.slug}`}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gold-gradient text-white font-serif font-bold py-3 px-8 text-sm hover:brightness-110 transition-all shadow-gold"
+              >
+                自分も回答する
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          )}
         </>
       )}
     </div>
