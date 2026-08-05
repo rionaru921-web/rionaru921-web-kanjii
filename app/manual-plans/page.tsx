@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { Plus, Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import GoldButton from "@/components/shared/GoldButton";
@@ -74,7 +75,9 @@ export default async function ManualPlansPage() {
         よく使うプラン
       </Link>
 
-      <ManualPlansList plans={items} />
+      <Suspense fallback={null}>
+        <ManualPlansList plans={items} />
+      </Suspense>
     </main>
   );
 }

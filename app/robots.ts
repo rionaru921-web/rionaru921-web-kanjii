@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
           "/nomikai",
           "/travel",
           "/history",
+          "/manual-plans",
           "/settings",
           "/api",
           "/share",
