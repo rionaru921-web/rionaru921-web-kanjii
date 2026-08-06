@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Noto_Serif_JP, Playfair_Display } from "next/font/google";
 import { Analytics } from "@/components/shared/Analytics";
 import FloatingBottomNav from "@/components/layout/FloatingBottomNav";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -91,6 +92,15 @@ export const metadata: Metadata = {
   // attribute was clobbering that (duplicate rel="icon" tags, one missing
   // sizes), which is what caused browser tabs to fall back to a blank/
   // generic icon instead of the lantern.
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "幹事ラボ",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
@@ -135,6 +145,7 @@ export default function RootLayout({
         */}
         {children}
         <FloatingBottomNav />
+        <InstallPrompt />
         <Analytics />
       </body>
     </html>

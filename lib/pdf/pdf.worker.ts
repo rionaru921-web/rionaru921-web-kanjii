@@ -30,7 +30,6 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const blob = await pdf(element).toBlob();
     const buffer = await blob.arrayBuffer();
     const response: WorkerResponse = { ok: true, buffer };
-    // @ts-expect-error DedicatedWorkerGlobalScope.postMessage
     self.postMessage(response, [buffer]);
   } catch (err) {
     console.error("[pdf.worker] generation failed:", err);
