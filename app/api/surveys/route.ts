@@ -65,6 +65,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: optionalQuestionsResult.error }, { status: 400 });
   }
 
+  // 「聞く」をONにした項目には候補が最低1つ必要(クライアント側の
+  // 入力し忘れガードと同じ条件をサーバー側でも強制する)。
+  if (body.askDates && (body.dateOptions?.length ?? 0) === 0) {
+    return NextResponse.json({ error: "日程候補を1つ以上追加してください。" }, { status: 400 });
+  }
+  if (body.askBudget && (body.budgetOptions?.length ?? 0) === 0) {
+    return NextResponse.json({ error: "予算候補を1つ以上追加してください。" }, { status: 400 });
+  }
+  if (body.askGenre && (body.genreOptions?.length ?? 0) === 0) {
+    return NextResponse.json({ error: "ジャンル候補を1つ以上追加してください。" }, { status: 400 });
+  }
+
   const { data: survey, error } = await supabase
     .from("surveys")
     .insert({

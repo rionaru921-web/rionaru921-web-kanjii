@@ -61,6 +61,7 @@ export default function OptionListInput({
               addValue();
             }
           }}
+          onBlur={addValue}
           disabled={disabled}
           placeholder={placeholder}
           className="flex-1 min-w-0 rounded-xl border border-gold/20 bg-surface px-3 py-2.5 text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"

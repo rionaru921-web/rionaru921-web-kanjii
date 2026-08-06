@@ -76,6 +76,18 @@ export default function SurveyForm() {
       setError("タイトルは必須です。");
       return;
     }
+    if (askDates && dateOptions.length === 0) {
+      setError("日程候補を1つ以上追加してください(入力後に「＋」を押す必要があります)。");
+      return;
+    }
+    if (askBudget && budgetOptions.length === 0) {
+      setError("予算候補を1つ以上追加してください(入力後に「＋」を押す必要があります)。");
+      return;
+    }
+    if (askGenre && genreOptions.length === 0) {
+      setError("ジャンル候補を1つ以上追加してください(入力後に「＋」を押す必要があります)。");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {

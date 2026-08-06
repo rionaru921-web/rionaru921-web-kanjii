@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, X } from "lucide-react";
 import type { DateOption } from "@/lib/surveys/types";
 import { formatDateOptionLabel } from "@/lib/surveys/format";
@@ -18,6 +18,7 @@ export default function DateOptionInput({
 }) {
   const [draftDate, setDraftDate] = useState("");
   const [draftSlot, setDraftSlot] = useState(TIME_SLOTS[1]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   function addOption() {
     if (!draftDate) return;
@@ -30,8 +31,16 @@ export default function DateOptionInput({
     onChange(values.filter((_, i) => i !== index));
   }
 
+  // 日付→時間帯ボタンの間のフォーカス移動では追加しない(選び終わる前に
+  // デフォルト枠で確定してしまうため)。ウィジェット全体からフォーカスが
+  // 外れた時だけ、入力済みの下書きを「＋」代わりに自動確定する。
+  function handleContainerBlur(e: React.FocusEvent<HTMLDivElement>) {
+    if (containerRef.current?.contains(e.relatedTarget as Node | null)) return;
+    addOption();
+  }
+
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={containerRef} onBlur={handleContainerBlur} className="flex flex-col gap-2">
       {values.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {values.map((opt, i) => (
