@@ -9,7 +9,8 @@ import ShareQrModal from "@/components/manual-plans/ShareQrModal";
 import ShareButtons from "./ShareButtons";
 import DateRecommendation from "./aggregations/DateRecommendation";
 import BudgetHistogram from "./aggregations/BudgetHistogram";
-import type { AttendanceKind, OptionalQuestion, PublicSurvey } from "@/lib/surveys/types";
+import HostResponseList from "./HostResponseList";
+import type { AttendanceKind, OptionalQuestion, PublicSurvey, SurveyResponse } from "@/lib/surveys/types";
 import type { BudgetSliderStats, DateRangeExtendedDateScore, TallyItem } from "@/lib/surveys/aggregate";
 
 interface OptionalTally {
@@ -46,6 +47,7 @@ export default function SurveyResultsView({
   maxCount,
   totalResponses,
   mode = "owner",
+  responses,
 }: {
   survey: PublicSurvey;
   shareUrl: string;
@@ -63,6 +65,11 @@ export default function SurveyResultsView({
   // "owner": 幹事のダッシュボード(URL/QR/CSV/プラン作成)。
   // "public": 回答者にも見せる /s/[slug]/results(共有ボタンと回答導線のみ)。
   mode?: "owner" | "public";
+  // Wave 28: 幹事のみに見せる個別回答一覧の元データ。owner側の呼び出し元
+  // (app/(dashboard)/surveys/[id]/page.tsx)だけがこれを渡す —
+  // 公開ページ(mode="public")のコード自体がこの prop を一切参照しないため、
+  // respondent_name が漏れる経路が構造的に存在しない。
+  responses?: SurveyResponse[];
 }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -240,6 +247,8 @@ export default function SurveyResultsView({
               <BudgetHistogram stats={stats} />
             </div>
           ))}
+
+          {mode === "owner" && responses && <HostResponseList survey={survey} responses={responses} />}
 
           {mode === "owner" ? (
             <div className="rounded-3xl border border-gold/20 bg-gold/5 p-6 text-center">

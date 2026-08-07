@@ -62,7 +62,14 @@ export default async function SurveyResultsPage({ params }: { params: { id: stri
         <ResultsPublicToggle slug={typedSurvey.slug} initialValue={typedSurvey.results_public} />
       </div>
 
-      <SurveyResultsView survey={typedSurvey} shareUrl={shareUrl} mode="owner" csv={csv} {...results} />
+      <SurveyResultsView
+        survey={typedSurvey}
+        shareUrl={shareUrl}
+        mode="owner"
+        csv={csv}
+        responses={typedResponses}
+        {...results}
+      />
     </main>
   );
 }

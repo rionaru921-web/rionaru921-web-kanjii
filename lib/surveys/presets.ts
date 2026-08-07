@@ -71,6 +71,19 @@ export const EVENT_PRESETS: Record<SurveyEventType, EventPreset> = {
   },
 };
 
+// Wave 28: 第二章の「予算」チェックを幹事がONにした時、SurveyForm の
+// 第四章で見せる min/max/step の初期値。EVENT_PRESETS.budgetOptions は
+// 「会社負担(幹事に確認)」のような定性的な文言を含み budget_slider の
+// 数値レンジへ変換できないため、予算だけは別テーブルで持つ。
+export const BUDGET_SLIDER_PRESETS: Record<SurveyEventType, { min: number; max: number; step: number }> = {
+  nomikai: { min: 2000, max: 10000, step: 500 },
+  kangeikai: { min: 3000, max: 8000, step: 500 },
+  sobetsukai: { min: 3000, max: 8000, step: 500 },
+  travel: { min: 5000, max: 30000, step: 1000 },
+  birthday: { min: 2000, max: 10000, step: 500 },
+  other: { min: 1000, max: 10000, step: 500 },
+};
+
 export const PRESET_LABELS: Record<SurveyEventType, string> = {
   nomikai: "飲み会テンプレを使う",
   kangeikai: "歓迎会テンプレを使う",
@@ -152,19 +165,13 @@ export const OPTIONAL_QUESTION_PRESETS: OptionalQuestionPreset[] = [
     options: ["当日現金", "事前振込", "幹事にお任せ"],
     suggestedFor: ["nomikai", "travel"],
   },
-  // Wave 21: 追加質問プリセット3件。既存の optional_questions/optional_answers
-  // (jsonb) と type: 'select' | 'multi_select' の仕組みだけで表現でき、
+  // Wave 21: 追加質問プリセット2件(元は3件だったが、"genre_multi" は
+  // Wave 28 で第五章の基本ジャンル質問と重複していたため削除・統合した)。
+  // 既存の optional_questions/optional_answers(jsonb)と
+  // type: 'select' | 'multi_select' の仕組みだけで表現でき、
   // 回答UI(SurveyResponseForm.tsx)・集計(lib/surveys/aggregate.ts)・
   // 結果表示(SurveyResultsView.tsx)はどれも型ベースで汎用実装済みのため
   // このファイル以外は無変更。
-  {
-    id: "genre_multi",
-    label: "食べたいジャンルは?(複数選択可)",
-    description: "単一選択の「ジャンル候補」とは別に、複数のジャンルを希望として聞けます",
-    type: "multi_select",
-    options: ["居酒屋", "焼肉", "カフェ", "和食", "洋食", "中華", "韓国料理", "寿司", "ラーメン", "その他"],
-    suggestedFor: ["nomikai", "kangeikai", "sobetsukai", "birthday", "travel"],
-  },
   {
     id: "allergy_checklist",
     label: "アレルギー・苦手な食べ物はありますか?(該当するものを選択)",

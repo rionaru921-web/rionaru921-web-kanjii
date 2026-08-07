@@ -9,7 +9,7 @@ import OptionListInput from "./OptionListInput";
 import DateOptionInput from "./DateOptionInput";
 import OptionalQuestionsSection from "./OptionalQuestionsSection";
 import SurveyPreview from "./SurveyPreview";
-import { EVENT_PRESETS, PRESET_LABELS } from "@/lib/surveys/presets";
+import { BUDGET_SLIDER_PRESETS, EVENT_PRESETS, PRESET_LABELS } from "@/lib/surveys/presets";
 import type { DateOption, OptionalQuestion, SurveyEventType } from "@/lib/surveys/types";
 
 const inputClass =
@@ -38,7 +38,9 @@ export default function SurveyForm() {
   const [askAttend, setAskAttend] = useState(true);
 
   const [dateOptions, setDateOptions] = useState<DateOption[]>([]);
-  const [budgetOptions, setBudgetOptions] = useState<string[]>([]);
+  const [budgetMin, setBudgetMin] = useState(1000);
+  const [budgetMax, setBudgetMax] = useState(10000);
+  const [budgetStep, setBudgetStep] = useState(500);
   const [genreOptions, setGenreOptions] = useState<string[]>([]);
   const [optionalQuestions, setOptionalQuestions] = useState<OptionalQuestion[]>([]);
   const [deadline, setDeadline] = useState("");
@@ -63,8 +65,11 @@ export default function SurveyForm() {
 
   function applyPreset(type: SurveyEventType) {
     const preset = EVENT_PRESETS[type];
-    setBudgetOptions(preset.budgetOptions);
+    const budgetPreset = BUDGET_SLIDER_PRESETS[type];
     setGenreOptions(preset.genreOptions);
+    setBudgetMin(budgetPreset.min);
+    setBudgetMax(budgetPreset.max);
+    setBudgetStep(budgetPreset.step);
     setAskBudget(true);
     setAskGenre(true);
     setPresetDialogFor(null);
@@ -80,8 +85,8 @@ export default function SurveyForm() {
       setError("日程候補を1つ以上追加してください(入力後に「＋」を押す必要があります)。");
       return;
     }
-    if (askBudget && budgetOptions.length === 0) {
-      setError("予算候補を1つ以上追加してください(入力後に「＋」を押す必要があります)。");
+    if (askBudget && budgetMin >= budgetMax) {
+      setError("予算の最大値は最小値より大きくしてください。");
       return;
     }
     if (askGenre && genreOptions.length === 0) {
@@ -90,6 +95,28 @@ export default function SurveyForm() {
     }
     setSaving(true);
     setError(null);
+
+    // Wave 28: 基本ジャンル・基本予算は専用カラム(ask_genre/genre_options,
+    // ask_budget/budget_options)をやめ、optional_questions の
+    // select / budget_slider として送る。第四・五章の入力UI自体は維持しつつ、
+    // 送信時にだけ変換することで、参加者側の回答UI・集計・結果表示は
+    // 既存の汎用ロジック(optional_questions ベース)をそのまま使い回せる。
+    const questionsToSend: OptionalQuestion[] = [];
+    if (askGenre && genreOptions.length > 0) {
+      questionsToSend.push({ id: "genre", label: "ジャンル希望は?", type: "select", options: genreOptions });
+    }
+    if (askBudget && budgetMin < budgetMax) {
+      questionsToSend.push({
+        id: "budget",
+        label: "予算どれくらい?",
+        type: "budget_slider",
+        sliderMin: budgetMin,
+        sliderMax: budgetMax,
+        sliderStep: budgetStep,
+      });
+    }
+    questionsToSend.push(...optionalQuestions);
+
     try {
       const res = await fetch("/api/surveys", {
         method: "POST",
@@ -99,13 +126,13 @@ export default function SurveyForm() {
           description,
           eventType,
           askDates,
-          askBudget,
-          askGenre,
+          askBudget: false,
+          askGenre: false,
           askAttend,
           dateOptions,
-          budgetOptions,
-          genreOptions,
-          optionalQuestions,
+          budgetOptions: [],
+          genreOptions: [],
+          optionalQuestions: questionsToSend,
           deadline: deadline || null,
         }),
       });
@@ -204,8 +231,48 @@ export default function SurveyForm() {
 
       {askBudget && (
         <div>
-          <ChapterHeading number="第四章" title="予算候補" subtitle="金額の候補を追加してください(円)" />
-          <OptionListInput values={budgetOptions} onChange={setBudgetOptions} placeholder="例: 5000" disabled={saving} />
+          <ChapterHeading number="第四章" title="予算" subtitle="参加者が回答する範囲を設定してください(円)" />
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-[11px] text-ink-muted mb-1">最小(円)</label>
+              <input
+                type="number"
+                value={budgetMin}
+                onChange={(e) => setBudgetMin(Number(e.target.value))}
+                disabled={saving}
+                min={0}
+                step={100}
+                className={inputClass.replace("mt-1.5 ", "")}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-ink-muted mb-1">最大(円)</label>
+              <input
+                type="number"
+                value={budgetMax}
+                onChange={(e) => setBudgetMax(Number(e.target.value))}
+                disabled={saving}
+                min={0}
+                step={100}
+                className={inputClass.replace("mt-1.5 ", "")}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-ink-muted mb-1">刻み(円)</label>
+              <input
+                type="number"
+                value={budgetStep}
+                onChange={(e) => setBudgetStep(Number(e.target.value))}
+                disabled={saving}
+                min={100}
+                step={100}
+                className={inputClass.replace("mt-1.5 ", "")}
+              />
+            </div>
+          </div>
+          {budgetMin >= budgetMax && (
+            <p className="text-xs text-vermilion-text mt-2">最大は最小より大きい値にしてください。</p>
+          )}
         </div>
       )}
 
@@ -275,7 +342,9 @@ export default function SurveyForm() {
             askGenre={askGenre}
             askAttend={askAttend}
             dateOptions={dateOptions}
-            budgetOptions={budgetOptions}
+            budgetMin={budgetMin}
+            budgetMax={budgetMax}
+            budgetStep={budgetStep}
             genreOptions={genreOptions}
             optionalQuestions={optionalQuestions}
           />

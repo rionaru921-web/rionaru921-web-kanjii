@@ -41,7 +41,9 @@ export default function SurveyPreview({
   askGenre,
   askAttend,
   dateOptions,
-  budgetOptions,
+  budgetMin,
+  budgetMax,
+  budgetStep,
   genreOptions,
   optionalQuestions,
 }: {
@@ -52,7 +54,9 @@ export default function SurveyPreview({
   askGenre: boolean;
   askAttend: boolean;
   dateOptions: DateOption[];
-  budgetOptions: string[];
+  budgetMin: number;
+  budgetMax: number;
+  budgetStep: number;
   genreOptions: string[];
   optionalQuestions: OptionalQuestion[];
 }) {
@@ -79,14 +83,12 @@ export default function SurveyPreview({
 
       {askBudget && (
         <PreviewSection icon={Coins} title="予算どれくらい?">
-          {budgetOptions.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {budgetOptions.map((b) => (
-                <PreviewChip key={b}>{b}</PreviewChip>
-              ))}
-            </div>
+          {budgetMin < budgetMax ? (
+            <p className="text-xs text-ink-secondary">
+              ¥{budgetMin.toLocaleString()} 〜 ¥{budgetMax.toLocaleString()}(スライダー・{budgetStep.toLocaleString()}円刻み)
+            </p>
           ) : (
-            <p className="text-xs text-ink-muted">予算候補を追加すると表示されます</p>
+            <p className="text-xs text-ink-muted">最大値を最小値より大きくすると表示されます</p>
           )}
         </PreviewSection>
       )}
