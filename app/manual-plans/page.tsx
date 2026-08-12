@@ -16,9 +16,10 @@ export const metadata: Metadata = {
   },
 };
 
-// /manual-plans isn't in the middleware's PROTECTED_ROUTES deny-list (that
-// file is intentionally left untouched here), so auth is enforced locally
-// in each page instead.
+// /manual-plans isn't in the middleware's PROTECTED_ROUTES deny-list, so
+// auth is enforced locally in each page instead. The middleware does issue
+// an anonymous session here on the way in (Wave 29-W, GUEST_AUTO_ROUTES) so
+// this redirect only fires when that anonymous sign-in itself fails.
 export default async function ManualPlansPage() {
   const supabase = createClient();
   const {

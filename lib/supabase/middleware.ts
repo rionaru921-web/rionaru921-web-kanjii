@@ -8,8 +8,22 @@ const AUTH_ONLY_ROUTES = ["/login", "/signup"];
 // Next.js can render them normally (e.g. not-found.tsx for a 404).
 const PROTECTED_ROUTES = ["/dashboard", "/nomikai", "/travel", "/history", "/settings"];
 
+// Wave 29-W (Apple 5.1.1(v)): /manual-plans isn't in PROTECTED_ROUTES — each
+// page there does its own `if (!user) redirect("/login")` — so a guest
+// opening /manual-plans/new from the iOS WebView (no client-side JS has run
+// yet to trigger the usual guest sign-in button) hits a hard login wall.
+// These routes get an anonymous Supabase session issued right here instead,
+// so the page's own "some user exists" check passes transparently.
+const GUEST_AUTO_ROUTES = ["/manual-plans"];
+
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
+function isGuestAutoRoute(pathname: string): boolean {
+  return GUEST_AUTO_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 }
@@ -17,12 +31,14 @@ function isProtectedRoute(pathname: string): boolean {
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAuthOnlyRoute = AUTH_ONLY_ROUTES.includes(pathname);
+  const isGuestRoute = isGuestAutoRoute(pathname);
 
-  // Every branch below only fires for protected routes or the login/signup
-  // routes — everywhere else the user's session never affects the response,
-  // so skip the Supabase Auth round trip (a network call) entirely there.
-  // This runs on every navigation, so this early-return matters a lot.
-  if (!isProtectedRoute(pathname) && !isAuthOnlyRoute) {
+  // Every branch below only fires for protected routes, guest-auto routes,
+  // or the login/signup routes — everywhere else the user's session never
+  // affects the response, so skip the Supabase Auth round trip (a network
+  // call) entirely there. This runs on every navigation, so this
+  // early-return matters a lot.
+  if (!isProtectedRoute(pathname) && !isAuthOnlyRoute && !isGuestRoute) {
     return NextResponse.next({ request });
   }
 
@@ -55,6 +71,17 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Wave 29-W: a signed-out visitor on a guest-auto route (e.g.
+  // /manual-plans/new) gets upgraded to an anonymous session right here.
+  // `user` is intentionally left as-is (null) below — isProtectedRoute and
+  // isAuthOnlyRoute are both false for these paths, so none of the
+  // downstream redirect branches evaluate for them either way. If
+  // signInAnonymously fails (disabled, network error), this silently no-ops
+  // and the page's own `if (!user) redirect("/login")` remains as fallback.
+  if (!user && isGuestRoute) {
+    await supabase.auth.signInAnonymously();
+  }
 
   // Anonymous guest sessions have no email to confirm, so they're
   // exempt from the confirmation check below.
