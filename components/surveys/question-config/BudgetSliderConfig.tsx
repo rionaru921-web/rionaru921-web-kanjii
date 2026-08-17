@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Coins } from "lucide-react";
+import { sanitizeNumericInput } from "@/lib/format/currency";
 import type { OptionalQuestion } from "@/lib/surveys/types";
 
 const DEFAULT_MIN = 1000;
@@ -16,10 +17,13 @@ export default function BudgetSliderConfig({
   disabled?: boolean;
 }) {
   const [label, setLabel] = useState("希望予算(スライダー)");
-  const [min, setMin] = useState(DEFAULT_MIN);
-  const [max, setMax] = useState(DEFAULT_MAX);
-  const [step, setStep] = useState(DEFAULT_STEP);
+  const [minInput, setMinInput] = useState(String(DEFAULT_MIN));
+  const [maxInput, setMaxInput] = useState(String(DEFAULT_MAX));
+  const [stepInput, setStepInput] = useState(String(DEFAULT_STEP));
 
+  const min = Number(minInput) || 0;
+  const max = Number(maxInput) || 0;
+  const step = Number(stepInput) || 0;
   const valid = label.trim().length > 0 && min < max && step > 0;
 
   function handleAdd() {
@@ -33,9 +37,9 @@ export default function BudgetSliderConfig({
       sliderStep: step,
     });
     setLabel("希望予算(スライダー)");
-    setMin(DEFAULT_MIN);
-    setMax(DEFAULT_MAX);
-    setStep(DEFAULT_STEP);
+    setMinInput(String(DEFAULT_MIN));
+    setMaxInput(String(DEFAULT_MAX));
+    setStepInput(String(DEFAULT_STEP));
   }
 
   return (
@@ -59,36 +63,36 @@ export default function BudgetSliderConfig({
         <div>
           <label className="block text-[11px] text-ink-muted mb-1">最小(円)</label>
           <input
-            type="number"
-            value={min}
-            onChange={(e) => setMin(Number(e.target.value))}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={minInput}
+            onChange={(e) => setMinInput(sanitizeNumericInput(e.target.value))}
             disabled={disabled}
-            min={0}
-            step={100}
             className="w-full rounded-xl border border-gold/20 bg-surface px-2 py-2 text-sm text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
           />
         </div>
         <div>
           <label className="block text-[11px] text-ink-muted mb-1">最大(円)</label>
           <input
-            type="number"
-            value={max}
-            onChange={(e) => setMax(Number(e.target.value))}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={maxInput}
+            onChange={(e) => setMaxInput(sanitizeNumericInput(e.target.value))}
             disabled={disabled}
-            min={0}
-            step={100}
             className="w-full rounded-xl border border-gold/20 bg-surface px-2 py-2 text-sm text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
           />
         </div>
         <div>
           <label className="block text-[11px] text-ink-muted mb-1">刻み(円)</label>
           <input
-            type="number"
-            value={step}
-            onChange={(e) => setStep(Number(e.target.value))}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={stepInput}
+            onChange={(e) => setStepInput(sanitizeNumericInput(e.target.value))}
             disabled={disabled}
-            min={100}
-            step={100}
             className="w-full rounded-xl border border-gold/20 bg-surface px-2 py-2 text-sm text-ink outline-none transition-colors duration-200 focus:border-gold disabled:opacity-50"
           />
         </div>

@@ -9,6 +9,7 @@ import OptionListInput from "./OptionListInput";
 import DateOptionInput from "./DateOptionInput";
 import OptionalQuestionsSection from "./OptionalQuestionsSection";
 import SurveyPreview from "./SurveyPreview";
+import { sanitizeNumericInput } from "@/lib/format/currency";
 import { BUDGET_SLIDER_PRESETS, EVENT_PRESETS, PRESET_LABELS } from "@/lib/surveys/presets";
 import type { DateOption, OptionalQuestion, SurveyEventType } from "@/lib/surveys/types";
 
@@ -38,9 +39,12 @@ export default function SurveyForm() {
   const [askAttend, setAskAttend] = useState(true);
 
   const [dateOptions, setDateOptions] = useState<DateOption[]>([]);
-  const [budgetMin, setBudgetMin] = useState(1000);
-  const [budgetMax, setBudgetMax] = useState(10000);
-  const [budgetStep, setBudgetStep] = useState(500);
+  const [budgetMinInput, setBudgetMinInput] = useState("1000");
+  const [budgetMaxInput, setBudgetMaxInput] = useState("10000");
+  const [budgetStepInput, setBudgetStepInput] = useState("500");
+  const budgetMin = Number(budgetMinInput) || 0;
+  const budgetMax = Number(budgetMaxInput) || 0;
+  const budgetStep = Number(budgetStepInput) || 0;
   const [genreOptions, setGenreOptions] = useState<string[]>([]);
   const [optionalQuestions, setOptionalQuestions] = useState<OptionalQuestion[]>([]);
   const [deadline, setDeadline] = useState("");
@@ -67,9 +71,9 @@ export default function SurveyForm() {
     const preset = EVENT_PRESETS[type];
     const budgetPreset = BUDGET_SLIDER_PRESETS[type];
     setGenreOptions(preset.genreOptions);
-    setBudgetMin(budgetPreset.min);
-    setBudgetMax(budgetPreset.max);
-    setBudgetStep(budgetPreset.step);
+    setBudgetMinInput(String(budgetPreset.min));
+    setBudgetMaxInput(String(budgetPreset.max));
+    setBudgetStepInput(String(budgetPreset.step));
     setAskBudget(true);
     setAskGenre(true);
     setPresetDialogFor(null);
@@ -236,36 +240,36 @@ export default function SurveyForm() {
             <div>
               <label className="block text-[11px] text-ink-muted mb-1">最小(円)</label>
               <input
-                type="number"
-                value={budgetMin}
-                onChange={(e) => setBudgetMin(Number(e.target.value))}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={budgetMinInput}
+                onChange={(e) => setBudgetMinInput(sanitizeNumericInput(e.target.value))}
                 disabled={saving}
-                min={0}
-                step={100}
                 className={inputClass.replace("mt-1.5 ", "")}
               />
             </div>
             <div>
               <label className="block text-[11px] text-ink-muted mb-1">最大(円)</label>
               <input
-                type="number"
-                value={budgetMax}
-                onChange={(e) => setBudgetMax(Number(e.target.value))}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={budgetMaxInput}
+                onChange={(e) => setBudgetMaxInput(sanitizeNumericInput(e.target.value))}
                 disabled={saving}
-                min={0}
-                step={100}
                 className={inputClass.replace("mt-1.5 ", "")}
               />
             </div>
             <div>
               <label className="block text-[11px] text-ink-muted mb-1">刻み(円)</label>
               <input
-                type="number"
-                value={budgetStep}
-                onChange={(e) => setBudgetStep(Number(e.target.value))}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={budgetStepInput}
+                onChange={(e) => setBudgetStepInput(sanitizeNumericInput(e.target.value))}
                 disabled={saving}
-                min={100}
-                step={100}
                 className={inputClass.replace("mt-1.5 ", "")}
               />
             </div>
