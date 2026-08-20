@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { User, GraduationCap, ChevronRight } from "lucide-react";
+import { User, GraduationCap, ChevronRight, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ProfileCard from "@/components/dashboard/ProfileCard";
 
@@ -52,6 +52,18 @@ export default async function ProfileSettingsPage() {
           </div>
           <ChevronRight className="text-ink-muted shrink-0" size={18} />
         </Link>
+      )}
+
+      {user && !user.is_anonymous && (
+        <div className="mt-10 pt-6 border-t border-gold/10">
+          <Link
+            href="/account/delete"
+            className="flex items-center gap-1.5 text-sm text-vermilion-text hover:brightness-125 transition-colors"
+          >
+            <Trash2 size={14} />
+            アカウントを削除する
+          </Link>
+        </div>
       )}
     </main>
   );
