@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { LogIn, Mail, Lock, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import { translateSupabaseError } from "@/lib/auth/error-translator";
 
 export default function LoginForm() {
@@ -111,6 +112,7 @@ function LoginFields() {
 
   return (
     <AuthCard title="ログイン" subtitle="幹事ラボへおかえりなさい">
+      <SocialLoginButtons redirectTo={searchParams.get("redirectTo") || "/dashboard"} />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {needsVerification && !error && (
           <div className="flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20 rounded-xl px-3 py-2.5">

@@ -23,6 +23,7 @@
     "@supabase/supabase-js": "^2.110.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.42.2",
+    "jose": "^6.2.10",
     "lucide-react": "^1.23.0",
     "nanoid": "^5.1.16",
     "next": "14.2.35",

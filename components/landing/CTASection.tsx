@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import GoldButton from "@/components/shared/GoldButton";
+import AppStoreBadge from "@/components/landing/AppStoreBadge";
 
 interface CTASectionProps {
   isLoggedIn: boolean;
@@ -32,6 +33,10 @@ export default function CTASection({ isLoggedIn }: CTASectionProps) {
         <GoldButton href={isLoggedIn ? "/dashboard" : "/signup"} size="lg">
           {isLoggedIn ? "マイページへ" : "無料ではじめる"}
         </GoldButton>
+        <div className="mt-6 flex flex-col items-center gap-1.5">
+          <span className="text-xs text-ink-muted">iOSアプリも配信中</span>
+          <AppStoreBadge />
+        </div>
       </motion.div>
     </section>
   );

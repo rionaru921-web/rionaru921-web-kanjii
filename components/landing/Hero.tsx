@@ -10,6 +10,7 @@ import ChochinIcon from "@/components/shared/ChochinIcon";
 import UseCaseTags from "@/components/landing/UseCaseTags";
 import HeroMockup from "@/components/landing/HeroMockup";
 import HeroCTA from "@/components/landing/HeroCTA";
+import AppStoreBadge from "@/components/landing/AppStoreBadge";
 import { useGuestSignIn } from "@/lib/auth/useGuestSignIn";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 
@@ -102,6 +103,10 @@ export default function Hero({ isLoggedIn }: HeroProps) {
               >
                 デモを見る
               </button>
+              <div className="mt-2 flex flex-col items-center lg:items-start gap-1.5">
+                <span className="text-xs text-ink-muted">iOSアプリも配信中</span>
+                <AppStoreBadge />
+              </div>
             </motion.div>
           )}
 

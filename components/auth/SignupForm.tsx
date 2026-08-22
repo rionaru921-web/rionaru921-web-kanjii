@@ -6,6 +6,7 @@ import { UserPlus, Mail, Lock, AlertCircle, MailCheck, Info } from "lucide-react
 import { createClient } from "@/lib/supabase/client";
 import AuthCard from "@/components/auth/AuthCard";
 import GuestLoginButton from "@/components/auth/GuestLoginButton";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import { translateSupabaseError } from "@/lib/auth/error-translator";
 
 export default function SignupForm() {
@@ -164,6 +165,7 @@ export default function SignupForm() {
 
   return (
     <AuthCard title="新規登録" subtitle="幹事ラボで幹事業務から解放されましょう">
+      <SocialLoginButtons />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="flex items-center gap-1.5 text-xs text-ink-secondary mb-1.5">

@@ -1,0 +1,17 @@
+<!--
+  暫定バッジ。Apple公式のApp Storeバッジ(SVG)は
+  https://tools.applemediaservices.com/app-store/badges
+  の対話式ジェネレータからしか取得できず、自動化ツールから直接ダウンロード
+  できないため、同じ情報を伝える自作バッジをここに置いている。
+  可能であれば上記から「日本語 / 黒 / SVG」を手動ダウンロードし、
+  このファイルを置き換えること(ファイル名はそのまま app-store-ja.svg でOK)。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="54" viewBox="0 0 180 54" role="img" aria-label="App Storeでダウンロード">
+  <rect x="0.5" y="0.5" width="179" height="53" rx="9" fill="#0B0B0C" stroke="#3A3A3C" />
+  <g transform="translate(14, 12)" fill="#FFFFFF">
+    <path d="M19.665 15.29c-.03-3.24 2.646-4.8 2.766-4.876-1.512-2.21-3.864-2.513-4.698-2.548-2.001-.203-3.9 1.178-4.914 1.178-1.014 0-2.583-1.148-4.245-1.116-2.184.032-4.197 1.27-5.322 3.226-2.268 3.93-.579 9.75 1.632 12.943 1.08 1.562 2.373 3.312 4.062 3.25 1.629-.066 2.247-1.05 4.221-1.05 1.956 0 2.532 1.05 4.257 1.011 1.761-.03 2.874-1.577 3.945-3.15 1.245-1.808 1.758-3.559 1.779-3.649-.039-.017-3.414-1.31-3.483-5.219z" />
+    <path d="M16.716 5.876c.894-1.084 1.497-2.588 1.332-4.086-1.29.052-2.85.858-3.774 1.94-.822.955-1.548 2.512-1.359 3.964 1.428.11 2.895-.723 3.801-1.818z" />
+  </g>
+  <text x="46" y="21" font-family="-apple-system, 'Hiragino Sans', sans-serif" font-size="9" fill="#D1D1D6">Download on the</text>
+  <text x="46" y="35" font-family="-apple-system, 'Hiragino Sans', sans-serif" font-size="17" font-weight="600" fill="#FFFFFF">App Store</text>
+</svg>

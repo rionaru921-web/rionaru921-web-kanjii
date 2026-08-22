@@ -100,6 +100,9 @@ export const metadata: Metadata = {
   },
   other: {
     "mobile-web-app-capable": "yes",
+    // iOS Safariで開いた時、画面上部に「開く」ボタン付きのスマートアプリ
+    // バナーを表示させる。iOS版アプリのApp ID: 6800397796
+    "apple-itunes-app": "app-id=6800397796",
   },
 };
 
